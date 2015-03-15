@@ -1,0 +1,51 @@
+name: "Deploy to iTunes Connect with Deliver"
+description: |
+  Deploy to iTunes Connect with Deliver.
+website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
+fork_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
+source:
+  git: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver.git
+host_os_tags:
+  - "osx-10.10"
+project_type_tags: []
+type_tags:
+  - "deploy"
+is_requires_admin_user: false
+inputs:
+  -
+    mapped_to: STEP_DELIVER_DEPLOY_IPA_PATH
+    title: "STEP_DELIVER_DEPLOY_IPA_PATH"
+    description: |
+      STEP_DELIVER_DEPLOY_IPA_PATH
+    is_required: true
+    is_expand: true
+    value: ""
+    is_dont_change_value: false
+  -
+    mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_USER
+    title: "STEP_DELIVER_DEPLOY_ITUNESCON_USER"
+    description: |
+      STEP_DELIVER_DEPLOY_ITUNESCON_USER
+    is_required: true
+    is_expand: true
+    value: ""
+    is_dont_change_value: false
+  -
+    mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD
+    title: "STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD"
+    description: |
+      STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD
+    is_required: true
+    is_expand: true
+    value: ""
+    is_dont_change_value: false
+  -
+    mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID
+    title: "STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID"
+    description: |
+      STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID
+    is_required: true
+    is_expand: true
+    value: ""
+    is_dont_change_value: false
+outputs: []
