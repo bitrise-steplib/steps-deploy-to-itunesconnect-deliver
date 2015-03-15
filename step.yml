@@ -11,7 +11,11 @@ description: |
   ## Example entitlements file
 
   The entitlements file is usually located in the *target's folder*,
-  with the name *YOUR-TARGET-NAME.entitlements*, and it's content have to
+  with the name *YOUR-TARGET-NAME.entitlements*.
+  It also have to be set in Xcode project settings:
+  in `Target > Build Settings` set the key **Code Signing Entitlements** (`CODE_SIGN_ENTITLEMENTS`)
+  to the file's path (*relative to the Xcode project file*).
+  It's content have to
   be something like this (both the `application-identifier` and the `beta-reports-active` are required):
 
       <?xml version="1.0" encoding="UTF-8"?>
