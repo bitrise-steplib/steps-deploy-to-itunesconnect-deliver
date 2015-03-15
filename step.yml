@@ -1,6 +1,29 @@
 name: "Deploy to iTunes Connect with Deliver"
 description: |
   Deploy to iTunes Connect with Deliver.
+
+  ## Setup guide and notes
+
+  * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
+  * Requires an **App Store iOS distibution Provisioning Profile**
+  * The app's Xcode project have to contain an *entitlements* file for the Target
+
+  ## Example entitlements file
+
+  The entitlements file is usually located in the *target's folder*,
+  with the name *YOUR-TARGET-NAME.entitlements*, and it's content have to
+  be something like this (both the `application-identifier` and the `beta-reports-active` are required):
+
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>application-identifier</key>
+        <string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
+        <key>beta-reports-active</key>
+        <true/>
+      </dict>
+      </plist>
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 fork_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 source:
@@ -14,36 +37,40 @@ is_requires_admin_user: false
 inputs:
   -
     mapped_to: STEP_DELIVER_DEPLOY_IPA_PATH
-    title: "STEP_DELIVER_DEPLOY_IPA_PATH"
+    title: "IPA path"
     description: |
-      STEP_DELIVER_DEPLOY_IPA_PATH
+      Path of the IPA file, to be deployed to iTunes Connect
     is_required: true
     is_expand: true
     value: ""
     is_dont_change_value: false
   -
     mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_USER
-    title: "STEP_DELIVER_DEPLOY_ITUNESCON_USER"
+    title: "iTunes Connect - User Apple ID (email)"
     description: |
-      STEP_DELIVER_DEPLOY_ITUNESCON_USER
+      Login Apple ID (email) for the iTunes Connect site.
     is_required: true
     is_expand: true
     value: ""
     is_dont_change_value: false
   -
     mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD
-    title: "STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD"
+    title: "iTunes Connect - Password"
     description: |
-      STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD
+      Password for the specified User Apple ID.
     is_required: true
     is_expand: true
     value: ""
     is_dont_change_value: false
   -
     mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID
-    title: "STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID"
+    title: "iTunes Connect - App Apple ID"
     description: |
-      STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID
+      The App's *Apple ID* on iTunes Connect.
+
+      Open the **App's page on iTunes Connect**,
+      click on **More**, click on *About this app*,
+      copy the *Apple ID*'s value from here (numeric, like 846814360)
     is_required: true
     is_expand: true
     value: ""
