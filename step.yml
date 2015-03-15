@@ -7,6 +7,7 @@ description: |
   * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
   * Requires an **App Store iOS distibution Provisioning Profile**
   * The app's Xcode project have to contain an *entitlements* file for the Target
+  * Every build which you want to push to iTunes Connect have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
 
   ## Example entitlements file
 
