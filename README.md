@@ -1,6 +1,8 @@
 # Deploy to iTunes Connect with Deliver
 
-Deploy to iTunes Connect with Deliver
+Deploy to iTunes Connect, using the
+fantastic [Deliver](https://github.com/KrauseFx/deliver)
+Ruby gem.
 
 
 ## Test run this Step on your own machine

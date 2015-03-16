@@ -1,6 +1,8 @@
 name: "Deploy to iTunes Connect with Deliver"
 description: |
-  Deploy to iTunes Connect with Deliver.
+  Deploy to iTunes Connect, using the
+  fantastic [Deliver](https://github.com/KrauseFx/deliver)
+  Ruby gem.
 
   ## Setup guide and notes
 

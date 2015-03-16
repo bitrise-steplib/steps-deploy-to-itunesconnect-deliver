@@ -13,6 +13,8 @@ else
 	echo " (i) deliver NOT yet installed, attempting install..."
 fi
 
+STARTTIME=$(date +%s)
+
 if command_exists rvm ; then
 	echo " -> installing with RVM"
 	gem install deliver
@@ -21,3 +23,8 @@ elif command_exists rbenv ; then
 	gem install deliver
 	rbenv rehash
 fi
+
+ENDTIME=$(date +%s)
+echo
+echo " (i) Setup took $(($ENDTIME - $STARTTIME)) seconds to complete"
+echo
