@@ -1,4 +1,4 @@
-name: "Deploy to iTunes Connect with Deliver"
+name: "Deploy to iTunes Connect (with Deliver)"
 description: |
   Deploy to iTunes Connect, using the
   fantastic [Deliver](https://github.com/KrauseFx/deliver)
@@ -57,7 +57,7 @@ inputs:
     description: |
       Login Apple ID (email) for the iTunes Connect site.
     is_required: true
-    is_expand: true
+    is_expand: false
     value: ""
     is_dont_change_value: false
   -
@@ -66,7 +66,7 @@ inputs:
     description: |
       Password for the specified User Apple ID.
     is_required: true
-    is_expand: true
+    is_expand: false
     value: ""
     is_dont_change_value: false
   -
@@ -79,7 +79,7 @@ inputs:
       click on **More**, click on *About this app*,
       copy the *Apple ID*'s value from here (numeric, like 846814360)
     is_required: true
-    is_expand: true
+    is_expand: false
     value: ""
     is_dont_change_value: false
 outputs: []
