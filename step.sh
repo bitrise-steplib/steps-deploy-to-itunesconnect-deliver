@@ -41,6 +41,8 @@ set -e
 
 write_section_to_formatted_output "# Deploy"
 set +e
+export DELIVER_USER="${STEP_DELIVER_DEPLOY_ITUNESCON_USER}"
+export DELIVER_PASSWORD="${STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD}"
 deliver testflight --skip-deploy -a "${STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID}" "${STEP_DELIVER_DEPLOY_IPA_PATH}"
 fail_if_cmd_error "Deploy failed!"
 set -e
