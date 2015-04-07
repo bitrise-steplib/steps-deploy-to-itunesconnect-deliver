@@ -1,0 +1,8 @@
+{
+	"dep_locks": [
+		{
+			"url": "https://github.com/bitrise-io/steps-utils-bash-toolkit.git",
+			"revision": "1e3af9647d8ae5f1c48b2eb0549a06c71f9defad"
+		}
+	]
+}
