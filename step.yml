@@ -13,29 +13,7 @@ description: |
 
   * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
   * Requires an **App Store iOS distibution Provisioning Profile**
-  * The app's Xcode project have to contain an *entitlements* file for the Target
   * Every build which you want to push to iTunes Connect have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
-
-  ## Example entitlements file
-
-  The entitlements file is usually located in the *target's folder*,
-  with the name *YOUR-TARGET-NAME.entitlements*.
-  It also have to be set in Xcode project settings:
-  in `Target > Build Settings` set the key **Code Signing Entitlements** (`CODE_SIGN_ENTITLEMENTS`)
-  to the file's path (*relative to the Xcode project file*).
-  It's content have to
-  be something like this (both the `application-identifier` and the `beta-reports-active` are required):
-
-      <?xml version="1.0" encoding="UTF-8"?>
-      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-      <plist version="1.0">
-      <dict>
-        <key>application-identifier</key>
-        <string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
-        <key>beta-reports-active</key>
-        <true/>
-      </dict>
-      </plist>
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 fork_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 source:
