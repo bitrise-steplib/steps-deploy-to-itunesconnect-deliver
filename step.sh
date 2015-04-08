@@ -25,27 +25,26 @@ if [ -z "${STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID}" ] ; then
 	exit 1
 fi
 
+CONFIG_testflight_beta_deploy_type_flag='--skip-deploy'
+if [[ "${STEP_DELIVER_DEPLOY_IS_SUBMIT_FOR_BETA}" == "yes" ]] ; then
+	CONFIG_testflight_beta_deploy_type_flag='--beta'
+fi
+
+echo " (i) TestFlight beta deploy type flag: ${CONFIG_testflight_beta_deploy_type_flag}"
 
 
 # ---------------------
 # --- Main
 
-set -e
-set -v
-
 write_section_to_formatted_output "# Setup"
-set +e
 bash "${THIS_SCRIPT_DIR}/_setup.sh"
 fail_if_cmd_error "Failed to setup the required tools!"
-set -e
 
 write_section_to_formatted_output "# Deploy"
-set +e
 export DELIVER_USER="${STEP_DELIVER_DEPLOY_ITUNESCON_USER}"
 export DELIVER_PASSWORD="${STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD}"
-deliver testflight --skip-deploy -a "${STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID}" "${STEP_DELIVER_DEPLOY_IPA_PATH}"
+deliver testflight ${CONFIG_testflight_beta_deploy_type_flag} -a "${STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID}" "${STEP_DELIVER_DEPLOY_IPA_PATH}"
 fail_if_cmd_error "Deploy failed!"
-set -e
 
 write_section_to_formatted_output "# Success"
 echo_string_to_formatted_output "* The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!"

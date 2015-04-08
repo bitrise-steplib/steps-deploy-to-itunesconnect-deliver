@@ -22,6 +22,9 @@ elif command_exists rbenv ; then
 	echo " -> installing with rbenv"
 	gem install deliver
 	rbenv rehash
+else
+	echo " [!] Failed to install: neither RVM nor rbenv is available!"
+	exit 1
 fi
 
 ENDTIME=$(date +%s)

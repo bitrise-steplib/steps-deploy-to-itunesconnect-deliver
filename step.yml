@@ -82,4 +82,29 @@ inputs:
     is_expand: false
     value: ""
     is_dont_change_value: false
+  -
+    mapped_to: STEP_DELIVER_DEPLOY_IS_SUBMIT_FOR_BETA
+    title: "Submit for TestFlight Beta Testing?"
+    description: |
+      Wait for the submission to be processed and then
+      enable **TestFlight Beta Testing** for this specific version?
+
+      If this option is disabled then this step won't wait
+      for the new version to be processed on iTunes Connect
+      and won't enable it for *TestFlight Beta Testing* automatically.
+
+      *Enabling this option will wait for the submission to be
+      processed which might take a couple of minutes after the
+      new version is deployed to iTunes Connect*.
+
+      **NOTE:** if this option is enabled then this step will
+      fail if it can't enable TestFlight Beta Testing for the
+      version, even if the version was successfully uploaded
+      to iTunes Connect and only the TestFlight Beta Testing
+      submission failed.
+    is_required: true
+    is_expand: false
+    value: "yes"
+    value_options: ["yes", "no"]
+    is_dont_change_value: false
 outputs: []
