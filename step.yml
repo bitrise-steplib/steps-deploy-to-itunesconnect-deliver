@@ -104,7 +104,7 @@ inputs:
       submission failed.
     is_required: true
     is_expand: false
-    value: "yes"
+    value: "no"
     value_options: ["yes", "no"]
     is_dont_change_value: false
 outputs: []
