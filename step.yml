@@ -64,7 +64,7 @@ inputs:
 
       *Make sure that this email is verified,
       your Apple ID cannot be used until you verify it
-      no Apple's website!*
+      on Apple's website!*
     is_required: true
     is_expand: false
     value: ""
