@@ -4,6 +4,11 @@ description: |
   fantastic [Deliver](https://github.com/KrauseFx/deliver)
   Ruby gem.
 
+  **If this is the very first build** of the app
+  you try to deploy to iTunes Connect then you might want to upload the first
+  build manually to make sure it fulfills the initial iTunes Connect submission
+  verification process.
+
   ## Setup guide and notes
 
   * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
@@ -65,6 +70,13 @@ inputs:
     title: "iTunes Connect - Password"
     description: |
       Password for the specified User Apple ID.
+
+      **Note:**If your password
+      contains special characters
+      and you experience problems, please
+      consider changing your password
+      to something with only
+      alphanumeric characters.
     is_required: true
     is_expand: false
     value: ""
