@@ -79,7 +79,7 @@ fail_if_cmd_error "Failed to setup the required tools!"
 
 write_section_to_formatted_output "# Deploy"
 
-write_section_to_formatted_output "**Note:**If your password
+write_section_to_formatted_output "**Note:** if your password
 contains special characters
 and you experience problems, please
 consider changing your password

@@ -58,20 +58,24 @@ inputs:
     is_dont_change_value: false
   -
     mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_USER
-    title: "iTunes Connect - User Apple ID (email)"
+    title: "iTunes Connect: User Apple ID (email)"
     description: |
       Login Apple ID (email) for the iTunes Connect site.
+
+      *Make sure that this email is verified,
+      your Apple ID cannot be used until you verify it
+      no Apple's website!*
     is_required: true
     is_expand: false
     value: ""
     is_dont_change_value: false
   -
     mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD
-    title: "iTunes Connect - Password"
+    title: "iTunes Connect: Password"
     description: |
       Password for the specified User Apple ID.
 
-      **Note:**If your password
+      **Note:** if your password
       contains special characters
       and you experience problems, please
       consider changing your password
@@ -83,7 +87,7 @@ inputs:
     is_dont_change_value: false
   -
     mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID
-    title: "iTunes Connect - App Apple ID"
+    title: "iTunes Connect: App Apple ID"
     description: |
       The App's *Apple ID* on iTunes Connect.
 
