@@ -9,6 +9,14 @@ description: |
   build manually to make sure it fulfills the initial iTunes Connect submission
   verification process.
 
+  **Be advised** that this
+  step uses a well maintained, open source tool which
+  uses *undocumented and unsupported APIs* (because the current
+  iTunes Connect platform does not have a documented and supported API)
+  to perform the deployment.
+  This means that when the API changes
+  **this step might fail until the tool is updated**.
+
   ## Setup guide and notes
 
   * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
