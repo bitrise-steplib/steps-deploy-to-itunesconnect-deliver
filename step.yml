@@ -37,7 +37,7 @@ is_skippable: false
 dependencies: []
 run_if: ""
 inputs:
-  - ipa_path: ""
+  - ipa_path: "$BITRISE_IPA_PATH"
     opts:
       title: "IPA path"
       summary: ""
