@@ -1,0 +1,17 @@
+format_version: 0.9.10
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  # define these in your .bitrise.secrets.yml
+  - ipa_path:
+  - itunescon_user:
+  - password:
+  - app_id:
+  - submit_for_beta:
+
+workflows:
+  test:
+    steps:
+    - path::./:
+        inputs:
