@@ -1,5 +1,6 @@
-name: "Deploy to iTunes Connect (with Deliver)"
-description: |
+title: "Deploy to iTunes Connect (with Deliver)"
+summary: "Deploy to iTunes Connect (with Deliver)"
+description: |-
   Deploy to iTunes Connect, using the
   fantastic [Deliver](https://github.com/KrauseFx/deliver)
   Ruby gem.
@@ -23,90 +24,93 @@ description: |
   * Requires an **App Store iOS distibution Provisioning Profile**
   * Every build which you want to push to iTunes Connect have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
-fork_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
-source:
-  git: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver.git
+source_code_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
+support_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/issues
 host_os_tags:
   - "osx-10.10"
 project_type_tags: []
 type_tags:
   - "deploy"
 is_requires_admin_user: false
+is_always_run: false
+is_skippable: false
+dependencies: []
+run_if: ""
 inputs:
-  -
-    mapped_to: STEP_DELIVER_DEPLOY_IPA_PATH
-    title: "IPA path"
-    description: |
-      Path of the IPA file, to be deployed to iTunes Connect
-    is_required: true
-    is_expand: true
-    value: ""
-    is_dont_change_value: false
-  -
-    mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_USER
-    title: "iTunes Connect: User Apple ID (email)"
-    description: |
-      Login Apple ID (email) for the iTunes Connect site.
+  - ipa_path: ""
+    opts:
+      title: "IPA path"
+      summary: ""
+      description: |-
+        Path of the IPA file, to be deployed to iTunes Connect
+      is_required: true
+      is_expand: true
+      is_dont_change_value: false
+  - itunescon_user: ""
+    opts:
+      title: "iTunes Connect: User Apple ID (email)"
+      summary: ""
+      description: |-
+        Login Apple ID (email) for the iTunes Connect site.
 
-      *Make sure that this email is verified,
-      your Apple ID cannot be used until you verify it
-      on Apple's website!*
-    is_required: true
-    is_expand: false
-    value: ""
-    is_dont_change_value: false
-  -
-    mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_PASSWORD
-    title: "iTunes Connect: Password"
-    description: |
-      Password for the specified User Apple ID.
+        *Make sure that this email is verified,
+        your Apple ID cannot be used until you verify it
+        on Apple's website!*
+      is_required: true
+      is_expand: false
+      is_dont_change_value: false
+  - password: ""
+    opts:
+      title: "iTunes Connect: Password"
+      summary: ""
+      description: |-
+        Password for the specified User Apple ID.
 
-      **Note:** if your password
-      contains special characters
-      and you experience problems, please
-      consider changing your password
-      to something with only
-      alphanumeric characters.
-    is_required: true
-    is_expand: false
-    value: ""
-    is_dont_change_value: false
-  -
-    mapped_to: STEP_DELIVER_DEPLOY_ITUNESCON_APP_ID
-    title: "iTunes Connect: App Apple ID"
-    description: |
-      The App's *Apple ID* on iTunes Connect.
+        **Note:** if your password
+        contains special characters
+        and you experience problems, please
+        consider changing your password
+        to something with only
+        alphanumeric characters.
+      is_required: true
+      is_expand: false
+      is_dont_change_value: false
+  - app_id: ""
+    opts:
+      title: "iTunes Connect: App Apple ID"
+      summary: ""
+      description: |-
+        The App's *Apple ID* on iTunes Connect.
 
-      Open the **App's page on iTunes Connect**,
-      click on **More**, click on *About this app*,
-      copy the *Apple ID*'s value from here (numeric, like 846814360)
-    is_required: true
-    is_expand: false
-    value: ""
-    is_dont_change_value: false
-  -
-    mapped_to: STEP_DELIVER_DEPLOY_IS_SUBMIT_FOR_BETA
-    title: "Submit for TestFlight Beta Testing?"
-    description: |
-      Wait for the submission to be processed and then
-      enable **TestFlight Beta Testing** for this specific version?
+        Open the **App's page on iTunes Connect**,
+        click on **More**, click on *About this app*,
+        copy the *Apple ID*'s value from here (numeric, like 846814360)
+      is_required: true
+      is_expand: false
+      is_dont_change_value: false
+  - submit_for_beta: "no"
+    opts:
+      title: "Submit for TestFlight Beta Testing?"
+      summary: ""
+      description: |
+        Wait for the submission to be processed and then
+        enable **TestFlight Beta Testing** for this specific version?
 
-      If this option is disabled then this step won't wait
-      for the new version to be processed on iTunes Connect
-      and won't enable it for *TestFlight Beta Testing* automatically.
+        If this option is disabled then this step won't wait
+        for the new version to be processed on iTunes Connect
+        and won't enable it for *TestFlight Beta Testing* automatically.
 
-      *Enabling this option will wait for the submission to be
-      processed which might take a couple of minutes after the
-      new version is deployed to iTunes Connect*.
+        *Enabling this option will wait for the submission to be
+        processed which might take a couple of minutes after the
+        new version is deployed to iTunes Connect*.
 
-      **NOTE:** if this option is enabled then this step will
-      fail if it can't enable TestFlight Beta Testing for the
-      version, even if the version was successfully uploaded
-      to iTunes Connect and only the TestFlight Beta Testing
-      submission failed.
-    is_required: true
-    is_expand: false
-    value: "no"
-    value_options: ["yes", "no"]
-    is_dont_change_value: false
+        **NOTE:** if this option is enabled then this step will
+        fail if it can't enable TestFlight Beta Testing for the
+        version, even if the version was successfully uploaded
+        to iTunes Connect and only the TestFlight Beta Testing
+        submission failed.
+      value_options: ["yes", "no"]
+      is_required: true
+      is_expand: false
+      is_dont_change_value: false
 outputs: []
