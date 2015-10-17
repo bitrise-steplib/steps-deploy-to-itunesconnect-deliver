@@ -98,7 +98,7 @@ This means that when the API changes
 export DELIVER_USER="${itunescon_user}"
 export DELIVER_PASSWORD="${password}"
 export DELIVER_APP_ID="${app_id}"
-deliver --ipa "${ipa_path}" ${CONFIG_testflight_beta_deploy_type_flag}
+deliver --ipa "${ipa_path}" --skip_screenshots --skip_metadata --force ${CONFIG_testflight_beta_deploy_type_flag}
 fail_if_cmd_error "Deploy failed!"
 
 write_section_to_formatted_output "# Success"
