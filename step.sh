@@ -62,6 +62,8 @@ if [ -z "${app_id}" ] ; then
 	exit 1
 fi
 
+echo " (i) submit_for_beta: ${submit_for_beta}"
+
 CONFIG_testflight_beta_deploy_type_flag=''
 if [[ "${submit_for_beta}" == "yes" ]] ; then
 	CONFIG_testflight_beta_deploy_type_flag='--submit_for_review'
