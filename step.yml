@@ -57,7 +57,7 @@ inputs:
         your Apple ID cannot be used until you verify it
         on Apple's website!*
       is_required: true
-      is_expand: false
+      is_expand: true
       is_dont_change_value: false
   - password: ""
     opts:
@@ -73,7 +73,7 @@ inputs:
         to something with only
         alphanumeric characters.
       is_required: true
-      is_expand: false
+      is_expand: true
       is_dont_change_value: false
   - app_id: ""
     opts:
@@ -86,7 +86,7 @@ inputs:
         click on **More**, click on *About this app*,
         copy the *Apple ID*'s value from here (numeric, like 846814360)
       is_required: true
-      is_expand: false
+      is_expand: true
       is_dont_change_value: false
   - submit_for_beta: "no"
     opts:
