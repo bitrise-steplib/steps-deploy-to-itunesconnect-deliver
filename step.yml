@@ -28,7 +28,8 @@ source_code_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-del
 support_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/issues
 host_os_tags:
   - "osx-10.10"
-project_type_tags: []
+project_type_tags:
+  - ios
 type_tags:
   - "deploy"
 is_requires_admin_user: false
@@ -45,7 +46,6 @@ inputs:
         Path of the IPA file, to be deployed to iTunes Connect
       is_required: true
       is_expand: true
-      is_dont_change_value: false
   - itunescon_user: ""
     opts:
       title: "iTunes Connect: User Apple ID (email)"
@@ -58,7 +58,6 @@ inputs:
         on Apple's website!*
       is_required: true
       is_expand: true
-      is_dont_change_value: false
   - password: ""
     opts:
       title: "iTunes Connect: Password"
@@ -74,7 +73,6 @@ inputs:
         alphanumeric characters.
       is_required: true
       is_expand: true
-      is_dont_change_value: false
   - app_id: ""
     opts:
       title: "iTunes Connect: App Apple ID"
@@ -87,7 +85,6 @@ inputs:
         copy the *Apple ID*'s value from here (numeric, like 846814360)
       is_required: true
       is_expand: true
-      is_dont_change_value: false
   - submit_for_beta: "no"
     opts:
       title: "Submit for TestFlight Beta Testing?"
@@ -112,5 +109,4 @@ inputs:
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
-      is_dont_change_value: false
 outputs: []
