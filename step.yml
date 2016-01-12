@@ -109,7 +109,7 @@ inputs:
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
-  - skip_metadata: "no"
+  - skip_metadata: "yes"
     opts:
       title: "Skip Metadata?"
       summary: ""
@@ -118,7 +118,7 @@ inputs:
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
-  - skip_screenshots: "no"
+  - skip_screenshots: "yes"
     opts:
       title: "Skip Screenshots?"
       summary: ""
