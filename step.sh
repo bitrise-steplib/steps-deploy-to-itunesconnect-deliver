@@ -71,6 +71,19 @@ fi
 
 echo " (i) TestFlight beta deploy type flag: ${CONFIG_testflight_beta_deploy_type_flag}"
 
+echo " (i) skip_metadata: ${skip_metadata}"
+
+CONFIG_skip_metadata_type_flag=''
+if [[ "${skip_metadata}" == "yes" ]] ; then
+	CONFIG_skip_metadata_type_flag='--skip_metadata'
+fi
+
+echo " (i) skip_screenshots: ${skip_screenshots}"
+
+CONFIG_skip_screenshots_type_flag=''
+if [[ "${skip_screenshots}" == "yes" ]] ; then
+	CONFIG_skip_screenshots_type_flag='--skip_screenshots'
+fi
 
 # ---------------------
 # --- Main
@@ -100,7 +113,7 @@ This means that when the API changes
 export DELIVER_USER="${itunescon_user}"
 export DELIVER_PASSWORD="${password}"
 export DELIVER_APP_ID="${app_id}"
-deliver --ipa "${ipa_path}" --skip_screenshots --skip_metadata --force ${CONFIG_testflight_beta_deploy_type_flag}
+deliver --ipa "${ipa_path}" ${CONFIG_skip_screenshots_type_flag} --${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 fail_if_cmd_error "Deploy failed!"
 
 write_section_to_formatted_output "# Success"
