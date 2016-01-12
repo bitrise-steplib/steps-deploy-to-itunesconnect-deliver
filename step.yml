@@ -109,4 +109,22 @@ inputs:
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
+  - skip_metadata: "no"
+    opts:
+      title: "Skip Metadata?"
+      summary: ""
+      description: |
+        Flag to skip uploading the appstore metadata.
+      value_options: ["yes", "no"]
+      is_required: true
+      is_expand: false
+  - skip_screenshots: "no"
+    opts:
+      title: "Skip Screenshots?"
+      summary: ""
+      description: |
+        Flag to skip uploading changes to appstore screenshots.
+      value_options: ["yes", "no"]
+      is_required: true
+      is_expand: false
 outputs: []
