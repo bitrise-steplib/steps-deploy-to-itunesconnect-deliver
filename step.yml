@@ -127,4 +127,15 @@ inputs:
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
+  - team_name: ""
+    opts:
+      title: "iTunes Connect: Team name"
+      summary: ""
+      description: |-
+        The App's *Team Name* on iTunes Connect.
+
+        This field are required when using iTunes Connect account 
+        linked to multiple publish team.
+      is_required: false
+      is_expand: true
 outputs: []
