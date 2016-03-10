@@ -4,26 +4,75 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # define these in your .bitrise.secrets.yml
-  - BITRISE_IPA_PATH: $BITRISE_IPA_PATH
-  - itunescon_user: $itunescon_user
-  - password: $password
-  - app_id: $app_id
+  - BITRISE_PROJECT_PATH: $BITRISE_PROJECT_PATH
+  - BITRISE_SCHEME: $BITRISE_SCHEME
+  - CONFIG_INFO_PLIST_PATH: $CONFIG_INFO_PLIST_PATH
+  - BITRISE_DEPLOY_DIR: $BITRISE_DEPLOY_DIR
+
+  - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
+  - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+  - ITUNES_CONNECT_TEAM_NAME: $ITUNES_CONNECT_TEAM_NAME
+  - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
 workflows:
+  # ----------------------------------------------------------------
+  # --- workflow to Step Test
   test:
     steps:
-    - path::./:
+    - set-xcode-build-number:
+        title: Set Build Number
+        run_if: true
         inputs:
-        - itunescon_user: $itunescon_user
-        - password: $password
-        - app_id: $app_id
+        - plist_path: $CONFIG_INFO_PLIST_PATH
+        - build_version: 87
+    - xcode-archive:
+        title: Create Archive
+        inputs:
+        - output_dir: $BITRISE_DEPLOY_DIR
+        - project_path: $BITRISE_PROJECT_PATH
+    - path::./:
+        title: Step Test
+        inputs:
+        - itunescon_user: $ITUNES_CONNECT_USER
+        - password: $ITUNES_CONNECT_PASSWORD
+        - team_name: $ITUNES_CONNECT_TEAM_NAME
+        - app_id: $ITUNES_CONNECT_APP_ID
         - submit_for_beta: "no"
         - skip_metadata: "no"
         - skip_screenshots: "no"
 
+  # ----------------------------------------------------------------
+  # --- workflow to Release with auto version bump
+  create-release:
+    steps:
+    - script:
+        title:
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -e
+
+            export CI=true
+            releaseman create --bump-version patch
 
   # ----------------------------------------------------------------
-  # --- workflows to Share this step into a Step Library
+  # --- workflow to Release Version
+  create-release-version:
+    envs:
+    - RELEASE_VERSION: 2.4.0
+    steps:
+    - script:
+        title:
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -e
+
+            export CI=true
+            releaseman create --version $RELEASE_VERSION
+
+  # ----------------------------------------------------------------
+  # --- workflow to Share this step into a Step Library
   share-this-step:
     envs:
       # if you want to share this step into a StepLib
