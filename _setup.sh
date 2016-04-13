@@ -11,8 +11,11 @@ if command_exists $gem_name ; then
 	echo " (i) $gem_name already installed"
 
   if [ "$update_deliver" == "no" ] ; then
+    echo " (i) update  $gem_name disabled, setup finished..."
 	  exit 0
   fi
+
+  echo " (i) updating  $gem_name..."
 else
 	echo " (i) $gem_name NOT yet installed, attempting install..."
 fi
