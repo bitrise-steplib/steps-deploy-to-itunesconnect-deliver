@@ -1,6 +1,14 @@
-## Changelog (Current version: 2.4.0)
+## Changelog (Current version: 2.4.1)
 
 -----------------
+
+### 2.4.1 (2016 Apr 13)
+
+* [4b0b3c5] prepare for share
+* [fe51a2e] Merge pull request #6 from bitrise-io/update_deliver
+* [2806199] update log
+* [5abcdc3] step.yml update
+* [44ba436] update deliver gem
 
 ### 2.4.0 (2016 Mar 10)
 
@@ -56,4 +64,4 @@
 
 -----------------
 
-Updated: 2016 Mar 10
+Updated: 2016 Apr 13
