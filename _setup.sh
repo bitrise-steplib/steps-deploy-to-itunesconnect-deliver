@@ -4,11 +4,18 @@ command_exists () {
 	command -v "$1" >/dev/null 2>&1 ;
 }
 
+update_deliver=$1
 gem_name="deliver"
 
 if command_exists $gem_name ; then
 	echo " (i) $gem_name already installed"
-	exit 0
+
+  if [ "$update_deliver" == "no" ] ; then
+    echo " (i) update  $gem_name disabled, setup finished..."
+	  exit 0
+  fi
+
+  echo " (i) updating  $gem_name..."
 else
 	echo " (i) $gem_name NOT yet installed, attempting install..."
 fi

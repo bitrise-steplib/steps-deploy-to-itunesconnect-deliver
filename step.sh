@@ -85,11 +85,13 @@ if [[ "${skip_screenshots}" == "yes" ]] ; then
 	CONFIG_skip_screenshots_type_flag='--skip_screenshots'
 fi
 
+echo " (i) update_deliver: ${update_deliver}"
+
 # ---------------------
 # --- Main
 
 write_section_to_formatted_output "# Setup"
-bash "${THIS_SCRIPT_DIR}/_setup.sh"
+bash "${THIS_SCRIPT_DIR}/_setup.sh" ${update_deliver}
 fail_if_cmd_error "Failed to setup the required tools!"
 
 write_section_to_formatted_output "# Deploy"
@@ -114,10 +116,10 @@ export DELIVER_USER="${itunescon_user}"
 export DELIVER_PASSWORD="${password}"
 export DELIVER_APP_ID="${app_id}"
 if [ -n "${team_name}" ]
-then 
+then
     deliver --team_name "${team_name}" --ipa "${ipa_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 else
-    deliver --ipa "${ipa_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}    
+    deliver --ipa "${ipa_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 fi
 fail_if_cmd_error "Deploy failed!"
 

@@ -45,7 +45,6 @@ inputs:
       description: |-
         Path of the IPA file, to be deployed to iTunes Connect
       is_required: true
-      is_expand: true
   - itunescon_user: ""
     opts:
       title: "iTunes Connect: User Apple ID (email)"
@@ -57,7 +56,6 @@ inputs:
         your Apple ID cannot be used until you verify it
         on Apple's website!*
       is_required: true
-      is_expand: true
   - password: ""
     opts:
       title: "iTunes Connect: Password"
@@ -72,7 +70,6 @@ inputs:
         to something with only
         alphanumeric characters.
       is_required: true
-      is_expand: true
   - app_id: ""
     opts:
       title: "iTunes Connect: App Apple ID"
@@ -84,7 +81,6 @@ inputs:
         click on **More**, click on *About this app*,
         copy the *Apple ID*'s value from here (numeric, like 846814360)
       is_required: true
-      is_expand: true
   - submit_for_beta: "no"
     opts:
       title: "Submit for TestFlight Beta Testing?"
@@ -134,8 +130,17 @@ inputs:
       description: |-
         The App's *Team Name* on iTunes Connect.
 
-        This field are required when using iTunes Connect account 
+        This field are required when using iTunes Connect account
         linked to multiple publish team.
-      is_required: false
-      is_expand: true
+  - update_deliver: "yes"
+    opts:
+      title: "Update deliver gem"
+      summary: ""
+      description: |-
+        Should the step use the latest version of `deliver` gem,
+        or the preinstalled one?
+      is_required: true
+      value_options:
+      - "yes"
+      - "no"
 outputs: []
