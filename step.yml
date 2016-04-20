@@ -44,7 +44,14 @@ inputs:
       summary: ""
       description: |-
         Path of the IPA file, to be deployed to iTunes Connect
-      is_required: true
+      is_required: false
+  - pkg_path: "$BITRISE_PKG_PATH"
+    opts:
+      title: "PKG path"
+      summary: ""
+      description: |-
+        Path of the PKG file, to be deployed to iTunes Connect
+      is_required: false
   - itunescon_user: ""
     opts:
       title: "iTunes Connect: User Apple ID (email)"
