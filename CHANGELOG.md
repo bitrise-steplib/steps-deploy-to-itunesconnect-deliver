@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.4.1)
+## Changelog (Current version: 2.5.0)
 
 -----------------
+
+### 2.5.0 (2016 May 03)
+
+* [3921296] prepare for release
+* [5fd18c6] Merge pull request #7 from olegoid/master
+* [204129c] Add Mac apps deployment support
 
 ### 2.4.1 (2016 Apr 13)
 
@@ -64,4 +70,4 @@
 
 -----------------
 
-Updated: 2016 Apr 13
+Updated: 2016 May 03
