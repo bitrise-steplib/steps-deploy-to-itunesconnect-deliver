@@ -42,8 +42,8 @@ set_error_cleanup_function CLEANUP_ON_ERROR_FN
 # ---------------------
 # --- Required Inputs
 
-if [ -z "${ipa_path}" ] ; then
-	echo " [!] \`ipa_path\` not provided!"
+if [ -z "${ipa_path}" ] && [ -z "${pkg_path}" ] ; then
+	echo " [!] ipa/pkg path not provided!"
 	exit 1
 fi
 
@@ -60,6 +60,17 @@ fi
 if [ -z "${app_id}" ] ; then
 	echo " [!] \`app_id\` not provided!"
 	exit 1
+fi
+
+
+CONFIG_package_type=''
+CONFIG_package_path=''
+if [ -n "${ipa_path}" ] ; then
+  CONFIG_package_type='--ipa'
+  CONFIG_package_path="${ipa_path}"
+elif [ -n "${pkg_path}" ] ; then
+  CONFIG_package_type='--pkg'
+  CONFIG_package_path="${pkg_path}"
 fi
 
 echo " (i) submit_for_beta: ${submit_for_beta}"
@@ -117,9 +128,9 @@ export DELIVER_PASSWORD="${password}"
 export DELIVER_APP_ID="${app_id}"
 if [ -n "${team_name}" ]
 then
-    deliver --team_name "${team_name}" --ipa "${ipa_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+    deliver --team_name "${team_name}" ${CONFIG_package_type} ${CONFIG_package_path} ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 else
-    deliver --ipa "${ipa_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+    deliver ${CONFIG_package_type} ${CONFIG_package_path} ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 fi
 fail_if_cmd_error "Deploy failed!"
 
