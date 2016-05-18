@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.5.0)
+## Changelog (Current version: 2.5.1)
 
 -----------------
+
+### 2.5.1 (2016 May 18)
+
+* [2be7d7f] prepare for release
+* [9662ece] step description updates
 
 ### 2.5.0 (2016 May 03)
 
@@ -70,4 +75,4 @@
 
 -----------------
 
-Updated: 2016 May 03
+Updated: 2016 May 18
