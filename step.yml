@@ -130,6 +130,17 @@ inputs:
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
+  - team_id: ""
+    opts:
+      title: "iTunes Connect: Team ID"
+      summary: ""
+      description: |-
+        The App's *Team ID* on iTunes Connect.
+
+        This field is required when using iTunes Connect account
+        linked to multiple publish team.
+
+        Use this input or `team_name` to specify the team.
   - team_name: ""
     opts:
       title: "iTunes Connect: Team name"
@@ -137,8 +148,10 @@ inputs:
       description: |-
         The App's *Team Name* on iTunes Connect.
 
-        This field are required when using iTunes Connect account
+        This field is required when using iTunes Connect account
         linked to multiple publish team.
+
+        Use this input or `team_id` to specify the team.
   - update_deliver: "yes"
     opts:
       title: "Update deliver gem"
