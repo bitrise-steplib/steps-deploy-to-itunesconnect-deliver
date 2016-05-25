@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.5.1)
+## Changelog (Current version: 2.6.0)
 
 -----------------
+
+### 2.6.0 (2016 May 25)
+
+* [aaead97] prepare for release
+* [00928b4] Merge pull request #8 from bitrise-io/team_id
+* [7c984ab] team_id support
 
 ### 2.5.1 (2016 May 18)
 
@@ -75,4 +81,4 @@
 
 -----------------
 
-Updated: 2016 May 18
+Updated: 2016 May 25
