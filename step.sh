@@ -6,6 +6,19 @@ source "${THIS_SCRIPT_DIR}/bash_utils/utils.sh"
 source "${THIS_SCRIPT_DIR}/bash_utils/formatted_output.sh"
 
 
+echo "Config:"
+echo " * ipa_path: ${ipa_path}"
+echo " * pkg_path: ${pkg_path}"
+echo " * itunescon_user: ${itunescon_user}"
+echo " * password: ***"
+echo " * app_id: ${app_id}"
+echo " * submit_for_beta: ${submit_for_beta}"
+echo " * skip_metadata: ${skip_metadata}"
+echo " * skip_screenshots: ${skip_screenshots}"
+echo " * team_id: ${team_id}"
+echo " * team_name: ${team_name}"
+echo " * update_deliver: ${update_deliver}"
+
 # ------------------------------
 # --- Error Cleanup
 
@@ -73,30 +86,20 @@ elif [ -n "${pkg_path}" ] ; then
   CONFIG_package_path="${pkg_path}"
 fi
 
-echo " (i) submit_for_beta: ${submit_for_beta}"
-
 CONFIG_testflight_beta_deploy_type_flag=''
 if [[ "${submit_for_beta}" == "yes" ]] ; then
 	CONFIG_testflight_beta_deploy_type_flag='--submit_for_review'
 fi
-
-echo " (i) TestFlight beta deploy type flag: ${CONFIG_testflight_beta_deploy_type_flag}"
-
-echo " (i) skip_metadata: ${skip_metadata}"
 
 CONFIG_skip_metadata_type_flag=''
 if [[ "${skip_metadata}" == "yes" ]] ; then
 	CONFIG_skip_metadata_type_flag='--skip_metadata'
 fi
 
-echo " (i) skip_screenshots: ${skip_screenshots}"
-
 CONFIG_skip_screenshots_type_flag=''
 if [[ "${skip_screenshots}" == "yes" ]] ; then
 	CONFIG_skip_screenshots_type_flag='--skip_screenshots'
 fi
-
-echo " (i) update_deliver: ${update_deliver}"
 
 # ---------------------
 # --- Main
@@ -126,11 +129,13 @@ This means that when the API changes
 export DELIVER_USER="${itunescon_user}"
 export DELIVER_PASSWORD="${password}"
 export DELIVER_APP_ID="${app_id}"
-if [ -n "${team_name}" ]
-then
-    deliver --team_name "${team_name}" ${CONFIG_package_type} ${CONFIG_package_path} ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+
+if [ -n "${team_id}" ] ; then
+  deliver --team_id "${team_id}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+elif [ -n "${team_name}" ] ; then
+  deliver --team_name "${team_name}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 else
-    deliver ${CONFIG_package_type} ${CONFIG_package_path} ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+  deliver ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 fi
 fail_if_cmd_error "Deploy failed!"
 
