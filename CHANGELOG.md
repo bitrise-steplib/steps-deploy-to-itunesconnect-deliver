@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.6.0)
+## Changelog (Current version: 2.6.1)
 
 -----------------
+
+### 2.6.1 (2016 Aug 08)
+
+* [482e43b] prep for v2.6.1
+* [8b04fc6] Merge pull request #10 from ghuntley/patch-2
+* [4743c25] corrected spelling mistake
 
 ### 2.6.0 (2016 May 25)
 
@@ -81,4 +87,4 @@
 
 -----------------
 
-Updated: 2016 May 25
+Updated: 2016 Aug 08
