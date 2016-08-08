@@ -39,7 +39,7 @@ build manually to make sure it fulfills the initial iTunes Connect submission
 verification process."
 
   if [[ "${submit_for_beta}" == "yes" ]] ; then
-	write_section_to_formatted_output "**Beta deply note:** you
+	write_section_to_formatted_output "**Beta deploy note:** you
 should try to disable the \`Submit for TestFlight Beta Testing\` option and try
 the deploy again."
   fi
