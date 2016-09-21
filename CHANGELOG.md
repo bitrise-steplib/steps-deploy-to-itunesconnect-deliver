@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.6.1)
+## Changelog (Current version: 2.6.2)
 
 -----------------
+
+### 2.6.2 (2016 Sep 21)
+
+* [9eabedc] v2.6.2 prep - bitrise.yml cleanup
+* [fbe67a5] Added TestFlight to more places in descriptions
+* [e02e5ca] step title - include TestFlight
 
 ### 2.6.1 (2016 Aug 08)
 
@@ -87,4 +93,4 @@
 
 -----------------
 
-Updated: 2016 Aug 08
+Updated: 2016 Sep 21
