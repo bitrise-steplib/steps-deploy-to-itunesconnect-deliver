@@ -1,28 +1,28 @@
 title: "Deploy to iTunes Connect / TestFlight (with Deliver)"
-summary: Upload the archive to iTunes Connect and you can also submit it to TestFlight Beta Testing
+summary: Upload the archive to iTunes Connect / TestFlight and you can also submit it to TestFlight Beta Testing
 description: |-
-  Deploy to iTunes Connect, using the
+  Deploy to iTunes Connect / TestFlight, using the
   fantastic [Deliver](https://github.com/fastlane/fastlane/tree/master/deliver)
   Ruby gem.
 
   **If this is the very first build** of the app
-  you try to deploy to iTunes Connect then you might want to upload the first
-  build manually to make sure it fulfills the initial iTunes Connect submission
+  you try to deploy to iTunes Connect / TestFlight then you might want to upload the first
+  build manually to make sure it fulfills the initial iTunes Connect / TestFlight submission
   verification process.
 
   **Be advised** that this
   step uses a well maintained, open source tool which
   uses *undocumented and unsupported APIs* (because the current
-  iTunes Connect platform does not have a documented and supported API)
+  iTunes Connect / TestFlight platform does not have a documented and supported API)
   to perform the deployment.
   This means that when the API changes
   **this step might fail until the tool is updated**.
 
   ## Setup guide and notes
 
-  * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
+  * Register an app on iTunes Connect / TestFlight, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
   * Requires an **App Store iOS distibution Provisioning Profile**
-  * Every build which you want to push to iTunes Connect have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
+  * Every build which you want to push to iTunes Connect / TestFlight have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 source_code_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 support_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/issues
