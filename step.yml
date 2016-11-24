@@ -20,7 +20,7 @@ description: |-
 
   ## Setup guide and notes
 
-  * Register an app on iTunes Connect / TestFlight, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
+  * Register an app on iTunes Connect / TestFlight, on the **My Apps** page. Click on the *plus sign* and select the **New App** option. This requires an **admin** account.
   * Requires an **App Store iOS distibution Provisioning Profile**
   * Every build which you want to push to iTunes Connect / TestFlight have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
@@ -85,7 +85,7 @@ inputs:
         The App's *Apple ID* on iTunes Connect.
 
         Open the **App's page on iTunes Connect**,
-        click on **More**, click on *About this app*,
+        click on **App Information**, scroll down to the *General Information* section,
         copy the *Apple ID*'s value from here (numeric, like 846814360)
       is_required: true
   - submit_for_beta: "no"

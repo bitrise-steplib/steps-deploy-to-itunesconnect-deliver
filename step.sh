@@ -125,20 +125,17 @@ to perform the deployment.
 This means that when the API changes
 **this step might fail until the tool is updated**."
 
-
-export DELIVER_USER="${itunescon_user}"
 export DELIVER_PASSWORD="${password}"
-export DELIVER_APP_ID="${app_id}"
 
 if [ -n "${team_id}" ] ; then
   set -x
-  deliver --team_id "${team_id}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+  deliver --username "${itunescon_user}" --app "${app_id}" --team_id "${team_id}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 elif [ -n "${team_name}" ] ; then
   set -x
-  deliver --team_name "${team_name}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+  deliver --username "${itunescon_user}" --app "${app_id}" --team_name "${team_name}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 else
   set -x
-  deliver ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
+  deliver --username "${itunescon_user}" --app "${app_id}" ${CONFIG_package_type} "${CONFIG_package_path}" ${CONFIG_skip_screenshots_type_flag} ${CONFIG_skip_metadata_type_flag} --force ${CONFIG_testflight_beta_deploy_type_flag}
 fi
 fail_if_cmd_error "Deploy failed!"
 set +x
