@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.6.2)
+## Changelog (Current version: 2.6.3)
 
 -----------------
+
+### 2.6.3 (2016 Nov 24)
+
+* [abbd4ed] prepare for 2.6.3
+* [eed73aa] print performed deliver command (#15)
 
 ### 2.6.2 (2016 Sep 21)
 
@@ -93,4 +98,4 @@
 
 -----------------
 
-Updated: 2016 Sep 21
+Updated: 2016 Nov 24
