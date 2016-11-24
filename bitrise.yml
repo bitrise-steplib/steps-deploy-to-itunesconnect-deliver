@@ -1,9 +1,10 @@
-format_version: 1.1.0
+format_version: 1.3.1
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - STEP_VERSION: 2.6.2
+  - STEP_VERSION: 2.6.3
+
   # define these in your .bitrise.secrets.yml
   - BITRISE_PROJECT_PATH: $BITRISE_PROJECT_PATH
   - BITRISE_SCHEME: $BITRISE_SCHEME
@@ -43,22 +44,30 @@ workflows:
         - skip_screenshots: "no"
 
   # ----------------------------------------------------------------
-  # --- workflow to Release Version
-  create-release-version:
-    envs:
-    - RELEASE_VERSION: $STEP_VERSION
+  # --- workflows to create Release
+  create-release:
     steps:
     - script:
         title:
         inputs:
         - content: |
             #!/bin/bash
-            set -ex
+            set -e
+
             export CI=true
-            releaseman create --version $RELEASE_VERSION
+            releaseman create --version $STEP_VERSION
 
   # ----------------------------------------------------------------
-  # --- workflow to Share this step into a Step Library
+  # --- workflows to Share this step into a Step Library
+  audit-this-step:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            stepman audit --step-yml ./step.yml
+
   share-this-step:
     envs:
       # if you want to share this step into a StepLib
@@ -87,6 +96,8 @@ workflows:
 
       Once it finishes the only thing left is to actually create a Pull Request,
       the way described in the guide printed at the end of the process.
+    before_run:
+    - audit-this-step
     steps:
     - script:
         inputs:
