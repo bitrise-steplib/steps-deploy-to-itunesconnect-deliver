@@ -20,7 +20,7 @@ description: |-
 
   ## Setup guide and notes
 
-  * Register an app on iTunes Connect / TestFlight, on the **My Apps** page. Click on the *plus sign* and select the **New iOS App** option. This requires an **admin** account.
+  * Register an app on iTunes Connect / TestFlight, on the **My Apps** page. Click on the *plus sign* and select the **New App** option. This requires an **admin** account.
   * Requires an **App Store iOS distibution Provisioning Profile**
   * Every build which you want to push to iTunes Connect / TestFlight have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*)
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
@@ -85,29 +85,29 @@ inputs:
         The App's *Apple ID* on iTunes Connect.
 
         Open the **App's page on iTunes Connect**,
-        click on **More**, click on *About this app*,
+        click on **App Information**, scroll down to the *General Information* section,
         copy the *Apple ID*'s value from here (numeric, like 846814360)
       is_required: true
   - submit_for_beta: "no"
     opts:
-      title: "Submit for TestFlight Beta Testing?"
+      title: "Submit for TestFlight External Testing?"
       summary: ""
       description: |
         Wait for the submission to be processed and then
-        enable **TestFlight Beta Testing** for this specific version?
+        enable **TestFlight External Testing** for this specific version?
 
         If this option is disabled then this step won't wait
         for the new version to be processed on iTunes Connect
-        and won't enable it for *TestFlight Beta Testing* automatically.
+        and won't enable it for *TestFlight External Testing* automatically.
 
         *Enabling this option will wait for the submission to be
         processed which might take a couple of minutes after the
         new version is deployed to iTunes Connect*.
 
         **NOTE:** if this option is enabled then this step will
-        fail if it can't enable TestFlight Beta Testing for the
+        fail if it can't enable TestFlight External Testing for the
         version, even if the version was successfully uploaded
-        to iTunes Connect and only the TestFlight Beta Testing
+        to iTunes Connect and only the TestFlight External Testing
         submission failed.
       value_options: ["yes", "no"]
       is_required: true
