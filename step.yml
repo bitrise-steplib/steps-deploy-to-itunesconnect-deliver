@@ -35,8 +35,15 @@ type_tags:
 is_requires_admin_user: false
 is_always_run: false
 is_skippable: false
-dependencies: []
-run_if: ""
+deps:
+  brew:
+  - name: go
+  apt_get:
+  - name: golang
+    bin_name: go
+toolkit:
+  go:
+    package_name: github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 inputs:
   - ipa_path: "$BITRISE_IPA_PATH"
     opts:
@@ -44,14 +51,12 @@ inputs:
       summary: ""
       description: |-
         Path of the IPA file, to be deployed to iTunes Connect
-      is_required: false
   - pkg_path: "$BITRISE_PKG_PATH"
     opts:
       title: "PKG path"
       summary: ""
       description: |-
         Path of the PKG file, to be deployed to iTunes Connect
-      is_required: false
   - itunescon_user: ""
     opts:
       title: "iTunes Connect: User Apple ID (email)"
@@ -152,6 +157,15 @@ inputs:
         linked to multiple publish team.
 
         Use this input or `team_id` to specify the team.
+  - options: 
+    opts:
+      title: " Additional options for `deliver` call"
+      summary: ""
+      description: |-
+        Options added to the end of the `deliver` call.
+        
+        If you want to add more options, list that separated by space character.
+        Example: `--skip_metadata -skip_screenshots`
   - update_deliver: "yes"
     opts:
       title: "Update deliver gem"

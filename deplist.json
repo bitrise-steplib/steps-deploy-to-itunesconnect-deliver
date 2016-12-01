@@ -1,8 +1,0 @@
-{
-	"deps": [
-		{
-			"url": "https://github.com/bitrise-io/steps-utils-bash-toolkit.git",
-			"store_path": "bash_utils"
-		}
-	]
-}
