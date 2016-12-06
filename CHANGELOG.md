@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.6.3)
+## Changelog (Current version: 2.7.0)
 
 -----------------
+
+### 2.7.0 (2016 Dec 06)
+
+* [5fb4350] prepare for 2.7.0
+* [546f7e0] go-toolkit support (#16)
 
 ### 2.6.3 (2016 Nov 24)
 
@@ -98,4 +103,4 @@
 
 -----------------
 
-Updated: 2016 Nov 24
+Updated: 2016 Dec 06
