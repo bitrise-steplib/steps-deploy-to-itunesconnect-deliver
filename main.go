@@ -223,6 +223,14 @@ This means that when the API changes
 		"--username", configs.ItunesconUser,
 		"--app", configs.AppID,
 	}
+	
+	if configs.TeamID != "" {
+		args = append(args, "--team_id", configs.TeamID)
+	}
+	
+	if configs.TeamName != "" {
+		args = append(args, "--team_name", configs.TeamName)
+	}
 
 	if configs.IpaPath != "" {
 		args = append(args, "--ipa", configs.IpaPath)
