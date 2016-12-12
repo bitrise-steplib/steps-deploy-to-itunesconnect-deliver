@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.7.0)
+## Changelog (Current version: 2.7.1)
 
 -----------------
+
+### 2.7.1 (2016 Dec 12)
+
+* [085fd6d] prepare for 2.7.1
+* [0276868] Implement missing team args (#17)
 
 ### 2.7.0 (2016 Dec 06)
 
@@ -103,4 +108,4 @@
 
 -----------------
 
-Updated: 2016 Dec 06
+Updated: 2016 Dec 12
