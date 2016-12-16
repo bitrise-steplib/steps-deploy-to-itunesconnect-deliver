@@ -59,7 +59,7 @@ workflows:
         - content: |
             #!/bin/bash
             set -ex
-            # gem pristine xcode-install
+            gem install spaceship --no-document
     - path::./:
         title: Step Test
         inputs:
