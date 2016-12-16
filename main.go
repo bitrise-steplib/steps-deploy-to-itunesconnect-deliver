@@ -182,7 +182,7 @@ func main() {
 
 	elapsed := time.Since(startTime)
 
-	log.Detail("Setup took %f seconds to complete", elapsed.Seconds)
+	log.Detail("Setup took %f seconds to complete", elapsed.Seconds())
 
 	//
 	// Main
