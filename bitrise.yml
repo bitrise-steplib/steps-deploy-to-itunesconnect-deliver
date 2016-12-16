@@ -12,7 +12,7 @@ app:
 
   # define these in your .bitrise.secrets.yml
   - BITRISE_BUILD_NUMBER: $BITRISE_BUILD_NUMBER
-  
+
   - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
   - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
   - ITUNES_CONNECT_TEAM_NAME: $ITUNES_CONNECT_TEAM_NAME
@@ -40,7 +40,7 @@ workflows:
         - tag: ""
         - branch: "master"
         - pull_request_id: ""
-        - clone_depth: "" 
+        - clone_depth: ""
     - certificate-and-profile-installer:
     - set-xcode-build-number:
         title: Set Build Number

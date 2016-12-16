@@ -134,6 +134,38 @@ func fail(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
+func ensureGemInstalled(gemName string, isUpgrade bool) error {
+	rubyCmd, err := rubycmd.NewRubyCommandModel()
+	if err != nil {
+		return fmt.Errorf("Failed to create ruby command model, error: %s", err)
+	}
+
+	installed, err := rubyCmd.IsGemInstalled(gemName, "")
+	if err != nil {
+		return fmt.Errorf("Failed to check if gem (%s) installed, error: %s", gemName, err)
+	}
+
+	isGemInstall := true
+	if installed {
+		log.Detail("%s already installed", gemName)
+
+		if !isUpgrade {
+			log.Detail("update %s disabled, setup finished...", gemName)
+			isGemInstall = false
+		} else {
+			log.Detail("updating %s...", gemName)
+		}
+	} else {
+		log.Detail("%s NOT yet installed, attempting install...")
+	}
+
+	if isGemInstall {
+		rubyCmd.GemInstall(gemName, "")
+	}
+
+	return nil
+}
+
 func main() {
 	configs := createConfigsModelFromEnvs()
 
@@ -151,38 +183,16 @@ func main() {
 
 	startTime := time.Now()
 
-	rubyCmd, err := rubycmd.NewRubyCommandModel()
-	if err != nil {
-		fail("Failed to create ruby command model, error: %s", err)
-	}
-
-	deliverGemName := "deliver"
-	installed, err := rubyCmd.IsGemInstalled(deliverGemName, "")
-	if err != nil {
-		fail("Failed to check if gem (%s) installed, error: %s", err)
-	}
-
-	installDeliver := true
-	if installed {
-		log.Detail("%s already installed", deliverGemName)
-
-		if configs.UpdateDeliver == "no" {
-			log.Detail("update %s disabled, setup finished...", deliverGemName)
-			installDeliver = false
-		} else {
-			log.Detail("updating %s...", deliverGemName)
+	isUpdateGems := !(configs.UpdateDeliver == "no")
+	for _, aGemName := range []string{"deliver", "spaceship"} {
+		if err := ensureGemInstalled(aGemName, isUpdateGems); err != nil {
+			fail("Failed to install '%s', error: %s", aGemName, err)
 		}
-	} else {
-		log.Detail("%s NOT yet installed, attempting install...")
-	}
-
-	if installDeliver {
-		rubyCmd.GemInstall(deliverGemName, "")
 	}
 
 	elapsed := time.Since(startTime)
 
-	log.Detail("Setup took %d secounds to complete", elapsed.Seconds)
+	log.Detail("Setup took %f seconds to complete", elapsed.Seconds())
 
 	//
 	// Main
@@ -223,11 +233,11 @@ This means that when the API changes
 		"--username", configs.ItunesconUser,
 		"--app", configs.AppID,
 	}
-	
+
 	if configs.TeamID != "" {
 		args = append(args, "--team_id", configs.TeamID)
 	}
-	
+
 	if configs.TeamName != "" {
 		args = append(args, "--team_name", configs.TeamName)
 	}
@@ -254,9 +264,8 @@ This means that when the API changes
 
 	args = append(args, options...)
 
-	log.Done("$ %s", cmdex.PrintableCommandArgs(false, append([]string{"deliver"}, args...)))
-
 	cmd := cmdex.NewCommand("deliver", args...)
+	log.Done("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
 	cmd.SetStderr(os.Stderr)
