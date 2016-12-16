@@ -56,7 +56,7 @@ workflows:
     - script:
         title: 'Gem fix attempt'
         inputs:
-        - script: |
+        - content: |
             #!/bin/bash
             set -ex
             gem pristine xcode-install
