@@ -3,7 +3,7 @@
 The new Deploy to iTunes Connect with Deliver step.
 
 Deploy to iTunes Connect, using the
-fantastic [Deliver](https://github.com/fastlane/fastlane/tree/master/deliver)
+fantastic [deliver](https://github.com/fastlane/fastlane/tree/master/deliver)
 Ruby gem.
 
 
