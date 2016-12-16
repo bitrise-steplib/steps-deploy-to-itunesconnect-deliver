@@ -53,13 +53,6 @@ workflows:
         inputs:
         - output_dir: $BITRISE_DEPLOY_DIR
         - project_path: $BITRISE_PROJECT_PATH
-    - script:
-        title: 'Gem fix attempt'
-        inputs:
-        - content: |
-            #!/bin/bash
-            set -ex
-            gem install spaceship --no-document
     - path::./:
         title: Step Test
         inputs:
