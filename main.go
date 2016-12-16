@@ -156,7 +156,7 @@ func main() {
 		fail("Failed to create ruby command model, error: %s", err)
 	}
 
-	deliverGemName := "deliver"
+	deliverGemName := "fastlane"
 	installed, err := rubyCmd.IsGemInstalled(deliverGemName, "")
 	if err != nil {
 		fail("Failed to check if gem (%s) installed, error: %s", err)
