@@ -220,14 +220,15 @@ This means that when the API changes
 	}
 
 	args := []string{
+		"deliver",
 		"--username", configs.ItunesconUser,
 		"--app", configs.AppID,
 	}
-	
+
 	if configs.TeamID != "" {
 		args = append(args, "--team_id", configs.TeamID)
 	}
-	
+
 	if configs.TeamName != "" {
 		args = append(args, "--team_name", configs.TeamName)
 	}
@@ -254,9 +255,8 @@ This means that when the API changes
 
 	args = append(args, options...)
 
-	log.Done("$ %s", cmdex.PrintableCommandArgs(false, append([]string{"deliver"}, args...)))
-
-	cmd := cmdex.NewCommand("deliver", args...)
+	cmd := cmdex.NewCommand("fastlane", args...)
+	log.Done("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
 	cmd.SetStderr(os.Stderr)
