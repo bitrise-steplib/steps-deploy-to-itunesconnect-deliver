@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.7.1)
+## Changelog (Current version: 2.7.2)
 
 -----------------
+
+### 2.7.2 (2016 Dec 16)
+
+* [57ab0b0] prep for v2.7.2
+* [79da1a3] Feature/deliver update fixes (#18)
 
 ### 2.7.1 (2016 Dec 12)
 
@@ -108,4 +113,4 @@
 
 -----------------
 
-Updated: 2016 Dec 12
+Updated: 2016 Dec 16
