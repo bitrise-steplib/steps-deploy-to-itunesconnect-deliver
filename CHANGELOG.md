@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.7.2)
+## Changelog (Current version: 2.7.3)
 
 -----------------
+
+### 2.7.3 (2016 Dec 19)
+
+* [5acac8c] prepare for 2.7.3
+* [2c2d70f] add macos tag (#19)
 
 ### 2.7.2 (2016 Dec 16)
 
@@ -113,4 +118,4 @@
 
 -----------------
 
-Updated: 2016 Dec 16
+Updated: 2016 Dec 19
