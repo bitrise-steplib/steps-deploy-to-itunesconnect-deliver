@@ -104,7 +104,7 @@ func (command RubyCommandModel) ExecuteForOutput(workDir string, useBundle bool,
 
 // GemUpdate ...
 func (command RubyCommandModel) GemUpdate(gem string) error {
-	cmdSlice := []string{"gem", "update", gem}
+	cmdSlice := []string{"gem", "update", gem, "--no-document"}
 
 	if err := command.Execute("", false, cmdSlice); err != nil {
 		return err
