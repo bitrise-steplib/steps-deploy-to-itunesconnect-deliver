@@ -102,6 +102,25 @@ func (command RubyCommandModel) ExecuteForOutput(workDir string, useBundle bool,
 	return executeForOutput(workDir, false, cmdSlice)
 }
 
+// GemUpdate ...
+func (command RubyCommandModel) GemUpdate(gem string) error {
+	cmdSlice := []string{"gem", "update", gem, "--no-document"}
+
+	if err := command.Execute("", false, cmdSlice); err != nil {
+		return err
+	}
+
+	if command.rubyInstallType == RbenvRuby {
+		cmdSlice := []string{"rbenv", "rehash"}
+
+		if err := command.Execute("", false, cmdSlice); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // GemInstall ...
 func (command RubyCommandModel) GemInstall(gem, version string) error {
 	cmdSlice := []string{"gem", "install", gem, "--no-document"}

@@ -145,22 +145,18 @@ func ensureGemInstalled(gemName string, isUpgrade bool) error {
 		return fmt.Errorf("Failed to check if gem (%s) installed, error: %s", gemName, err)
 	}
 
-	isGemInstall := true
 	if installed {
 		log.Detail("%s already installed", gemName)
 
 		if !isUpgrade {
 			log.Detail("update %s disabled, setup finished...", gemName)
-			isGemInstall = false
 		} else {
 			log.Detail("updating %s...", gemName)
+			return rubyCmd.GemUpdate(gemName)
 		}
 	} else {
 		log.Detail("%s NOT yet installed, attempting install...")
-	}
-
-	if isGemInstall {
-		rubyCmd.GemInstall(gemName, "")
+		return rubyCmd.GemInstall(gemName, "")
 	}
 
 	return nil
@@ -184,7 +180,7 @@ func main() {
 	startTime := time.Now()
 
 	isUpdateGems := !(configs.UpdateDeliver == "no")
-	for _, aGemName := range []string{"deliver", "spaceship"} {
+	for _, aGemName := range []string{"fastlane"} {
 		if err := ensureGemInstalled(aGemName, isUpdateGems); err != nil {
 			fail("Failed to install '%s', error: %s", aGemName, err)
 		}
@@ -230,6 +226,7 @@ This means that when the API changes
 	}
 
 	args := []string{
+		"deliver",
 		"--username", configs.ItunesconUser,
 		"--app", configs.AppID,
 	}
@@ -264,7 +261,7 @@ This means that when the API changes
 
 	args = append(args, options...)
 
-	cmd := cmdex.NewCommand("deliver", args...)
+	cmd := cmdex.NewCommand("fastlane", args...)
 	log.Done("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
