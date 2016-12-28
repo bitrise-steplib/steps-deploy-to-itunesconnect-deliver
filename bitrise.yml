@@ -55,7 +55,7 @@ workflows:
         - content: |
             #!/bin/bash
             set -ex
-            gem install fastlane --no-document
+            gem update fastlane --no-document
             fastlane --version
     - path::./:
         title: Step Test
