@@ -145,22 +145,18 @@ func ensureGemInstalled(gemName string, isUpgrade bool) error {
 		return fmt.Errorf("Failed to check if gem (%s) installed, error: %s", gemName, err)
 	}
 
-	isGemInstall := true
 	if installed {
 		log.Detail("%s already installed", gemName)
 
 		if !isUpgrade {
 			log.Detail("update %s disabled, setup finished...", gemName)
-			isGemInstall = false
 		} else {
 			log.Detail("updating %s...", gemName)
+			return rubyCmd.GemUpdate(gemName)
 		}
 	} else {
 		log.Detail("%s NOT yet installed, attempting install...")
-	}
-
-	if isGemInstall {
-		rubyCmd.GemInstall(gemName, "")
+		return rubyCmd.GemInstall(gemName, "")
 	}
 
 	return nil

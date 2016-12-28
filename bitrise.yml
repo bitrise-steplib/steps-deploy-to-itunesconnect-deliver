@@ -51,12 +51,13 @@ workflows:
         - project_path: $BITRISE_PROJECT_PATH
     - script:
         title: TMP fix attempt
+        run_if: false
         inputs:
         - content: |
             #!/bin/bash
             set -ex
-            gem update fastlane --no-document
-            fastlane --version
+            # gem update fastlane --no-document
+            # fastlane --version
     - path::./:
         title: Step Test
         inputs:
