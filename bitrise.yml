@@ -49,6 +49,14 @@ workflows:
         inputs:
         - output_dir: $BITRISE_DEPLOY_DIR
         - project_path: $BITRISE_PROJECT_PATH
+    - script:
+        title: TMP fix attempt
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            gem install fastlane --no-document
+            fastlane --version
     - path::./:
         title: Step Test
         inputs:
