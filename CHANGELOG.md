@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.7.3)
+## Changelog (Current version: 2.8.0)
 
 -----------------
+
+### 2.8.0 (2016 Dec 28)
+
+* [06bd7ed] STEP_VERSION: 2.8.0
+* [1ae2de3] Feature/deliver fastlane fix (#20)
 
 ### 2.7.3 (2016 Dec 19)
 
@@ -118,4 +123,4 @@
 
 -----------------
 
-Updated: 2016 Dec 19
+Updated: 2016 Dec 28
