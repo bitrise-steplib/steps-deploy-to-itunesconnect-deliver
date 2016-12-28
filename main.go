@@ -184,7 +184,7 @@ func main() {
 	startTime := time.Now()
 
 	isUpdateGems := !(configs.UpdateDeliver == "no")
-	for _, aGemName := range []string{"deliver", "spaceship"} {
+	for _, aGemName := range []string{"fastlane"} {
 		if err := ensureGemInstalled(aGemName, isUpdateGems); err != nil {
 			fail("Failed to install '%s', error: %s", aGemName, err)
 		}
@@ -230,6 +230,7 @@ This means that when the API changes
 	}
 
 	args := []string{
+		"deliver",
 		"--username", configs.ItunesconUser,
 		"--app", configs.AppID,
 	}
@@ -264,7 +265,7 @@ This means that when the API changes
 
 	args = append(args, options...)
 
-	cmd := cmdex.NewCommand("deliver", args...)
+	cmd := cmdex.NewCommand("fastlane", args...)
 	log.Done("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
