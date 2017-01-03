@@ -166,7 +166,7 @@ inputs:
         Options added to the end of the `deliver` call.
         
         If you want to add more options, list that separated by space character.
-        Example: `--skip_metadata -skip_screenshots`
+        Example: `--skip_metadata --skip_screenshots`
   - update_deliver: "yes"
     opts:
       title: "Update deliver gem"
