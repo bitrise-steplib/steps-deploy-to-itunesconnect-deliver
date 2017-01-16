@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/bitrise-io/go-utils/cmdex"
+	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/rubycmd"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -53,28 +53,28 @@ func createConfigsModelFromEnvs() ConfigsModel {
 }
 
 func (configs ConfigsModel) print() {
-	log.Info("Configs:")
+	log.Infof("Configs:")
 
-	log.Detail("- IpaPath: %s", configs.IpaPath)
-	log.Detail("- PkgPath: %s", configs.PkgPath)
+	log.Printf("- IpaPath: %s", configs.IpaPath)
+	log.Printf("- PkgPath: %s", configs.PkgPath)
 
-	log.Detail("- ItunesconUser: %s", configs.ItunesconUser)
+	log.Printf("- ItunesconUser: %s", configs.ItunesconUser)
 
 	securePassword := ""
 	if configs.Password != "" {
 		securePassword = "***"
 	}
-	log.Detail("- Password: %s", securePassword)
+	log.Printf("- Password: %s", securePassword)
 
-	log.Detail("- AppID: %s", configs.AppID)
-	log.Detail("- SubmitForBeta: %s", configs.SubmitForBeta)
-	log.Detail("- SkipMetadata: %s", configs.SkipMetadata)
-	log.Detail("- SkipScreenshots: %s", configs.SkipScreenshots)
-	log.Detail("- TeamID: %s", configs.TeamID)
-	log.Detail("- TeamName: %s", configs.TeamName)
-	log.Detail("- Options: %s", configs.Options)
+	log.Printf("- AppID: %s", configs.AppID)
+	log.Printf("- SubmitForBeta: %s", configs.SubmitForBeta)
+	log.Printf("- SkipMetadata: %s", configs.SkipMetadata)
+	log.Printf("- SkipScreenshots: %s", configs.SkipScreenshots)
+	log.Printf("- TeamID: %s", configs.TeamID)
+	log.Printf("- TeamName: %s", configs.TeamName)
+	log.Printf("- Options: %s", configs.Options)
 
-	log.Detail("- UpdateDeliver: %s", configs.UpdateDeliver)
+	log.Printf("- UpdateDeliver: %s", configs.UpdateDeliver)
 }
 
 func (configs ConfigsModel) validate() error {
@@ -130,33 +130,49 @@ func (configs ConfigsModel) validate() error {
 }
 
 func fail(format string, v ...interface{}) {
-	log.Error(format, v...)
+	log.Errorf(format, v...)
 	os.Exit(1)
 }
 
 func ensureGemInstalled(gemName string, isUpgrade bool) error {
-	rubyCmd, err := rubycmd.NewRubyCommandModel()
-	if err != nil {
-		return fmt.Errorf("Failed to create ruby command model, error: %s", err)
-	}
-
-	installed, err := rubyCmd.IsGemInstalled(gemName, "")
+	installed, err := rubycommand.IsGemInstalled(gemName, "")
 	if err != nil {
 		return fmt.Errorf("Failed to check if gem (%s) installed, error: %s", gemName, err)
 	}
 
 	if installed {
-		log.Detail("%s already installed", gemName)
+		log.Printf("%s already installed", gemName)
 
 		if !isUpgrade {
-			log.Detail("update %s disabled, setup finished...", gemName)
+			log.Printf("update %s disabled, setup finished...", gemName)
 		} else {
-			log.Detail("updating %s...", gemName)
-			return rubyCmd.GemUpdate(gemName)
+			log.Printf("updating %s...", gemName)
+
+			cmds, err := rubycommand.GemUpdate(gemName)
+			if err != nil {
+				return fmt.Errorf("Failed to create command, error: %s", err)
+			}
+
+			for _, cmd := range cmds {
+				if err := cmd.Run(); err != nil {
+					return fmt.Errorf("Gem update failed, error: %s", err)
+				}
+			}
+			return nil
 		}
 	} else {
-		log.Detail("%s NOT yet installed, attempting install...")
-		return rubyCmd.GemInstall(gemName, "")
+		log.Printf("%s NOT yet installed, attempting install...", gemName)
+
+		cmds, err := rubycommand.GemInstall(gemName, "")
+		if err != nil {
+			return fmt.Errorf("Failed to create command, error: %s", err)
+		}
+
+		for _, cmd := range cmds {
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("Gem install failed, error: %s", err)
+			}
+		}
 	}
 
 	return nil
@@ -175,7 +191,7 @@ func main() {
 	//
 	// Setup
 	fmt.Println()
-	log.Info("Setup")
+	log.Infof("Setup")
 
 	startTime := time.Now()
 
@@ -188,14 +204,14 @@ func main() {
 
 	elapsed := time.Since(startTime)
 
-	log.Detail("Setup took %f seconds to complete", elapsed.Seconds())
+	log.Printf("Setup took %f seconds to complete", elapsed.Seconds())
 
 	//
 	// Main
 	fmt.Println()
-	log.Info("Deploy")
+	log.Infof("Deploy")
 
-	log.Detail(`**Note:** if your password
+	log.Printf(`**Note:** if your password
 contains special characters
 and you experience problems, please
 consider changing your password
@@ -203,7 +219,7 @@ to something with only
 alphanumeric characters.`)
 	fmt.Println()
 
-	log.Detail(`**Be advised** log.Detail(that this
+	log.Printf(`**Be advised** log.Printf(that this
 step uses a well maintained, open source tool which
 uses *undocumented and unsupported APIs* (because the current
 iTunes Connect platform does not have a documented and supported API)
@@ -261,13 +277,13 @@ This means that when the API changes
 
 	args = append(args, options...)
 
-	cmd := cmdex.NewCommand("fastlane", args...)
-	log.Done("$ %s", cmd.PrintableCommandArgs())
+	cmd := command.New("fastlane", args...)
+	log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
 	cmd.SetStderr(os.Stderr)
 	cmd.SetStdin(os.Stdin)
-	cmd.AppendEnvs(envs)
+	cmd.AppendEnvs(envs...)
 
 	fmt.Println()
 
@@ -275,7 +291,7 @@ This means that when the API changes
 		fail("Deploy failed, error: %s", err)
 	}
 
-	log.Done("Success")
-	log.Detail("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
-	log.Detail("**Don't forget to enable** the **TestFlight Beta Testing** switch on iTunes Connect (on the *Prerelease* tab of the app) if this is a new version of the app!")
+	log.Donef("Success")
+	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
+	log.Printf("**Don't forget to enable** the **TestFlight Beta Testing** switch on iTunes Connect (on the *Prerelease* tab of the app) if this is a new version of the app!")
 }
