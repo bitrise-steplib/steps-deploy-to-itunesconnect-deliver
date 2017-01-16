@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.8.0)
+## Changelog (Current version: 2.8.1)
 
 -----------------
+
+### 2.8.1 (2017 Jan 16)
+
+* [d87a434] prepare for 2.8.1
+* [b3838ca] use rubycommand package (#21)
+* [38b9eb5] step.yml typo fix
 
 ### 2.8.0 (2016 Dec 28)
 
@@ -123,4 +129,4 @@
 
 -----------------
 
-Updated: 2016 Dec 28
+Updated: 2017 Jan 16
