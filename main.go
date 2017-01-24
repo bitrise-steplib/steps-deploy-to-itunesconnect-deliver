@@ -254,10 +254,9 @@ This means that when the API changes
 		if configs.TeamID != "" {
 			log.Warnf("TeamName parameter specified, TeamID will be ignored")
 		}
-	} else {
-		if configs.TeamID != "" {
-			args = append(args, "--team_id", configs.TeamID)
-		}
+
+	} else if configs.TeamID != "" {
+		args = append(args, "--team_id", configs.TeamID)
 	}
 
 	if configs.IpaPath != "" {
