@@ -1,6 +1,10 @@
-## Changelog (Current version: 2.8.1)
+## Changelog (Current version: 2.8.2)
 
 -----------------
+
+### 2.8.2 (2017 Jan 25)
+
+* [3b5430e] TeamID&TeamName parameter check (#22)
 
 ### 2.8.1 (2017 Jan 16)
 
@@ -129,4 +133,4 @@
 
 -----------------
 
-Updated: 2017 Jan 16
+Updated: 2017 Jan 25
