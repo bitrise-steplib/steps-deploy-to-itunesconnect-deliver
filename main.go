@@ -247,12 +247,15 @@ This means that when the API changes
 		"--app", configs.AppID,
 	}
 
-	if configs.TeamID != "" {
-		args = append(args, "--team_id", configs.TeamID)
-	}
-
 	if configs.TeamName != "" {
 		args = append(args, "--team_name", configs.TeamName)
+
+		//warn user if TeamID is also set
+		if configs.TeamID != "" {
+			log.Warnf("TeamName parameter specified, TeamID will be ignored")
+		}
+	} else if configs.TeamID != "" {
+		args = append(args, "--team_id", configs.TeamID)
 	}
 
 	if configs.IpaPath != "" {
