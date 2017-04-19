@@ -86,7 +86,7 @@ func isParameterValueAnOption(value string, options ...string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("parameter given: %s, available parameters: %v", value, options)
+	return fmt.Errorf("invalid parameter: %s, available: %v", value, options)
 }
 
 func (configs ConfigsModel) validate() error {
