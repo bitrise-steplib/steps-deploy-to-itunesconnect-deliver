@@ -30,6 +30,7 @@ type ConfigsModel struct {
 	Options         string
 
 	UpdateDeliver string
+	Platform      string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
@@ -49,6 +50,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Options:         os.Getenv("options"),
 
 		UpdateDeliver: os.Getenv("update_deliver"),
+		Platform:      os.Getenv("platform"),
 	}
 }
 
@@ -75,6 +77,16 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Options: %s", configs.Options)
 
 	log.Printf("- UpdateDeliver: %s", configs.UpdateDeliver)
+	log.Printf("- Platform: %s", configs.Platform)
+}
+
+func isParameterValueAnOption(value string, options ...string) error {
+	for _, option := range options {
+		if option == value {
+			return nil
+		}
+	}
+	return fmt.Errorf("parameter given: %s, available parameters: %v", value, options)
 }
 
 func (configs ConfigsModel) validate() error {
@@ -114,16 +126,40 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no SubmitForBeta parameter specified")
 	}
 
+	if err := isParameterValueAnOption(configs.SubmitForBeta, "yes", "no"); err != nil {
+		return fmt.Errorf("SubmitForBeta, %s", err)
+	}
+
 	if configs.SkipMetadata == "" {
 		return errors.New("no SkipMetadata parameter specified")
+	}
+
+	if err := isParameterValueAnOption(configs.SkipMetadata, "yes", "no"); err != nil {
+		return fmt.Errorf("SkipMetadata, %s", err)
 	}
 
 	if configs.SkipScreenshots == "" {
 		return errors.New("no SkipScreenshots parameter specified")
 	}
 
+	if err := isParameterValueAnOption(configs.SkipScreenshots, "yes", "no"); err != nil {
+		return fmt.Errorf("SkipScreenshots, %s", err)
+	}
+
 	if configs.UpdateDeliver == "" {
 		return errors.New("no UpdateDeliver parameter specified")
+	}
+
+	if err := isParameterValueAnOption(configs.UpdateDeliver, "yes", "no"); err != nil {
+		return fmt.Errorf("UpdateDeliver, %s", err)
+	}
+
+	if configs.Platform == "" {
+		return errors.New("no Platform parameter specified")
+	}
+
+	if err := isParameterValueAnOption(configs.Platform, "ios", "osx", "appletvos"); err != nil {
+		return fmt.Errorf("Platform, %s", err)
 	}
 
 	return nil
@@ -277,6 +313,8 @@ This means that when the API changes
 	if configs.SubmitForBeta == "yes" {
 		args = append(args, "--submit_for_review")
 	}
+
+	args = append(args, "--platform", configs.Platform)
 
 	args = append(args, options...)
 

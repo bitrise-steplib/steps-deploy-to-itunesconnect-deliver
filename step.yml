@@ -178,4 +178,15 @@ inputs:
       value_options:
       - "yes"
       - "no"
+  - platform: "ios"
+    opts:
+      title: "Platform"
+      summary: ""
+      description: |-
+        The platform will be delivered to iTunes Connect.
+      is_required: true
+      value_options:
+      - "ios"
+      - "osx"
+      - "appletvos"
 outputs: []
