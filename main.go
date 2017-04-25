@@ -10,6 +10,7 @@ import (
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -61,12 +62,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- PkgPath: %s", configs.PkgPath)
 
 	log.Printf("- ItunesconUser: %s", configs.ItunesconUser)
-
-	securePassword := ""
-	if configs.Password != "" {
-		securePassword = "***"
-	}
-	log.Printf("- Password: %s", securePassword)
+	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
 	log.Printf("- AppID: %s", configs.AppID)
 	log.Printf("- SubmitForBeta: %s", configs.SubmitForBeta)
@@ -78,15 +74,6 @@ func (configs ConfigsModel) print() {
 
 	log.Printf("- UpdateDeliver: %s", configs.UpdateDeliver)
 	log.Printf("- Platform: %s", configs.Platform)
-}
-
-func isParameterValueAnOption(value string, options ...string) error {
-	for _, option := range options {
-		if option == value {
-			return nil
-		}
-	}
-	return fmt.Errorf("invalid parameter: %s, available: %v", value, options)
 }
 
 func (configs ConfigsModel) validate() error {
@@ -126,7 +113,7 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no SubmitForBeta parameter specified")
 	}
 
-	if err := isParameterValueAnOption(configs.SubmitForBeta, "yes", "no"); err != nil {
+	if err := input.ValidateWithOptions(configs.SubmitForBeta, "yes", "no"); err != nil {
 		return fmt.Errorf("SubmitForBeta, %s", err)
 	}
 
@@ -134,7 +121,7 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no SkipMetadata parameter specified")
 	}
 
-	if err := isParameterValueAnOption(configs.SkipMetadata, "yes", "no"); err != nil {
+	if err := input.ValidateWithOptions(configs.SkipMetadata, "yes", "no"); err != nil {
 		return fmt.Errorf("SkipMetadata, %s", err)
 	}
 
@@ -142,7 +129,7 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no SkipScreenshots parameter specified")
 	}
 
-	if err := isParameterValueAnOption(configs.SkipScreenshots, "yes", "no"); err != nil {
+	if err := input.ValidateWithOptions(configs.SkipScreenshots, "yes", "no"); err != nil {
 		return fmt.Errorf("SkipScreenshots, %s", err)
 	}
 
@@ -150,7 +137,7 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no UpdateDeliver parameter specified")
 	}
 
-	if err := isParameterValueAnOption(configs.UpdateDeliver, "yes", "no"); err != nil {
+	if err := input.ValidateWithOptions(configs.UpdateDeliver, "yes", "no"); err != nil {
 		return fmt.Errorf("UpdateDeliver, %s", err)
 	}
 
@@ -158,7 +145,7 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no Platform parameter specified")
 	}
 
-	if err := isParameterValueAnOption(configs.Platform, "ios", "osx", "appletvos"); err != nil {
+	if err := input.ValidateWithOptions(configs.Platform, "ios", "osx", "appletvos"); err != nil {
 		return fmt.Errorf("Platform, %s", err)
 	}
 
