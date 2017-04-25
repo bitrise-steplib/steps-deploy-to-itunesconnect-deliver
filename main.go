@@ -9,7 +9,7 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -30,6 +30,7 @@ type ConfigsModel struct {
 	Options         string
 
 	UpdateDeliver string
+	Platform      string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
@@ -49,6 +50,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Options:         os.Getenv("options"),
 
 		UpdateDeliver: os.Getenv("update_deliver"),
+		Platform:      os.Getenv("platform"),
 	}
 }
 
@@ -59,12 +61,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- PkgPath: %s", configs.PkgPath)
 
 	log.Printf("- ItunesconUser: %s", configs.ItunesconUser)
-
-	securePassword := ""
-	if configs.Password != "" {
-		securePassword = "***"
-	}
-	log.Printf("- Password: %s", securePassword)
+	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
 	log.Printf("- AppID: %s", configs.AppID)
 	log.Printf("- SubmitForBeta: %s", configs.SubmitForBeta)
@@ -75,55 +72,56 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Options: %s", configs.Options)
 
 	log.Printf("- UpdateDeliver: %s", configs.UpdateDeliver)
+	log.Printf("- Platform: %s", configs.Platform)
 }
 
 func (configs ConfigsModel) validate() error {
 	if configs.IpaPath == "" && configs.PkgPath == "" {
-		return errors.New("no IpaPath not PkgPath parameter specified")
+		return errors.New("no IpaPath nor PkgPath parameter specified")
 	}
 
 	if configs.IpaPath != "" {
-		if exist, err := pathutil.IsPathExists(configs.IpaPath); err != nil {
-			return fmt.Errorf("failed to check if IpaPath exist at: %s, error: %s", configs.IpaPath, err)
-		} else if !exist {
-			return fmt.Errorf("IpaPath not exist at: %s", configs.IpaPath)
+		if err := input.ValidateIfPathExists(configs.IpaPath); err != nil {
+			return fmt.Errorf("IpaPath %s", err)
 		}
 	}
 
 	if configs.PkgPath != "" {
-		if exist, err := pathutil.IsPathExists(configs.PkgPath); err != nil {
-			return fmt.Errorf("failed to check if PkgPath exist at: %s, error: %s", configs.PkgPath, err)
-		} else if !exist {
-			return fmt.Errorf("PkgPath not exist at: %s", configs.PkgPath)
+		if err := input.ValidateIfPathExists(configs.PkgPath); err != nil {
+			return fmt.Errorf("PkgPath %s", err)
 		}
 	}
 
-	if configs.ItunesconUser == "" {
-		return errors.New("no ItunesconUser parameter specified")
+	if err := input.ValidateIfNotEmpty(configs.ItunesconUser); err != nil {
+		return fmt.Errorf("ItunesconUser %s", err)
 	}
 
-	if configs.Password == "" {
-		return errors.New("no Password parameter specified")
+	if err := input.ValidateIfNotEmpty(configs.Password); err != nil {
+		return fmt.Errorf("Password %s", err)
 	}
 
-	if configs.AppID == "" {
-		return errors.New("no AppID parameter specified")
+	if err := input.ValidateIfNotEmpty(configs.AppID); err != nil {
+		return fmt.Errorf("AppID %s", err)
 	}
 
-	if configs.SubmitForBeta == "" {
-		return errors.New("no SubmitForBeta parameter specified")
+	if err := input.ValidateWithOptions(configs.SubmitForBeta, "yes", "no"); err != nil {
+		return fmt.Errorf("SubmitForBeta, %s", err)
 	}
 
-	if configs.SkipMetadata == "" {
-		return errors.New("no SkipMetadata parameter specified")
+	if err := input.ValidateWithOptions(configs.SkipMetadata, "yes", "no"); err != nil {
+		return fmt.Errorf("SkipMetadata, %s", err)
 	}
 
-	if configs.SkipScreenshots == "" {
-		return errors.New("no SkipScreenshots parameter specified")
+	if err := input.ValidateWithOptions(configs.SkipScreenshots, "yes", "no"); err != nil {
+		return fmt.Errorf("SkipScreenshots, %s", err)
 	}
 
-	if configs.UpdateDeliver == "" {
-		return errors.New("no UpdateDeliver parameter specified")
+	if err := input.ValidateWithOptions(configs.UpdateDeliver, "yes", "no"); err != nil {
+		return fmt.Errorf("UpdateDeliver, %s", err)
+	}
+
+	if err := input.ValidateWithOptions(configs.Platform, "ios", "osx", "appletvos"); err != nil {
+		return fmt.Errorf("Platform, %s", err)
 	}
 
 	return nil
@@ -277,6 +275,8 @@ This means that when the API changes
 	if configs.SubmitForBeta == "yes" {
 		args = append(args, "--submit_for_review")
 	}
+
+	args = append(args, "--platform", configs.Platform)
 
 	args = append(args, options...)
 
