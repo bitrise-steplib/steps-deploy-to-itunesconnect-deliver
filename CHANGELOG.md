@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.8.2)
+## Changelog (Current version: 2.9.2)
 
 -----------------
+
+### 2.9.2 (2017 Apr 25)
+
+* [80c4c43] Prepare for 2.9.2
+* [a717c76] Added platform input (#23)
 
 ### 2.8.2 (2017 Jan 25)
 
@@ -133,4 +138,4 @@
 
 -----------------
 
-Updated: 2017 Jan 25
+Updated: 2017 Apr 25
