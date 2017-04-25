@@ -6,22 +6,25 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 )
 
-// ValidateWithOptions ...
-func ValidateWithOptions(value string, options ...string) error {
-	for _, option := range options {
-		if option == value {
-			return nil
-		}
-	}
-	return fmt.Errorf("invalid parameter: %s, available: %v", value, options)
-}
-
 // ValidateIfNotEmpty ...
 func ValidateIfNotEmpty(input string) error {
 	if input == "" {
 		return fmt.Errorf("parameter not specified")
 	}
 	return nil
+}
+
+// ValidateWithOptions ...
+func ValidateWithOptions(value string, options ...string) error {
+	if err := ValidateIfNotEmpty(value); err != nil {
+		return err
+	}
+	for _, option := range options {
+		if option == value {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid parameter: %s, available: %v", value, options)
 }
 
 // ValidateIfPathExists ...
