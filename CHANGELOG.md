@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.9.3)
+## Changelog (Current version: 2.9.4)
 
 -----------------
+
+### 2.9.4 (2017 Jul 05)
+
+* [acdc839] prepare for 2.9.4
+* [a9c668d] type tag updates
 
 ### 2.9.3 (2017 Jul 05)
 
