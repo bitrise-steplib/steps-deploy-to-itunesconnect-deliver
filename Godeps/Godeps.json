@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
 	"Packages": [
 		"./..."
@@ -8,35 +8,39 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/colorstring",
-			"Rev": "c8163959178ae89a3829ce02e485eef6b2befd22"
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/command",
-			"Rev": "c8163959178ae89a3829ce02e485eef6b2befd22"
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/command/rubycommand",
-			"Rev": "c8163959178ae89a3829ce02e485eef6b2befd22"
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/errorutil",
-			"Rev": "c8163959178ae89a3829ce02e485eef6b2befd22"
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/log",
-			"Rev": "c8163959178ae89a3829ce02e485eef6b2befd22"
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-io/go-utils/pathutil",
-			"Rev": "c8163959178ae89a3829ce02e485eef6b2befd22"
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
+		},
+		{
+			"ImportPath": "github.com/bitrise-io/go-utils/retry",
+			"Rev": "8c03314e2538904a9122b109f6043aaae5c8861f"
 		},
 		{
 			"ImportPath": "github.com/bitrise-tools/go-steputils/input",
-			"Rev": "4d564bfeca0fbb7a9e148fb0efd7e7ddf0ed2ead"
+			"Rev": "a848c9870ff7d745a8fb2a951e1c81fcb147b4ec"
 		},
 		{
 			"ImportPath": "github.com/kballard/go-shellquote",
-			"Rev": "d8ec1a69a250a17bb0e419c386eac1f3711dc142"
+			"Rev": "cd60e84ee657ff3dc51de0b4f55dd299a3e136f2"
 		}
 	]
 }

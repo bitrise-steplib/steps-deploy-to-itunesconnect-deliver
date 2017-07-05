@@ -40,6 +40,19 @@ func ValidateIfPathExists(input string) error {
 	return nil
 }
 
+// ValidateIfDirExists ...
+func ValidateIfDirExists(input string) error {
+	if err := ValidateIfNotEmpty(input); err != nil {
+		return err
+	}
+	if exist, err := pathutil.IsDirExists(input); err != nil {
+		return fmt.Errorf("failed to check if dir exist at: %s, error: %s", input, err)
+	} else if !exist {
+		return fmt.Errorf("dir not exist at: %s", input)
+	}
+	return nil
+}
+
 // SecureInput ...
 func SecureInput(input string) string {
 	if input != "" {
