@@ -27,12 +27,16 @@ website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 source_code_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 support_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/issues
 host_os_tags:
-  - "osx-10.10"
+- "osx-10.10"
 project_type_tags:
-  - ios
-  - macos
+- ios
+- macos
+- xamarin
+- cordova
+- ionic
+- react-native
 type_tags:
-  - "deploy"
+- deploy
 is_requires_admin_user: false
 is_always_run: false
 is_skippable: false
