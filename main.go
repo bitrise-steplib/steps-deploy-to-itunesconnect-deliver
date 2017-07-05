@@ -158,8 +158,8 @@ func ensureGemInstalled(gemName string, isUpgrade bool) error {
 				}
 
 				for _, cmd := range cmds {
-					if err := cmd.Run(); err != nil {
-						return fmt.Errorf("Gem update failed, error: %s", err)
+					if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+						return fmt.Errorf("Gem update failed, output: %s, error: %s", out, err)
 					}
 				}
 
@@ -182,8 +182,8 @@ func ensureGemInstalled(gemName string, isUpgrade bool) error {
 			}
 
 			for _, cmd := range cmds {
-				if err := cmd.Run(); err != nil {
-					return fmt.Errorf("Gem install failed, error: %s", err)
+				if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+					return fmt.Errorf("Gem install failed, output: %s, error: %s", out, err)
 				}
 			}
 
