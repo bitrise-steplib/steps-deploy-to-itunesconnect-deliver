@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.9.2)
+## Changelog (Current version: 2.9.3)
 
 -----------------
+
+### 2.9.3 (2017 Jul 05)
+
+* [5f7e43a] prepare for 2.9.3
+* [cd55149] retry gem install and gem update commands (#25)
 
 ### 2.9.2 (2017 Apr 25)
 
@@ -138,4 +143,4 @@
 
 -----------------
 
-Updated: 2017 Apr 25
+Updated: 2017 Jul 05
