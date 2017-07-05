@@ -9,6 +9,7 @@ import (
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/kballard/go-shellquote"
 )
@@ -146,31 +147,50 @@ func ensureGemInstalled(gemName string, isUpgrade bool) error {
 		} else {
 			log.Printf("updating %s...", gemName)
 
-			cmds, err := rubycommand.GemUpdate(gemName)
+			err := retry.Times(2).Try(func(attempt uint) error {
+				if attempt > 0 {
+					log.Warnf("%d attempt failed", attempt+1)
+				}
+
+				cmds, err := rubycommand.GemUpdate(gemName)
+				if err != nil {
+					return fmt.Errorf("Failed to create command, error: %s", err)
+				}
+
+				for _, cmd := range cmds {
+					if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+						return fmt.Errorf("Gem update failed, output: %s, error: %s", out, err)
+					}
+				}
+
+				return nil
+			})
+
+			return err
+		}
+	} else {
+		log.Printf("%s NOT yet installed, attempting install...", gemName)
+
+		err := retry.Times(2).Try(func(attempt uint) error {
+			if attempt > 0 {
+				log.Warnf("%d attempt failed", attempt+1)
+			}
+
+			cmds, err := rubycommand.GemInstall(gemName, "")
 			if err != nil {
 				return fmt.Errorf("Failed to create command, error: %s", err)
 			}
 
 			for _, cmd := range cmds {
-				if err := cmd.Run(); err != nil {
-					return fmt.Errorf("Gem update failed, error: %s", err)
+				if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+					return fmt.Errorf("Gem install failed, output: %s, error: %s", out, err)
 				}
 			}
+
 			return nil
-		}
-	} else {
-		log.Printf("%s NOT yet installed, attempting install...", gemName)
+		})
 
-		cmds, err := rubycommand.GemInstall(gemName, "")
-		if err != nil {
-			return fmt.Errorf("Failed to create command, error: %s", err)
-		}
-
-		for _, cmd := range cmds {
-			if err := cmd.Run(); err != nil {
-				return fmt.Errorf("Gem install failed, error: %s", err)
-			}
-		}
+		return err
 	}
 
 	return nil
