@@ -23,6 +23,7 @@ type ConfigsModel struct {
 	Password      string
 
 	AppID           string
+	BundleID        string
 	SubmitForBeta   string
 	SkipMetadata    string
 	SkipScreenshots string
@@ -43,6 +44,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Password:      os.Getenv("password"),
 
 		AppID:           os.Getenv("app_id"),
+		BundleID:        os.Getenv("bundle_id"),
 		SubmitForBeta:   os.Getenv("submit_for_beta"),
 		SkipMetadata:    os.Getenv("skip_metadata"),
 		SkipScreenshots: os.Getenv("skip_screenshots"),
@@ -65,6 +67,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- Password: %s", input.SecureInput(configs.Password))
 
 	log.Printf("- AppID: %s", configs.AppID)
+	log.Printf("- BundleID: %s", configs.BundleID)
 	log.Printf("- SubmitForBeta: %s", configs.SubmitForBeta)
 	log.Printf("- SkipMetadata: %s", configs.SkipMetadata)
 	log.Printf("- SkipScreenshots: %s", configs.SkipScreenshots)
@@ -101,8 +104,8 @@ func (configs ConfigsModel) validate() error {
 		return fmt.Errorf("Password %s", err)
 	}
 
-	if err := input.ValidateIfNotEmpty(configs.AppID); err != nil {
-		return fmt.Errorf("AppID %s", err)
+	if configs.AppID == "" && configs.BundleID == "" {
+		return errors.New("no AppID or BundleID parameter specified")
 	}
 
 	if err := input.ValidateWithOptions(configs.SubmitForBeta, "yes", "no"); err != nil {
@@ -262,7 +265,17 @@ This means that when the API changes
 	args := []string{
 		"deliver",
 		"--username", configs.ItunesconUser,
-		"--app", configs.AppID,
+	}
+	
+	if configs.AppID != "" {
+		args = append(args, "--app", configs.AppID)
+		
+		//warn user if BundleID is also set
+		if configs.BundleID != "" {
+			log.Warnf("AppID parameter specified, BundleID will be ignored")
+		}
+	} else if configs.BundleID != "" {
+		args = append(args, "--app_identifier", configs.BundleID)
 	}
 
 	if configs.TeamName != "" {

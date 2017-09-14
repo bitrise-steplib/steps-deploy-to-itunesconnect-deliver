@@ -93,11 +93,21 @@ inputs:
       summary: ""
       description: |-
         The App's *Apple ID* on iTunes Connect.
+        
+        This input or `bundle_id` is required
 
         Open the **App's page on iTunes Connect**,
         click on **App Information**, scroll down to the *General Information* section,
         copy the *Apple ID*'s value from here (numeric, like 846814360)
-      is_required: true
+  - bundle_id: ""
+    opts:
+      title: "iTunes Connect: App Bundle ID"
+      summary: ""
+      description: |-
+        The App's *Bundle ID* on iTunes Connect.
+        
+        This input or app_id is required
+
   - submit_for_beta: "no"
     opts:
       title: "Submit for TestFlight External Testing?"
