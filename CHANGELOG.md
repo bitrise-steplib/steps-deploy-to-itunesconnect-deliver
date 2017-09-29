@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.9.4)
+## Changelog (Current version: 2.9.5)
 
 -----------------
+
+### 2.9.5 (2017 Sep 29)
+
+* [af49e48] prepare for 2.9.5
+* [668eb4b] add bundle_id, make app_id not required, add description text to specify that one of the two fields is required (#27)
 
 ### 2.9.4 (2017 Jul 05)
 
@@ -148,4 +153,4 @@
 
 -----------------
 
-Updated: 2017 Jul 05
+Updated: 2017 Sep 29
