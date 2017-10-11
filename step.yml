@@ -203,4 +203,12 @@ inputs:
       - "ios"
       - "osx"
       - "appletvos"
+  - fastlane_version: "latest"
+    opts:
+      title: "Fastlane version"
+      summary: "Install a specific version of the `fastlane` gem."
+      description: |-
+        This option lets you specify a specific version of the `fastlane` gem to be installed.
+      is_required: false
+
 outputs: []

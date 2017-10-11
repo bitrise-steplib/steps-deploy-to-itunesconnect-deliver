@@ -31,8 +31,9 @@ type ConfigsModel struct {
 	TeamName        string
 	Options         string
 
-	UpdateDeliver string
-	Platform      string
+	UpdateDeliver   string
+	Platform        string
+	FastlaneVersion string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
@@ -52,8 +53,9 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		TeamName:        os.Getenv("team_name"),
 		Options:         os.Getenv("options"),
 
-		UpdateDeliver: os.Getenv("update_deliver"),
-		Platform:      os.Getenv("platform"),
+		UpdateDeliver:   os.Getenv("update_deliver"),
+		Platform:        os.Getenv("platform"),
+		FastlaneVersion: os.Getenv("fastlane_version"),
 	}
 }
 
@@ -77,6 +79,7 @@ func (configs ConfigsModel) print() {
 
 	log.Printf("- UpdateDeliver: %s", configs.UpdateDeliver)
 	log.Printf("- Platform: %s", configs.Platform)
+	log.Printf("- FastlaneVersion: %s", configs.FastlaneVersion)
 }
 
 func (configs ConfigsModel) validate() error {
@@ -136,13 +139,45 @@ func fail(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
-func ensureGemInstalled(gemName string, isUpgrade bool) error {
+func gemInstallWithRetry(gemName string, version string) error {
+	return retry.Times(2).Try(func(attempt uint) error {
+		if attempt > 0 {
+			log.Warnf("%d attempt failed", attempt+1)
+		}
+
+		versionToInstall := version
+
+		if versionToInstall == "latest" {
+			versionToInstall = ""
+		}
+
+		cmds, err := rubycommand.GemInstall(gemName, versionToInstall)
+		if err != nil {
+			return fmt.Errorf("Failed to create command, error: %s", err)
+		}
+
+		for _, cmd := range cmds {
+			if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
+				return fmt.Errorf("Gem install failed, output: %s, error: %s", out, err)
+			}
+		}
+
+		return nil
+	})
+}
+
+func ensureGemInstalled(gemName string, isUpgrade bool, version string) error {
 	installed, err := rubycommand.IsGemInstalled(gemName, "")
 	if err != nil {
 		return fmt.Errorf("Failed to check if gem (%s) installed, error: %s", gemName, err)
 	}
 
 	if installed {
+		if version != "latest" {
+			err := gemInstallWithRetry(gemName, version)
+			return err
+		}
+
 		log.Printf("%s already installed", gemName)
 
 		if !isUpgrade {
@@ -173,25 +208,7 @@ func ensureGemInstalled(gemName string, isUpgrade bool) error {
 		}
 	} else {
 		log.Printf("%s NOT yet installed, attempting install...", gemName)
-
-		err := retry.Times(2).Try(func(attempt uint) error {
-			if attempt > 0 {
-				log.Warnf("%d attempt failed", attempt+1)
-			}
-
-			cmds, err := rubycommand.GemInstall(gemName, "")
-			if err != nil {
-				return fmt.Errorf("Failed to create command, error: %s", err)
-			}
-
-			for _, cmd := range cmds {
-				if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-					return fmt.Errorf("Gem install failed, output: %s, error: %s", out, err)
-				}
-			}
-
-			return nil
-		})
+		err := gemInstallWithRetry(gemName, version)
 
 		return err
 	}
@@ -218,7 +235,7 @@ func main() {
 
 	isUpdateGems := !(configs.UpdateDeliver == "no")
 	for _, aGemName := range []string{"fastlane"} {
-		if err := ensureGemInstalled(aGemName, isUpdateGems); err != nil {
+		if err := ensureGemInstalled(aGemName, isUpdateGems, configs.FastlaneVersion); err != nil {
 			fail("Failed to install '%s', error: %s", aGemName, err)
 		}
 	}
@@ -266,10 +283,10 @@ This means that when the API changes
 		"deliver",
 		"--username", configs.ItunesconUser,
 	}
-	
+
 	if configs.AppID != "" {
 		args = append(args, "--app", configs.AppID)
-		
+
 		//warn user if BundleID is also set
 		if configs.BundleID != "" {
 			log.Warnf("AppID parameter specified, BundleID will be ignored")
@@ -312,6 +329,10 @@ This means that when the API changes
 	args = append(args, "--platform", configs.Platform)
 
 	args = append(args, options...)
+
+	if configs.FastlaneVersion != "latest" {
+		args = append([]string{"_" + configs.FastlaneVersion + "_"}, args...)
+	}
 
 	cmd := command.New("fastlane", args...)
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
