@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.9.5)
+## Changelog (Current version: 2.10.0)
 
 -----------------
+
+### 2.10.0 (2017 Oct 16)
+
+* [1c9c410] prepare for 2.10.0
+* [bb1d23b] new input: gemfile_path, gem version fixes, go dependencies with dep, (#29)
+* [9c13a37] Add fastlane_version; lets you specify a specific version of fastlane to install and use (#28)
 
 ### 2.9.5 (2017 Sep 29)
 
@@ -153,4 +159,4 @@
 
 -----------------
 
-Updated: 2017 Sep 29
+Updated: 2017 Oct 16
