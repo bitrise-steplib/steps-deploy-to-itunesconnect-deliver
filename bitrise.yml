@@ -1,9 +1,9 @@
-format_version: "2"
+format_version: "4"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - STEP_VERSION: 2.9.5
+  - STEP_VERSION: 2.10.0
 
   - SAMPLE_APP_URL: https://gitlab.com/bitrise/Bitrise-iTunesConnectBetaTest.git
   - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
