@@ -107,7 +107,6 @@ inputs:
         The App's *Bundle ID* on iTunes Connect.
         
         This input or app_id is required
-
   - submit_for_beta: "no"
     opts:
       title: "Submit for TestFlight External Testing?"
@@ -172,26 +171,6 @@ inputs:
         linked to multiple publish team.
 
         Use this input or `team_id` to specify the team.
-  - options: 
-    opts:
-      title: " Additional options for `deliver` call"
-      summary: ""
-      description: |-
-        Options added to the end of the `deliver` call.
-        
-        If you want to add more options, list that separated by space character.
-        Example: `--skip_metadata --skip_screenshots`
-  - update_deliver: "yes"
-    opts:
-      title: "Update deliver gem"
-      summary: ""
-      description: |-
-        Should the step use the latest version of `deliver` gem,
-        or the preinstalled one?
-      is_required: true
-      value_options:
-      - "yes"
-      - "no"
   - platform: "ios"
     opts:
       title: "Platform"
@@ -203,12 +182,29 @@ inputs:
       - "ios"
       - "osx"
       - "appletvos"
+  - options: 
+    opts:
+      title: " Additional options for `deliver` call"
+      summary: ""
+      description: |-
+        Options added to the end of the `deliver` call.
+        
+        If you want to add more options, list that separated by space character.
+        Example: `--skip_metadata --skip_screenshots`
+  - gemfile_path: ./Gemfile
+    opts:
+      title: "Gemfile path"
+      description: |
+        Path to the Gemfile which contains `fastlane` gem.
+
+        If Gemfile not exist or does not contain fastlane gem:
+
+        - if `fastlane_version` input not specified, latest version will be used
   - fastlane_version: "latest"
     opts:
       title: "Fastlane version"
       summary: "Install a specific version of the `fastlane` gem."
       description: |-
         This option lets you specify a specific version of the `fastlane` gem to be installed.
-      is_required: false
 
 outputs: []
