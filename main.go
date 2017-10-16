@@ -4,11 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
+	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
+	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-tools/go-steputils/input"
 	"github.com/kballard/go-shellquote"
@@ -29,10 +34,10 @@ type ConfigsModel struct {
 	SkipScreenshots string
 	TeamID          string
 	TeamName        string
+	Platform        string
 	Options         string
 
-	UpdateDeliver   string
-	Platform        string
+	GemfilePath     string
 	FastlaneVersion string
 }
 
@@ -51,10 +56,10 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		SkipScreenshots: os.Getenv("skip_screenshots"),
 		TeamID:          os.Getenv("team_id"),
 		TeamName:        os.Getenv("team_name"),
+		Platform:        os.Getenv("platform"),
 		Options:         os.Getenv("options"),
 
-		UpdateDeliver:   os.Getenv("update_deliver"),
-		Platform:        os.Getenv("platform"),
+		GemfilePath:     os.Getenv("gemfile_path"),
 		FastlaneVersion: os.Getenv("fastlane_version"),
 	}
 }
@@ -75,10 +80,10 @@ func (configs ConfigsModel) print() {
 	log.Printf("- SkipScreenshots: %s", configs.SkipScreenshots)
 	log.Printf("- TeamID: %s", configs.TeamID)
 	log.Printf("- TeamName: %s", configs.TeamName)
+	log.Printf("- Platform: %s", configs.Platform)
 	log.Printf("- Options: %s", configs.Options)
 
-	log.Printf("- UpdateDeliver: %s", configs.UpdateDeliver)
-	log.Printf("- Platform: %s", configs.Platform)
+	log.Printf("- GemfilePath: %s", configs.GemfilePath)
 	log.Printf("- FastlaneVersion: %s", configs.FastlaneVersion)
 }
 
@@ -123,10 +128,6 @@ func (configs ConfigsModel) validate() error {
 		return fmt.Errorf("SkipScreenshots, %s", err)
 	}
 
-	if err := input.ValidateWithOptions(configs.UpdateDeliver, "yes", "no"); err != nil {
-		return fmt.Errorf("UpdateDeliver, %s", err)
-	}
-
 	if err := input.ValidateWithOptions(configs.Platform, "ios", "osx", "appletvos"); err != nil {
 		return fmt.Errorf("Platform, %s", err)
 	}
@@ -166,54 +167,125 @@ func gemInstallWithRetry(gemName string, version string) error {
 	})
 }
 
-func ensureGemInstalled(gemName string, isUpgrade bool, version string) error {
-	installed, err := rubycommand.IsGemInstalled(gemName, "")
+func gemVersionFromGemfileLockContent(gem, content string) string {
+	relevantLines := []string{}
+	lines := strings.Split(content, "\n")
+
+	specsStart := false
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if trimmed == "" {
+			break
+		}
+
+		if trimmed == "specs:" {
+			specsStart = true
+			continue
+		}
+
+		if specsStart {
+			relevantLines = append(relevantLines, trimmed)
+		}
+	}
+
+	exp := regexp.MustCompile(fmt.Sprintf(`^%s \((.+)\)`, gem))
+	for _, line := range relevantLines {
+		match := exp.FindStringSubmatch(line)
+		if match != nil && len(match) == 2 {
+			return match[1]
+		}
+	}
+
+	return ""
+}
+
+func gemVersionFromGemfileLock(gem, gemfileLockPth string) (string, error) {
+	content, err := fileutil.ReadStringFromFile(gemfileLockPth)
 	if err != nil {
-		return fmt.Errorf("Failed to check if gem (%s) installed, error: %s", gemName, err)
+		return "", err
 	}
+	return gemVersionFromGemfileLockContent(gem, content), nil
+}
 
-	if installed {
-		if version != "latest" {
-			err := gemInstallWithRetry(gemName, version)
-			return err
+func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]string, string, error) {
+	if forceVersion != "" {
+		log.Printf("fastlane version defined: %s, installing...", forceVersion)
+
+		newVersion := forceVersion
+		if forceVersion == "latest" {
+			newVersion = ""
 		}
 
-		log.Printf("%s already installed", gemName)
-
-		if !isUpgrade {
-			log.Printf("update %s disabled, setup finished...", gemName)
-		} else {
-			log.Printf("updating %s...", gemName)
-
-			err := retry.Times(2).Try(func(attempt uint) error {
-				if attempt > 0 {
-					log.Warnf("%d attempt failed", attempt+1)
-				}
-
-				cmds, err := rubycommand.GemUpdate(gemName)
-				if err != nil {
-					return fmt.Errorf("Failed to create command, error: %s", err)
-				}
-
-				for _, cmd := range cmds {
-					if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-						return fmt.Errorf("Gem update failed, output: %s, error: %s", out, err)
-					}
-				}
-
-				return nil
-			})
-
-			return err
+		if err := gemInstallWithRetry("fastlane", newVersion); err != nil {
+			return nil, "", err
 		}
-	} else {
-		log.Printf("%s NOT yet installed, attempting install...", gemName)
-		err := gemInstallWithRetry(gemName, version)
 
-		return err
+		fastlaneCmdSlice := []string{"fastlane"}
+		if newVersion != "" {
+			fastlaneCmdSlice = append(fastlaneCmdSlice, fmt.Sprintf("_%s_", newVersion))
+		}
+
+		return fastlaneCmdSlice, "", nil
 	}
 
-	return nil
+	if gemfilePth == "" {
+		log.Printf("no fastlane version nor Gemfile path defined, using system installed fastlane...")
+		return []string{"fastlane"}, "", nil
+	}
+
+	if exist, err := pathutil.IsPathExists(gemfilePth); err != nil {
+		return nil, "", err
+	} else if !exist {
+		log.Printf("Gemfile not exist at: %s and no fastlane version defined, using system installed fastlane...", gemfilePth)
+		return []string{"fastlane"}, "", nil
+	}
+
+	log.Printf("Gemfile exist, checking fastlane version from Gemfile.lock")
+
+	gemfileDir := filepath.Dir(gemfilePth)
+	gemfileLockPth := filepath.Join(gemfileDir, "Gemfile.lock")
+
+	bundleInstallCalled := false
+	if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
+		return nil, "", err
+	} else if !exist {
+		log.Printf("Gemfile.lock not exist at: %s, running 'bundle install' ...", gemfileLockPth)
+
+		cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+		if err := cmd.Run(); err != nil {
+			return nil, "", err
+		}
+
+		bundleInstallCalled = true
+
+		if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
+			return nil, "", err
+		} else if !exist {
+			return nil, "", errors.New("Gemfile.lock does not exist, even 'bundle install' was called")
+		}
+	}
+
+	fastlaneVersion, err := gemVersionFromGemfileLock("fastlane", gemfileLockPth)
+	if err != nil {
+		return nil, "", err
+	}
+
+	if fastlaneVersion != "" {
+		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlaneVersion)
+
+		if !bundleInstallCalled {
+			cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+			if err := cmd.Run(); err != nil {
+				return nil, "", err
+			}
+		}
+
+		return []string{"bundle", "exec", "fastlane"}, gemfileDir, nil
+	}
+
+	log.Printf("fastlane version not found in Gemfile.lock, using system installed fastlane...")
+
+	return []string{"fastlane"}, "", nil
 }
 
 func main() {
@@ -233,11 +305,16 @@ func main() {
 
 	startTime := time.Now()
 
-	isUpdateGems := !(configs.UpdateDeliver == "no")
-	for _, aGemName := range []string{"fastlane"} {
-		if err := ensureGemInstalled(aGemName, isUpdateGems, configs.FastlaneVersion); err != nil {
-			fail("Failed to install '%s', error: %s", aGemName, err)
-		}
+	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(configs.FastlaneVersion, configs.GemfilePath)
+	if err != nil {
+		fail("Failed to ensure fastlane version, error: %s", err)
+	}
+
+	versionCmdSlice := append(fastlaneCmdSlice, "-v")
+	versionCmd := command.NewWithStandardOuts(versionCmdSlice[0], versionCmdSlice[1:]...)
+	log.Printf("$ %s", versionCmd.PrintableCommandArgs())
+	if err := versionCmd.Run(); err != nil {
+		fail("Failed to print fastlane version, error: %s", err)
 	}
 
 	elapsed := time.Since(startTime)
@@ -330,17 +407,18 @@ This means that when the API changes
 
 	args = append(args, options...)
 
-	if configs.FastlaneVersion != "latest" {
-		args = append([]string{"_" + configs.FastlaneVersion + "_"}, args...)
-	}
+	cmdSlice := append(fastlaneCmdSlice, args...)
 
-	cmd := command.New("fastlane", args...)
+	cmd := command.New(cmdSlice[0], cmdSlice[1:]...)
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
 	cmd.SetStderr(os.Stderr)
 	cmd.SetStdin(os.Stdin)
 	cmd.AppendEnvs(envs...)
+	if workDir != "" {
+		cmd.SetDir(workDir)
+	}
 
 	fmt.Println()
 
