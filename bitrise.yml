@@ -62,7 +62,7 @@ workflows:
         - password: $ITUNES_CONNECT_PASSWORD
         - team_name: $ITUNES_CONNECT_TEAM_NAME
         - app_id: $ITUNES_CONNECT_APP_ID
-        - submit_for_beta: "no"
+        - submit_for_review: "no"
         - skip_metadata: "no"
         - skip_screenshots: "no"
 

@@ -1,5 +1,5 @@
 title: "Deploy to iTunes Connect / TestFlight (with Deliver)"
-summary: Upload the archive to iTunes Connect / TestFlight and you can also submit it to TestFlight Beta Testing
+summary: Upload the archive to iTunes Connect / TestFlight and you can also submit it for review.
 description: |-
   Deploy to iTunes Connect / TestFlight, using the
   fantastic [Deliver](https://github.com/fastlane/fastlane/tree/master/deliver)
@@ -93,7 +93,7 @@ inputs:
       summary: ""
       description: |-
         The App's *Apple ID* on iTunes Connect.
-        
+
         This input or `bundle_id` is required
 
         Open the **App's page on iTunes Connect**,
@@ -105,29 +105,27 @@ inputs:
       summary: ""
       description: |-
         The App's *Bundle ID* on iTunes Connect.
-        
+
         This input or app_id is required
-  - submit_for_beta: "no"
+  - submit_for_review: "no"
     opts:
-      title: "Submit for TestFlight External Testing?"
+      title: "Submit for Review?"
       summary: ""
       description: |
         Wait for the submission to be processed and then
-        enable **TestFlight External Testing** for this specific version?
+        submit the app for review for this specific version?
 
         If this option is disabled then this step won't wait
         for the new version to be processed on iTunes Connect
-        and won't enable it for *TestFlight External Testing* automatically.
+        and won't submit it for review automatically.
 
         *Enabling this option will wait for the submission to be
         processed which might take a couple of minutes after the
         new version is deployed to iTunes Connect*.
 
         **NOTE:** if this option is enabled then this step will
-        fail if it can't enable TestFlight External Testing for the
-        version, even if the version was successfully uploaded
-        to iTunes Connect and only the TestFlight External Testing
-        submission failed.
+        fail even if the version was successfully uploaded
+        to iTunes Connect and only the review submission failed.
       value_options: ["yes", "no"]
       is_required: true
       is_expand: false
@@ -182,13 +180,13 @@ inputs:
       - "ios"
       - "osx"
       - "appletvos"
-  - options: 
+  - options:
     opts:
       title: " Additional options for `deliver` call"
       summary: ""
       description: |-
         Options added to the end of the `deliver` call.
-        
+
         If you want to add more options, list that separated by space character.
         Example: `--skip_metadata --skip_screenshots`
   - gemfile_path: ./Gemfile
