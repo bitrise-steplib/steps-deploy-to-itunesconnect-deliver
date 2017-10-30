@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.10.0)
+## Changelog (Current version: 2.11.0)
 
 -----------------
+
+### 2.11.0 (2017 Oct 30)
+
+* [9e970b0] Prepare for version 2.11.0
+* [afd28fe] Change 'beta' -> 'review' (#32)
 
 ### 2.10.0 (2017 Oct 16)
 
@@ -159,4 +164,4 @@
 
 -----------------
 
-Updated: 2017 Oct 16
+Updated: 2017 Oct 30
