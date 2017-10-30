@@ -29,7 +29,7 @@ type ConfigsModel struct {
 
 	AppID           string
 	BundleID        string
-	SubmitForBeta   string
+	SubmitForReview string
 	SkipMetadata    string
 	SkipScreenshots string
 	TeamID          string
@@ -51,7 +51,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 
 		AppID:           os.Getenv("app_id"),
 		BundleID:        os.Getenv("bundle_id"),
-		SubmitForBeta:   os.Getenv("submit_for_beta"),
+		SubmitForReview: os.Getenv("submit_for_review"),
 		SkipMetadata:    os.Getenv("skip_metadata"),
 		SkipScreenshots: os.Getenv("skip_screenshots"),
 		TeamID:          os.Getenv("team_id"),
@@ -75,7 +75,7 @@ func (configs ConfigsModel) print() {
 
 	log.Printf("- AppID: %s", configs.AppID)
 	log.Printf("- BundleID: %s", configs.BundleID)
-	log.Printf("- SubmitForBeta: %s", configs.SubmitForBeta)
+	log.Printf("- SubmitForReview: %s", configs.SubmitForReview)
 	log.Printf("- SkipMetadata: %s", configs.SkipMetadata)
 	log.Printf("- SkipScreenshots: %s", configs.SkipScreenshots)
 	log.Printf("- TeamID: %s", configs.TeamID)
@@ -116,8 +116,8 @@ func (configs ConfigsModel) validate() error {
 		return errors.New("no AppID or BundleID parameter specified")
 	}
 
-	if err := input.ValidateWithOptions(configs.SubmitForBeta, "yes", "no"); err != nil {
-		return fmt.Errorf("SubmitForBeta, %s", err)
+	if err := input.ValidateWithOptions(configs.SubmitForReview, "yes", "no"); err != nil {
+		return fmt.Errorf("SubmitForReview, %s", err)
 	}
 
 	if err := input.ValidateWithOptions(configs.SkipMetadata, "yes", "no"); err != nil {
@@ -399,7 +399,7 @@ This means that when the API changes
 
 	args = append(args, "--force")
 
-	if configs.SubmitForBeta == "yes" {
+	if configs.SubmitForReview == "yes" {
 		args = append(args, "--submit_for_review")
 	}
 
@@ -428,5 +428,4 @@ This means that when the API changes
 
 	log.Donef("Success")
 	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
-	log.Printf("**Don't forget to enable** the **TestFlight Beta Testing** switch on iTunes Connect (on the *Prerelease* tab of the app) if this is a new version of the app!")
 }
