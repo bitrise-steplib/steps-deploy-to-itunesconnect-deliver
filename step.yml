@@ -87,6 +87,13 @@ inputs:
         to something with only
         alphanumeric characters.
       is_required: true
+  - app_password: ""
+    opts:
+      title: "iTunes Connect: Application Specific Password"
+      summary: ""
+      description: |-
+        an Application specific password for the Apple ID.
+      is_required: false
   - app_id: ""
     opts:
       title: "iTunes Connect: App Apple ID"

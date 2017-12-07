@@ -26,6 +26,7 @@ type ConfigsModel struct {
 
 	ItunesconUser string
 	Password      string
+	AppPassword   string
 
 	AppID           string
 	BundleID        string
@@ -48,6 +49,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 
 		ItunesconUser: os.Getenv("itunescon_user"),
 		Password:      os.Getenv("password"),
+		AppPassword:   os.Getenv("app_password"),
 
 		AppID:           os.Getenv("app_id"),
 		BundleID:        os.Getenv("bundle_id"),
@@ -72,6 +74,7 @@ func (configs ConfigsModel) print() {
 
 	log.Printf("- ItunesconUser: %s", configs.ItunesconUser)
 	log.Printf("- Password: %s", input.SecureInput(configs.Password))
+	log.Printf("- AppPassword: %s", input.SecureInput(configs.AppPassword))
 
 	log.Printf("- AppID: %s", configs.AppID)
 	log.Printf("- BundleID: %s", configs.BundleID)
@@ -355,6 +358,10 @@ This means that when the API changes
 	envs := []string{
 		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
 	}
+
+	if configs.AppPassword != "" {
+        envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", configs.AppPassword))
+    }
 
 	args := []string{
 		"deliver",
