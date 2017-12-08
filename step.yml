@@ -93,6 +93,10 @@ inputs:
       summary: ""
       description: |-
         an Application specific password for the Apple ID.
+
+        **Note:** Application specific passwords can be created on the
+        [AppleID Website](https://appleid.apple.com). It can be used to
+        surpass Two Factor Authentication.
       is_required: false
   - app_id: ""
     opts:
