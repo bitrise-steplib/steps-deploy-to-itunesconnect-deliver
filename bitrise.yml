@@ -6,6 +6,7 @@ app:
   - STEP_VERSION: 2.11.0
 
   - SAMPLE_APP_URL: https://gitlab.com/bitrise/Bitrise-iTunesConnectBetaTest.git
+  - BRANCH: master
   - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
@@ -15,6 +16,7 @@ app:
 
   - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
   - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+  - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
   - ITUNES_CONNECT_TEAM_NAME: $ITUNES_CONNECT_TEAM_NAME
   - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
@@ -33,16 +35,21 @@ workflows:
         inputs:
         - path: ./_tmp
         - is_create_path: true
-    - git-clone:
-        run_if: true
+    - script:
         inputs:
-        - repository_url: $SAMPLE_APP_URL
-        - clone_into_dir: ./
-        - commit: ""
-        - tag: ""
-        - branch: "master"
-        - pull_request_id: ""
-        - clone_depth: ""
+        - content: |-
+            #!/usr/bin/env bash
+            if [[ -z "${SAMPLE_APP_URL}" ]]; then
+              echo "error: there is no SAMPLE_APP_URL env var specified"
+              exit 1
+            elif [[ -z "${COMMIT}" && -z "${BRANCH}" ]]; then
+              echo "error: can't checkout: there is no BRANCH or COMMIT env var specified"
+              exit 1
+            fi
+            git init
+            git remote add origin "${SAMPLE_APP_URL}"
+            git fetch || exit 1
+            [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
     - certificate-and-profile-installer:
     - set-xcode-build-number:
         title: Set Build Number
@@ -60,6 +67,7 @@ workflows:
         inputs:
         - itunescon_user: $ITUNES_CONNECT_USER
         - password: $ITUNES_CONNECT_PASSWORD
+        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
         - team_name: $ITUNES_CONNECT_TEAM_NAME
         - app_id: $ITUNES_CONNECT_APP_ID
         - submit_for_review: "no"
