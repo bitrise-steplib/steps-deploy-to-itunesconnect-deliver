@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.11.0)
+## Changelog (Current version: 2.12.0)
 
 -----------------
+
+### 2.12.0 (2018 Jan 12)
+
+* [d137dff] prepare for 2.12.0
+* [b1f48e7] add AppPassword to make use of application-specific passwords (#34)
+* [9e87c12] fix ci build (#36)
 
 ### 2.11.0 (2017 Oct 30)
 
@@ -164,4 +170,4 @@
 
 -----------------
 
-Updated: 2017 Oct 30
+Updated: 2018 Jan 12
