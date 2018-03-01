@@ -61,10 +61,10 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		TeamName:        os.Getenv("team_name"),
 		Platform:        os.Getenv("platform"),
 		Options:         os.Getenv("options"),
+		ITMSOptions: os.Getenv("itms_options"),
 
 		GemfilePath:     os.Getenv("gemfile_path"),
 		FastlaneVersion: os.Getenv("fastlane_version"),
-		ITMSOptions: os.Getenv("itms_options")
 	}
 }
 
