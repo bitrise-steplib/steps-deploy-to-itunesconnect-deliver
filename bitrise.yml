@@ -19,6 +19,7 @@ app:
   - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
   - ITUNES_CONNECT_TEAM_NAME: $ITUNES_CONNECT_TEAM_NAME
   - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
+  - ITMS_UPLOAD_OPTIONS: $ITMS_UPLOAD_OPTIONS
 
 workflows:
   # ----------------------------------------------------------------
@@ -70,6 +71,7 @@ workflows:
         - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
         - team_name: $ITUNES_CONNECT_TEAM_NAME
         - app_id: $ITUNES_CONNECT_APP_ID
+        - itms_options: $ITMS_UPLOAD_OPTIONS
         - submit_for_review: "no"
         - skip_metadata: "no"
         - skip_screenshots: "no"
