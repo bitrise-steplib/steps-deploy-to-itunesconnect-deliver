@@ -356,6 +356,7 @@ This means that when the API changes
 	}
 
 	envs := []string{
+		"DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=-t DAV",
 		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
 	}
 
