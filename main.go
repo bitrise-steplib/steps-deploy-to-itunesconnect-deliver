@@ -362,8 +362,6 @@ This means that when the API changes
 		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
 	}
 
-	if configs.
-
 	if configs.AppPassword != "" {
 		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", configs.AppPassword))
 	}
