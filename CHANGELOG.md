@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.12.0)
+## Changelog (Current version: 2.13.0)
 
 -----------------
+
+### 2.13.0 (2018 Mar 01)
+
+* [c60b316] prepare for 2.13.0
+* [3e84702] Fix "ERROR: Could not start delivery: all transports failed diagnostics" (#38)
 
 ### 2.12.0 (2018 Jan 12)
 
@@ -170,4 +175,4 @@
 
 -----------------
 
-Updated: 2018 Jan 12
+Updated: 2018 Mar 01
