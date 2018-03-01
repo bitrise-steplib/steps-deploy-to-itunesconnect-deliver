@@ -40,6 +40,7 @@ type ConfigsModel struct {
 
 	GemfilePath     string
 	FastlaneVersion string
+	ITMSParameters  string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
@@ -63,6 +64,7 @@ func createConfigsModelFromEnvs() ConfigsModel {
 
 		GemfilePath:     os.Getenv("gemfile_path"),
 		FastlaneVersion: os.Getenv("fastlane_version"),
+		ITMSParameters:  os.Getenv("itms_upload_parameters"),
 	}
 }
 
@@ -356,12 +358,17 @@ This means that when the API changes
 	}
 
 	envs := []string{
-		"DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=-t DAV",
 		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
 	}
 
+	if configs.
+
 	if configs.AppPassword != "" {
 		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", configs.AppPassword))
+	}
+
+	if configs.ITMSParameters != "" {
+		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSParameters))	
 	}
 
 	args := []string{
