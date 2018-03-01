@@ -37,7 +37,6 @@ type ConfigsModel struct {
 	TeamName        string
 	Platform        string
 	Options         string
-	ITMSOptions	string
 
 	GemfilePath     string
 	FastlaneVersion string
@@ -61,7 +60,6 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		TeamName:        os.Getenv("team_name"),
 		Platform:        os.Getenv("platform"),
 		Options:         os.Getenv("options"),
-		ITMSOptions: os.Getenv("itms_options"),
 
 		GemfilePath:     os.Getenv("gemfile_path"),
 		FastlaneVersion: os.Getenv("fastlane_version"),
@@ -87,8 +85,6 @@ func (configs ConfigsModel) print() {
 	log.Printf("- TeamName: %s", configs.TeamName)
 	log.Printf("- Platform: %s", configs.Platform)
 	log.Printf("- Options: %s", configs.Options)
-	
-	log.Printf("- ITMS upload options: %s", configs.ITMSOptions)
 
 	log.Printf("- GemfilePath: %s", configs.GemfilePath)
 	log.Printf("- FastlaneVersion: %s", configs.FastlaneVersion)
@@ -362,12 +358,6 @@ This means that when the API changes
 	envs := []string{
 		"DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=-t DAV",
 		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
-	}
-	
-	if config.ITMSOptions == "" {
-		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSOptions))
-	} else {
-		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=-t DAV")
 	}
 	
 	if configs.AppPassword != "" {
