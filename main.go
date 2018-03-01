@@ -90,6 +90,7 @@ func (configs ConfigsModel) print() {
 
 	log.Printf("- GemfilePath: %s", configs.GemfilePath)
 	log.Printf("- FastlaneVersion: %s", configs.FastlaneVersion)
+	log.Printf("- ITMSParameters: %s", configs.ITMSParameters)
 }
 
 func (configs ConfigsModel) validate() error {
