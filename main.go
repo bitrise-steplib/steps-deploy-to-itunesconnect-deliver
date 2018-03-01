@@ -358,10 +358,12 @@ This means that when the API changes
 	envs := []string{
 		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
 	}
-
+	
+	os.Setenv("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS", "-t DAV")
+	
 	if configs.AppPassword != "" {
-        envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", configs.AppPassword))
-    }
+        	envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", configs.AppPassword))
+    	}
 
 	args := []string{
 		"deliver",
