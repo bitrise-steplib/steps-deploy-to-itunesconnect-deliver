@@ -1,6 +1,12 @@
-## Changelog (Current version: 2.13.0)
+## Changelog (Current version: 2.13.1)
 
 -----------------
+
+### 2.13.1 (2018 Mar 23)
+
+* [2dbc557] prepare for 2.13.1
+* [0a722c2] step definition update (#42)
+* [0c98b64] Refactor ITMS configuration (#40)
 
 ### 2.13.0 (2018 Mar 01)
 
@@ -175,4 +181,4 @@
 
 -----------------
 
-Updated: 2018 Mar 01
+Updated: 2018 Mar 23
