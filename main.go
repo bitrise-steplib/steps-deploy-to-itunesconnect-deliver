@@ -367,7 +367,7 @@ This means that when the API changes
 	}
 
 	if configs.ITMSParameters != "" {
-		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSParameters))	
+		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSParameters))
 	}
 
 	args := []string{
@@ -398,9 +398,18 @@ This means that when the API changes
 	}
 
 	if configs.IpaPath != "" {
-		args = append(args, "--ipa", configs.IpaPath)
+		tmpIpaPath, err := copyToTmp(configs.IpaPath)
+		if err != nil {
+			fail("Deploy failed, error: %s", err)
+		}
+		args = append(args, "--ipa", tmpIpaPath)
+
 	} else if configs.PkgPath != "" {
-		args = append(args, "--pkg", configs.PkgPath)
+		tmpPkgPath, err := copyToTmp(configs.PkgPath)
+		if err != nil {
+			fail("Deploy failed, error: %s", err)
+		}
+		args = append(args, "--pkg", tmpPkgPath)
 	}
 
 	if configs.SkipScreenshots == "yes" {
@@ -442,4 +451,21 @@ This means that when the API changes
 
 	log.Donef("Success")
 	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
+}
+
+func copyToTmp(pth string) (string, error) {
+	tmpDir, err := pathutil.NormalizedOSTempDirPath("ipaOrPkg")
+	if err != nil {
+		return "", err
+	}
+	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
+	cmd := command.New("cp", pth, tmpPath)
+
+	cmd.SetStdout(os.Stdout)
+	cmd.SetStderr(os.Stderr)
+	cmd.SetStdin(os.Stdin)
+	if err := cmd.Run(); err != nil {
+		return "", err
+	}
+	return tmpPath, nil
 }
