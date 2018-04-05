@@ -398,16 +398,18 @@ This means that when the API changes
 	}
 
 	if configs.IpaPath != "" {
-		tmpIpaPath, err := copyToTmp(configs.IpaPath)
+		tmpIpaPath, err := normalizeArtifactPath(configs.IpaPath)
 		if err != nil {
-			fail("Deploy failed, error: %s", err)
+			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(configs.IpaPath), err)
+			tmpIpaPath = configs.IpaPath
 		}
 		args = append(args, "--ipa", tmpIpaPath)
 
 	} else if configs.PkgPath != "" {
-		tmpPkgPath, err := copyToTmp(configs.PkgPath)
+		tmpPkgPath, err := normalizeArtifactPath(configs.PkgPath)
 		if err != nil {
-			fail("Deploy failed, error: %s", err)
+			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(configs.PkgPath), err)
+			tmpPkgPath = configs.PkgPath
 		}
 		args = append(args, "--pkg", tmpPkgPath)
 	}
@@ -453,19 +455,16 @@ This means that when the API changes
 	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
 }
 
-func copyToTmp(pth string) (string, error) {
+func normalizeArtifactPath(pth string) (string, error) {
 	tmpDir, err := pathutil.NormalizedOSTempDirPath("ipaOrPkg")
 	if err != nil {
 		return "", err
 	}
-	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
-	cmd := command.New("cp", pth, tmpPath)
 
-	cmd.SetStdout(os.Stdout)
-	cmd.SetStderr(os.Stderr)
-	cmd.SetStdin(os.Stdin)
-	if err := cmd.Run(); err != nil {
+	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
+	if err := command.CopyFile(pth, tmpPath); err != nil {
 		return "", err
 	}
+
 	return tmpPath, nil
 }
