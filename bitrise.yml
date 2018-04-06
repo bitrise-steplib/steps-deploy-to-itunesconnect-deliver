@@ -56,7 +56,7 @@ workflows:
         run_if: true
         inputs:
         - plist_path: $INFO_PLIST_PATH
-        - build_version_offset: 72
+        - build_version_offset: 74
     - xcode-archive:
         title: Create Archive
         inputs:

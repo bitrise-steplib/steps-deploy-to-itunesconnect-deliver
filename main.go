@@ -367,7 +367,7 @@ This means that when the API changes
 	}
 
 	if configs.ITMSParameters != "" {
-		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSParameters))	
+		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSParameters))
 	}
 
 	args := []string{
@@ -398,9 +398,20 @@ This means that when the API changes
 	}
 
 	if configs.IpaPath != "" {
-		args = append(args, "--ipa", configs.IpaPath)
+		tmpIpaPath, err := normalizeArtifactPath(configs.IpaPath)
+		if err != nil {
+			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(configs.IpaPath), err)
+			tmpIpaPath = configs.IpaPath
+		}
+		args = append(args, "--ipa", tmpIpaPath)
+
 	} else if configs.PkgPath != "" {
-		args = append(args, "--pkg", configs.PkgPath)
+		tmpPkgPath, err := normalizeArtifactPath(configs.PkgPath)
+		if err != nil {
+			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(configs.PkgPath), err)
+			tmpPkgPath = configs.PkgPath
+		}
+		args = append(args, "--pkg", tmpPkgPath)
 	}
 
 	if configs.SkipScreenshots == "yes" {
@@ -442,4 +453,18 @@ This means that when the API changes
 
 	log.Donef("Success")
 	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
+}
+
+func normalizeArtifactPath(pth string) (string, error) {
+	tmpDir, err := pathutil.NormalizedOSTempDirPath("ipaOrPkg")
+	if err != nil {
+		return "", err
+	}
+
+	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
+	if err := command.CopyFile(pth, tmpPath); err != nil {
+		return "", err
+	}
+
+	return tmpPath, nil
 }
