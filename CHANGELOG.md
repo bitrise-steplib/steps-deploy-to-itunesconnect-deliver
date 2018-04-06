@@ -1,6 +1,11 @@
-## Changelog (Current version: 2.13.1)
+## Changelog (Current version: 2.13.2)
 
 -----------------
+
+### 2.13.2 (2018 Apr 06)
+
+* [2a4e2b0] Prepare for 2.13.2
+* [7bc5c23] Copy the .ipa/.pkg to tmp folder (#44)
 
 ### 2.13.1 (2018 Mar 23)
 
@@ -181,4 +186,4 @@
 
 -----------------
 
-Updated: 2018 Mar 23
+Updated: 2018 Apr 06
