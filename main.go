@@ -21,50 +21,52 @@ import (
 
 // ConfigsModel ...
 type ConfigsModel struct {
-	IpaPath string
-	PkgPath string
+	IpaPath              string
+	PkgPath              string
 
-	ItunesconUser string
-	Password      string
-	AppPassword   string
+	ItunesconUser        string
+	Password             string
+	AppPassword          string
 
-	AppID           string
-	BundleID        string
-	SubmitForReview string
-	SkipMetadata    string
-	SkipScreenshots string
-	TeamID          string
-	TeamName        string
-	Platform        string
-	Options         string
+	AppID                string
+	BundleID             string
+	SubmitForReview      string
+	SkipMetadata         string
+	SkipScreenshots      string
+	SkipAppVersionUpdate string
+	TeamID               string
+	TeamName             string
+	Platform             string
+	Options              string
 
-	GemfilePath     string
-	FastlaneVersion string
-	ITMSParameters  string
+	GemfilePath          string
+	FastlaneVersion      string
+	ITMSParameters       string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
-		IpaPath: os.Getenv("ipa_path"),
-		PkgPath: os.Getenv("pkg_path"),
+		IpaPath:              os.Getenv("ipa_path"),
+		PkgPath:              os.Getenv("pkg_path"),
 
-		ItunesconUser: os.Getenv("itunescon_user"),
-		Password:      os.Getenv("password"),
-		AppPassword:   os.Getenv("app_password"),
+		ItunesconUser:        os.Getenv("itunescon_user"),
+		Password:             os.Getenv("password"),
+		AppPassword:          os.Getenv("app_password"),
 
-		AppID:           os.Getenv("app_id"),
-		BundleID:        os.Getenv("bundle_id"),
-		SubmitForReview: os.Getenv("submit_for_review"),
-		SkipMetadata:    os.Getenv("skip_metadata"),
-		SkipScreenshots: os.Getenv("skip_screenshots"),
-		TeamID:          os.Getenv("team_id"),
-		TeamName:        os.Getenv("team_name"),
-		Platform:        os.Getenv("platform"),
-		Options:         os.Getenv("options"),
+		AppID:                os.Getenv("app_id"),
+		BundleID:             os.Getenv("bundle_id"),
+		SubmitForReview:      os.Getenv("submit_for_review"),
+		SkipMetadata:         os.Getenv("skip_metadata"),
+		SkipScreenshots:      os.Getenv("skip_screenshots"),
+		SkipAppVersionUpdate: os.Getenv("skip_app_version_update"),
+		TeamID:               os.Getenv("team_id"),
+		TeamName:             os.Getenv("team_name"),
+		Platform:             os.Getenv("platform"),
+		Options:              os.Getenv("options"),
 
-		GemfilePath:     os.Getenv("gemfile_path"),
-		FastlaneVersion: os.Getenv("fastlane_version"),
-		ITMSParameters:  os.Getenv("itms_upload_parameters"),
+		GemfilePath:          os.Getenv("gemfile_path"),
+		FastlaneVersion:      os.Getenv("fastlane_version"),
+		ITMSParameters:       os.Getenv("itms_upload_parameters"),
 	}
 }
 
@@ -83,6 +85,7 @@ func (configs ConfigsModel) print() {
 	log.Printf("- SubmitForReview: %s", configs.SubmitForReview)
 	log.Printf("- SkipMetadata: %s", configs.SkipMetadata)
 	log.Printf("- SkipScreenshots: %s", configs.SkipScreenshots)
+	log.Printf("- SkipAppVersionUpdate: %s", configs.SkipAppVersionUpdate)
 	log.Printf("- TeamID: %s", configs.TeamID)
 	log.Printf("- TeamName: %s", configs.TeamName)
 	log.Printf("- Platform: %s", configs.Platform)
@@ -132,6 +135,10 @@ func (configs ConfigsModel) validate() error {
 
 	if err := input.ValidateWithOptions(configs.SkipScreenshots, "yes", "no"); err != nil {
 		return fmt.Errorf("SkipScreenshots, %s", err)
+	}
+
+	if err := input.ValidateWithOptions(configs.SkipAppVersionUpdate, "yes", "no"); err != nil {
+		return fmt.Errorf("SkipAppVersionUpdate, %s", err)
 	}
 
 	if err := input.ValidateWithOptions(configs.Platform, "ios", "osx", "appletvos"); err != nil {
@@ -420,6 +427,10 @@ This means that when the API changes
 
 	if configs.SkipMetadata == "yes" {
 		args = append(args, "--skip_metadata")
+	}
+
+	if configs.SkipAppVersionUpdate == "yes" {
+		args = append(args, "--skip_app_version_update")
 	}
 
 	args = append(args, "--force")
