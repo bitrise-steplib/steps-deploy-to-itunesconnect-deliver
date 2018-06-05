@@ -1,7 +1,7 @@
 title: "Deploy to iTunes Connect"
 summary: Upload screenshots, metadata and binaries to [iTunes Connect](https://itunesconnect.apple.com/) and submit your app for App Store review.
 description: |-
-  Upload screenshots, metadata and binaries to [iTunes Connect](https://itunesconnect.apple.com/) and submit your app for App Store review, 
+  Upload screenshots, metadata and binaries to [iTunes Connect](https://itunesconnect.apple.com/) and submit your app for App Store review,
   using the fantastic [deliver](https://docs.fastlane.tools/actions/deliver/) fastlane action.
 
   Setup guide and notes:
@@ -145,6 +145,12 @@ inputs:
       description: Don't upload the screenshots.
       value_options: ["yes", "no"]
       is_required: true
+  - skip_app_version_update: "no"
+    opts:
+      title: "Skip App Version Update?"
+      description: Don't update app version for submission.
+      value_options: ["yes", "no"]
+      is_required: true
   - gemfile_path: ./Gemfile
     opts:
       category: Debug
@@ -152,7 +158,7 @@ inputs:
       description: |
         Path to the `Gemfile` which contains `fastlane` gem.
 
-        If `Gemfile` not exist or does not contain fastlane gem and 
+        If `Gemfile` not exist or does not contain fastlane gem and
         if `fastlane version` input not specified, latest fastlen version will be used.
   - fastlane_version: "latest"
     opts:
@@ -168,14 +174,14 @@ inputs:
         Options added to the end of the `deliver` call.
 
         If you want to add more options, list that separated by space character.
-        
+
         Example: `--skip_metadata --skip_screenshots`
   - itms_upload_parameters: "-t DAV"
     opts:
       category: Debug
       title: "Transporter delivery method"
       description: |-
-        `deliver` uses the iTunes Transporter to upload metadata and binaries.  
+        `deliver` uses the iTunes Transporter to upload metadata and binaries.
         In case you are behind a firewall, you can specify a different transporter protocol using this input.
 
         Read more on Apple [Transporter User Guide](https://help.apple.com/itc/transporteruserguide/#/apdATD1E1288-D1E1A1303-D1E1288A1126).
