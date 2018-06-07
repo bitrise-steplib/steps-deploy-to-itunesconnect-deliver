@@ -1,6 +1,13 @@
-## Changelog (Current version: 2.13.2)
+## Changelog (Current version: 2.14.0)
 
 -----------------
+
+### 2.14.0 (2018 Jun 07)
+
+* [b9628db] prepare for 2.14.0
+* [7ac3d64] support skip_app_version_update flag (#47)
+* [4134130] Update step.yml (#49)
+* [c4f5f8d] ci workflow update (#50)
 
 ### 2.13.2 (2018 Apr 06)
 
@@ -186,4 +193,4 @@
 
 -----------------
 
-Updated: 2018 Apr 06
+Updated: 2018 Jun 07
