@@ -169,7 +169,7 @@ inputs:
   - options:
     opts:
       category: Debug
-      title: " Additional options for `deliver` call"
+      title: "Additional options for `deliver` call"
       description: |-
         Options added to the end of the `deliver` call.
 
