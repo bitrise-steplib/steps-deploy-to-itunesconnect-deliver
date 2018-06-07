@@ -13,6 +13,7 @@ app:
 
   # define these in your .bitrise.secrets.yml
   - BITRISE_BUILD_NUMBER: $BITRISE_BUILD_NUMBER
+  - BITRISE_BUILD_VERSION_OFFSET: $BITRISE_BUILD_VERSION_OFFSET
 
   - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
   - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
@@ -56,7 +57,7 @@ workflows:
         inputs:
         - build_version: $BITRISE_BUILD_NUMBER
         - plist_path: $INFO_PLIST_PATH
-        - build_version_offset: 74
+        - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
     - xcode-archive:
         title: Create Archive
         inputs:
