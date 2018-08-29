@@ -64,11 +64,13 @@ inputs:
       title: "Apple ID"
       description: Login Apple ID for the iTunes Connect site.
       is_required: true
+      is_sensitive: true
   - password: ""
     opts:
       title: "Password"
       description: Password for the specified Apple ID.
       is_required: true
+      is_sensitive: true
   - app_password: ""
     opts:
       title: "Application Specific Password"
@@ -79,6 +81,7 @@ inputs:
         [AppleID Website](https://appleid.apple.com). It can be used to
         surpass Two Factor Authentication.
       is_required: false
+      is_sensitive: true
   - team_id: ""
     opts:
       title: "Team ID"
@@ -106,6 +109,7 @@ inputs:
         Open the **App's page on iTunes Connect**, click on **App Information**,
         scroll down to the *General Information* section,
         copy the *Apple ID*'s value from here (numeric, like 846814360).
+      is_sensitive: true
   - bundle_id: ""
     opts:
       title: "App Bundle ID"
@@ -113,6 +117,7 @@ inputs:
         The App's *Bundle ID* on iTunes Connect.
 
         **NOTE:** This input or `App Apple ID` is required.
+      is_sensitive: true
   - submit_for_review: "no"
     opts:
       title: "Submit for Review?"
