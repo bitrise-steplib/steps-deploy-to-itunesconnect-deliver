@@ -6,9 +6,9 @@ description: |-
 
   Setup guide and notes:
 
-  * Register an app on iTunes Connect, on the **My Apps** page. Click on the *plus sign* and select the **New App** option. This requires an **admin** account.
+  * Register an app on the **My Apps** page of iTunes Connect. Click on the *plus sign* and select the **New App** option. This requires an **admin** account.
   * Requires an app signed with **App Store iOS distibution Provisioning Profile**.
-  * Every build which you want to push to iTunes Connect have to have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*).
+  * Every build that you want to push to iTunes Connect must have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*).
 website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 source_code_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
 support_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/issues
@@ -40,16 +40,16 @@ inputs:
     opts:
       title: "IPA path"
       description: |-
-        Path to your IPA file, to be deployed.
+        Path to your IPA file to be deployed.
 
-        **NOTE:** This input or `PKG path` is required.
+        **NOTE:** This input or the `PKG path` is required.
   - pkg_path: "$BITRISE_PKG_PATH"
     opts:
       title: "PKG path"
       description: |-
-        Path to your PKG file, to be deployed.
+        Path to your PKG file to be deployed.
 
-        **NOTE:** This input or `IPA path` is required.
+        **NOTE:** This input or the `IPA path` is required.
   - platform: "ios"
     opts:
       title: "Platform"
@@ -62,7 +62,7 @@ inputs:
   - itunescon_user: ""
     opts:
       title: "Apple ID"
-      description: Login Apple ID for the iTunes Connect site.
+      description: Login Apple ID for iTunes Connect.
       is_required: true
       is_sensitive: true
   - password: ""
@@ -88,27 +88,27 @@ inputs:
       description: |-
         The App's *Team ID* on iTunes Connect.
 
-        **NOTE:** This field or `Team name` is required when using iTunes Connect account
-        linked to multiple publish team.
+        **NOTE:** This field or the `Team name` is required when using iTunes Connect account
+        linked to multiple publish teams.
   - team_name: ""
     opts:
       title: "Team name"
       description: |-
         The App's *Team Name* on iTunes Connect.
 
-        **NOTE:** This field or `Team ID` is required when using iTunes Connect account
-        linked to multiple publish team.
+        **NOTE:** This field or the `Team ID` is required when using iTunes Connect account
+        linked to multiple publish teams.
   - app_id: ""
     opts:
       title: "App Apple ID"
       description: |-
         The App's *Apple ID* on iTunes Connect.
 
-        **NOTE:** This input or `App Bundle ID` is required.
+        **NOTE:** This input or the `App Bundle ID` is required.
 
         Open the **App's page on iTunes Connect**, click on **App Information**,
         scroll down to the *General Information* section,
-        copy the *Apple ID*'s value from here (numeric, like 846814360).
+        copy the *Apple ID*'s value from here (numeric value, for example, 846814360).
       is_sensitive: true
   - bundle_id: ""
     opts:
@@ -116,7 +116,7 @@ inputs:
       description: |-
         The App's *Bundle ID* on iTunes Connect.
 
-        **NOTE:** This input or `App Apple ID` is required.
+        **NOTE:** This input or the `App Apple ID` is required.
       is_sensitive: true
   - submit_for_review: "no"
     opts:
@@ -125,7 +125,7 @@ inputs:
         Wait for the submission to be processed and then
         submit the app for review for this specific version?
 
-        If this option is disabled then this step won't wait
+        If this option is disabled, then this step won't wait
         for the new version to be processed on iTunes Connect
         and won't submit it for review automatically.
 
@@ -133,8 +133,8 @@ inputs:
         processed which might take a couple of minutes after the
         new version is deployed to iTunes Connect*.
 
-        **NOTE:** if this option is enabled then this step will
-        fail even if the version was successfully uploaded
+        **NOTE:** if this option is enabled, then this step will
+        fail, even if the version was successfully uploaded
         to iTunes Connect and only the review submission failed.
       value_options: ["yes", "no"]
       is_required: true
@@ -163,8 +163,8 @@ inputs:
       description: |
         Path to the `Gemfile` which contains `fastlane` gem.
 
-        If `Gemfile` not exist or does not contain fastlane gem and
-        if `fastlane version` input not specified, latest fastlen version will be used.
+        If `Gemfile` doesn't exist or doesn't contain fastlane gem and
+        if `fastlane version` input isn't specified, latest fastlen version will be used.
   - fastlane_version: "latest"
     opts:
       category: Debug
@@ -178,7 +178,7 @@ inputs:
       description: |-
         Options added to the end of the `deliver` call.
 
-        If you want to add more options, list that separated by space character.
+        If you want to add more options, list those separated by space character.
 
         Example: `--skip_metadata --skip_screenshots`
   - itms_upload_parameters: "-t DAV"
