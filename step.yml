@@ -117,7 +117,6 @@ inputs:
         The App's *Bundle ID* on iTunes Connect.
 
         **NOTE:** This input or the `App Apple ID` is required.
-      is_sensitive: true
   - submit_for_review: "no"
     opts:
       title: "Submit for Review?"
