@@ -6,6 +6,10 @@ Deploy to iTunes Connect, using the
 fantastic [deliver](https://github.com/fastlane/fastlane/tree/master/deliver)
 Ruby gem.
 
+## Trigger a new release
+
+- __merge every code changes__ to the `master` branch
+- __push the new version tag__ to the `master` branch
 
 ## How to use this Step
 
