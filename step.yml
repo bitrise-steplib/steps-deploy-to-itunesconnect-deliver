@@ -109,7 +109,6 @@ inputs:
         Open the **App's page on iTunes Connect**, click on **App Information**,
         scroll down to the *General Information* section,
         copy the *Apple ID*'s value from here (numeric value, for example, 846814360).
-      is_sensitive: true
   - bundle_id: ""
     opts:
       title: "App Bundle ID"
