@@ -86,17 +86,17 @@ inputs:
     opts:
       title: "Team ID"
       description: |-
-        The App's *Team ID* on iTunes Connect.
+        The App's *Team Name* on iTunes Connect.
 
-        **NOTE:** This field or the `Team name` is required when using iTunes Connect account
+        **NOTE:** This field or the `Team ID` is required when using iTunes Connect account
         linked to multiple publish teams.
   - team_name: ""
     opts:
       title: "Team name"
       description: |-
-        The App's *Team Name* on iTunes Connect.
+        The App's *Team ID* on iTunes Connect.
 
-        **NOTE:** This field or the `Team ID` is required when using iTunes Connect account
+        **NOTE:** This field or the `Team name` is required when using iTunes Connect account
         linked to multiple publish teams.
   - app_id: ""
     opts:
