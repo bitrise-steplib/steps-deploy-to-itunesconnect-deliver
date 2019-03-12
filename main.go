@@ -21,12 +21,12 @@ import (
 
 // ConfigsModel ...
 type ConfigsModel struct {
-	IpaPath              string
-	PkgPath              string
+	IpaPath string
+	PkgPath string
 
-	ItunesconUser        string
-	Password             string
-	AppPassword          string
+	ItunesconUser string
+	Password      string
+	AppPassword   string
 
 	AppID                string
 	BundleID             string
@@ -39,19 +39,19 @@ type ConfigsModel struct {
 	Platform             string
 	Options              string
 
-	GemfilePath          string
-	FastlaneVersion      string
-	ITMSParameters       string
+	GemfilePath     string
+	FastlaneVersion string
+	ITMSParameters  string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
-		IpaPath:              os.Getenv("ipa_path"),
-		PkgPath:              os.Getenv("pkg_path"),
+		IpaPath: os.Getenv("ipa_path"),
+		PkgPath: os.Getenv("pkg_path"),
 
-		ItunesconUser:        os.Getenv("itunescon_user"),
-		Password:             os.Getenv("password"),
-		AppPassword:          os.Getenv("app_password"),
+		ItunesconUser: os.Getenv("itunescon_user"),
+		Password:      os.Getenv("password"),
+		AppPassword:   os.Getenv("app_password"),
 
 		AppID:                os.Getenv("app_id"),
 		BundleID:             os.Getenv("bundle_id"),
@@ -64,9 +64,9 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Platform:             os.Getenv("platform"),
 		Options:              os.Getenv("options"),
 
-		GemfilePath:          os.Getenv("gemfile_path"),
-		FastlaneVersion:      os.Getenv("fastlane_version"),
-		ITMSParameters:       os.Getenv("itms_upload_parameters"),
+		GemfilePath:     os.Getenv("gemfile_path"),
+		FastlaneVersion: os.Getenv("fastlane_version"),
+		ITMSParameters:  os.Getenv("itms_upload_parameters"),
 	}
 }
 
@@ -347,8 +347,8 @@ to something with only
 alphanumeric characters.`)
 	fmt.Println()
 
-	log.Printf(`**Be advised** log.Printf(that this
-step uses a well maintained, open source tool which
+	log.Printf(`**Be advised**`)
+	log.Printf(`that this step uses a well maintained, open source tool which
 uses *undocumented and unsupported APIs* (because the current
 iTunes Connect platform does not have a documented and supported API)
 to perform the deployment.
