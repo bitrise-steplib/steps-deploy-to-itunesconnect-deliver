@@ -327,6 +327,10 @@ func main() {
 			fail("Failed to export FASTLANE_SESSION, error: %s", err)
 		}
 
+		if err := os.Setenv("FASTLANE_SESSION", fs); err != nil {
+			fail("Failed to set FASTLANE_SESSION env, error: %s", err)
+		}
+
 		log.Donef("FASTLANE_SESSION exported")
 	}
 
