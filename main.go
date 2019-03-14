@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/session"
+
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/fileutil"
@@ -16,17 +18,18 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-tools/go-steputils/input"
+	"github.com/bitrise-tools/go-steputils/tools"
 	"github.com/kballard/go-shellquote"
 )
 
 // ConfigsModel ...
 type ConfigsModel struct {
-	IpaPath              string
-	PkgPath              string
+	IpaPath string
+	PkgPath string
 
-	ItunesconUser        string
-	Password             string
-	AppPassword          string
+	ItunesconUser string
+	Password      string
+	AppPassword   string
 
 	AppID                string
 	BundleID             string
@@ -39,19 +42,19 @@ type ConfigsModel struct {
 	Platform             string
 	Options              string
 
-	GemfilePath          string
-	FastlaneVersion      string
-	ITMSParameters       string
+	GemfilePath     string
+	FastlaneVersion string
+	ITMSParameters  string
 }
 
 func createConfigsModelFromEnvs() ConfigsModel {
 	return ConfigsModel{
-		IpaPath:              os.Getenv("ipa_path"),
-		PkgPath:              os.Getenv("pkg_path"),
+		IpaPath: os.Getenv("ipa_path"),
+		PkgPath: os.Getenv("pkg_path"),
 
-		ItunesconUser:        os.Getenv("itunescon_user"),
-		Password:             os.Getenv("password"),
-		AppPassword:          os.Getenv("app_password"),
+		ItunesconUser: os.Getenv("itunescon_user"),
+		Password:      os.Getenv("password"),
+		AppPassword:   os.Getenv("app_password"),
 
 		AppID:                os.Getenv("app_id"),
 		BundleID:             os.Getenv("bundle_id"),
@@ -64,9 +67,9 @@ func createConfigsModelFromEnvs() ConfigsModel {
 		Platform:             os.Getenv("platform"),
 		Options:              os.Getenv("options"),
 
-		GemfilePath:          os.Getenv("gemfile_path"),
-		FastlaneVersion:      os.Getenv("fastlane_version"),
-		ITMSParameters:       os.Getenv("itms_upload_parameters"),
+		GemfilePath:     os.Getenv("gemfile_path"),
+		FastlaneVersion: os.Getenv("fastlane_version"),
+		ITMSParameters:  os.Getenv("itms_upload_parameters"),
 	}
 }
 
@@ -312,16 +315,32 @@ func main() {
 	}
 
 	//
-	// Setup
+	// Fastlane session
 	fmt.Println()
-	log.Infof("Setup")
+	log.Infof("Ensure cookies for Apple Developer Portal")
 
-	startTime := time.Now()
+	fs, err := session.GetSession()
+	if err != nil {
+		log.Warnf("Failed to get the session for the Apple Developer Portal, error: %s", err)
+	} else {
+		if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", fs); err != nil {
+			fail("Failed to export FASTLANE_SESSION, error: %s", err)
+		}
+
+		log.Donef("FASTLANE_SESSION exported")
+	}
 
 	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(configs.FastlaneVersion, configs.GemfilePath)
 	if err != nil {
 		fail("Failed to ensure fastlane version, error: %s", err)
 	}
+
+	//
+	// Setup
+	fmt.Println()
+	log.Infof("Setup")
+
+	startTime := time.Now()
 
 	versionCmdSlice := append(fastlaneCmdSlice, "-v")
 	versionCmd := command.NewWithStandardOuts(versionCmdSlice[0], versionCmdSlice[1:]...)
