@@ -332,11 +332,7 @@ func main() {
 		}
 
 		log.Donef("FASTLANE_SESSION exported")
-	}
-
-	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(configs.FastlaneVersion, configs.GemfilePath)
-	if err != nil {
-		fail("Failed to ensure fastlane version, error: %s", err)
+		log.Printf(os.Getenv("FASTLANE_SESSION"))
 	}
 
 	//
@@ -345,6 +341,11 @@ func main() {
 	log.Infof("Setup")
 
 	startTime := time.Now()
+
+	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(configs.FastlaneVersion, configs.GemfilePath)
+	if err != nil {
+		fail("Failed to ensure fastlane version, error: %s", err)
+	}
 
 	versionCmdSlice := append(fastlaneCmdSlice, "-v")
 	versionCmd := command.NewWithStandardOuts(versionCmdSlice[0], versionCmdSlice[1:]...)
