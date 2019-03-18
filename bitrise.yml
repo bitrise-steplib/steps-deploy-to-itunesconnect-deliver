@@ -64,6 +64,7 @@ workflows:
         inputs:
         - output_dir: $BITRISE_DEPLOY_DIR
         - project_path: $BITRISE_PROJECT_PATH
+        - export_method: app-store
     - path::./:
         title: Step Test
         inputs:
