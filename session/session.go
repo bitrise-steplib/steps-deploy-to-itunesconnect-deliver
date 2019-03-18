@@ -49,8 +49,6 @@ func GetSession() (string, error) {
 		return "", err
 	}
 
-	log.Warnf("portal data: %v", portalData)
-
 	cookies := convertDesCookie(portalData.SessionCookies["https://idmsa.apple.com"])
 	session := strings.Join(cookies, "")
 	return session, nil

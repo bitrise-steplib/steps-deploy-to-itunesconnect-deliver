@@ -331,8 +331,7 @@ func main() {
 			fail("Failed to set FASTLANE_SESSION env, error: %s", err)
 		}
 
-		log.Donef("FASTLANE_SESSION exported")
-		log.Printf(os.Getenv("FASTLANE_SESSION"))
+		log.Donef("Session exported")
 	}
 
 	//
