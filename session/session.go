@@ -140,14 +140,5 @@ func performRequest(req *http.Request, requestResponse interface{}) ([]byte, err
 	return body, nil
 }
 
-func sPretty(v interface{}) string {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	return fmt.Sprintf("%v\n", string(b))
-}
-
 func main() {
 }

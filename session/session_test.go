@@ -1,6 +1,8 @@
 package session
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -164,4 +166,13 @@ func Test_convertDesCookie(t *testing.T) {
 			}
 		})
 	}
+}
+
+func sPretty(v interface{}) string {
+	b, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	return fmt.Sprintf("%v\n", string(b))
 }
