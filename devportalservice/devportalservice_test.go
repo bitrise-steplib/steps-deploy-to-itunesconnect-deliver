@@ -11,13 +11,13 @@ import (
 func TestGetDeveloperPortalDataFromEnv(t *testing.T) {
 	// If the BITRISE_PORTAL_DATA_JSON env is already set (e.g for local testing the step),
 	// then we don't want to modify it during the test
-	var envAlreadyPresented bool
+	envAlreadyPresented := true
 	if os.Getenv("BITRISE_PORTAL_DATA_JSON") == "" {
+		envAlreadyPresented = false
+
 		if err := os.Setenv("BITRISE_PORTAL_DATA_JSON", dummyPortalDataJSON); err != nil {
 			t.Errorf("Failed to set BITRISE_PORTAL_DATA_JSON env to test getDeveloperPortalData() error = %v", err)
 		}
-	} else {
-		envAlreadyPresented = true
 	}
 
 	got, err := getDeveloperPortalData("", "")

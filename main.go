@@ -224,7 +224,7 @@ func main() {
 
 	fs, errors := devportalservice.SessionData()
 	if errors != nil {
-		log.Warnf("Failed to get the session for the Apple Developer Portal, errors:")
+		log.Warnf("Failed to activate the Bitrise Apple Developer Portal connection: %s\nRead more: https://devcenter.bitrise.io/getting-started/signing-up/connecting-apple-dev-account/\n\nerrors:")
 		for _, err := range errors {
 			log.Errorf("%s\n", err)
 		}
