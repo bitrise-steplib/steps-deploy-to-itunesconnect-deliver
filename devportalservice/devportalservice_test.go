@@ -53,7 +53,7 @@ func TestGetDeveloperPortalData(t *testing.T) {
 		t.Errorf("getDeveloperPortalData() error = %v", err)
 	}
 
-	if reflect.DeepEqual(got, PortalData{}) {
+	if reflect.DeepEqual(got, portalData{}) {
 		t.Errorf("getDeveloperPortalData() = nil")
 	}
 }
@@ -98,7 +98,7 @@ const dummyPortalDataJSON = `{
     "default_team_id": null
 }`
 
-var dummyPortalData = PortalData{
+var dummyPortalData = portalData{
 	AppleID:              "example@example.io",
 	Password:             "highSecurityPassword",
 	ConnectionExpiryDate: "2019-04-06T12:04:59.000Z",

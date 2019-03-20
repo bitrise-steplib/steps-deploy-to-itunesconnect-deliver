@@ -12,8 +12,8 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-// PortalData ...
-type PortalData struct {
+// portalData ...
+type portalData struct {
 	AppleID              string              `json:"apple_id"`
 	Password             string              `json:"password"`
 	ConnectionExpiryDate string              `json:"connection_expiry_date"`
@@ -44,43 +44,43 @@ const cookieTemplate = `- !ruby/object:HTTP::Cookie
 // SessionData will fetch the session from Bitrise for the connected Apple developer account
 // If the BITRISE_PORTAL_DATA_JSON is provided (for debug purposes) it will use that instead.
 func SessionData() (string, error) {
-	portalData, err := getDeveloperPortalData(os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN"))
+	p, err := getDeveloperPortalData(os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN"))
 	if err != nil {
 		return "", err
 	}
 
-	cookies := convertDesCookie(portalData.SessionCookies["https://idmsa.apple.com"])
+	cookies := convertDesCookie(p.SessionCookies["https://idmsa.apple.com"])
 	session := strings.Join(cookies, "")
 	return session, nil
 }
 
-func getDeveloperPortalData(buildURL, buildAPIToken string) (PortalData, error) {
-	var developerPortalData PortalData
+func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) {
+	var p portalData
 
-	portalDataJSON, exists := os.LookupEnv("BITRISE_PORTAL_DATA_JSON")
-	if exists && portalDataJSON != "" {
-		return developerPortalData, json.Unmarshal([]byte(portalDataJSON), &developerPortalData)
+	j, exists := os.LookupEnv("BITRISE_PORTAL_DATA_JSON")
+	if exists && j != "" {
+		return p, json.Unmarshal([]byte(j), &p)
 	}
 
 	if buildURL == "" {
-		return PortalData{}, fmt.Errorf("BITRISE_BUILD_URL env is not exported")
+		return portalData{}, fmt.Errorf("BITRISE_BUILD_URL env is not exported")
 	}
 
 	if buildAPIToken == "" {
-		return PortalData{}, fmt.Errorf("BITRISE_BUILD_API_TOKEN env is not exported")
+		return portalData{}, fmt.Errorf("BITRISE_BUILD_API_TOKEN env is not exported")
 	}
 
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/apple_developer_portal_data.json", buildURL), nil)
 	if err != nil {
-		return PortalData{}, err
+		return portalData{}, err
 	}
 
 	req.Header.Add("BUILD_API_TOKEN", buildAPIToken)
 
-	if _, err := performRequest(req, &developerPortalData); err != nil {
-		return PortalData{}, fmt.Errorf("Falied to fetch portal data from Bitrise, error: %s", err)
+	if _, err := performRequest(req, &p); err != nil {
+		return portalData{}, fmt.Errorf("Falied to fetch portal data from Bitrise, error: %s", err)
 	}
-	return developerPortalData, nil
+	return p, nil
 }
 
 func convertDesCookie(cookies []Cookie) []string {
