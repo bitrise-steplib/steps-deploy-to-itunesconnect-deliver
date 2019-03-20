@@ -17,11 +17,11 @@ type portalData struct {
 	AppleID              string              `json:"apple_id"`
 	Password             string              `json:"password"`
 	ConnectionExpiryDate string              `json:"connection_expiry_date"`
-	SessionCookies       map[string][]Cookie `json:"session_cookies"`
+	SessionCookies       map[string][]cookie `json:"session_cookies"`
 }
 
-// Cookie ...
-type Cookie struct {
+// cookie ...
+type cookie struct {
 	Name      string `json:"name"`
 	Path      string `json:"path"`
 	Value     string `json:"value"`
@@ -83,7 +83,7 @@ func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) 
 	return p, nil
 }
 
-func convertDesCookie(cookies []Cookie) []string {
+func convertDesCookie(cookies []cookie) []string {
 	var convertedCookies []string
 	for _, c := range cookies {
 		if convertedCookies == nil {
