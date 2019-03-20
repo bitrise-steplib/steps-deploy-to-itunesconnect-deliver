@@ -1,4 +1,4 @@
-package session
+package devportalservice
 
 import (
 	"encoding/json"
@@ -41,9 +41,9 @@ const cookieTemplate = `- !ruby/object:HTTP::Cookie
   path: "<PATH>"
 `
 
-// GetSession will fetch the session from Bitrise for the connected Apple developer account
+// SessionData will fetch the session from Bitrise for the connected Apple developer account
 // If the BITRISE_PORTAL_DATA_JSON is provided (for debug purposes) it will use that instead.
-func GetSession() (string, error) {
+func SessionData() (string, error) {
 	portalData, err := getDeveloperPortalData(os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN"))
 	if err != nil {
 		return "", err

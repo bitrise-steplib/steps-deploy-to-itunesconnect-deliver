@@ -15,7 +15,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
-	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/session"
+	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/devportalservice"
 	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-steputils/tools"
 	"github.com/kballard/go-shellquote"
@@ -222,7 +222,7 @@ func main() {
 	fmt.Println()
 	log.Infof("Ensure cookies for Apple Developer Portal")
 
-	fs, err := session.GetSession()
+	fs, err := devportalservice.SessionData()
 	if err != nil {
 		log.Warnf("Failed to get the session for the Apple Developer Portal, error: %s", err)
 	} else {

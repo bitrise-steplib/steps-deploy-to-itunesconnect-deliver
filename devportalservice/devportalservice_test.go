@@ -1,4 +1,4 @@
-package session
+package devportalservice
 
 import (
 	"encoding/json"
