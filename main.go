@@ -9,146 +9,41 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/session"
-
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
-	"github.com/bitrise-tools/go-steputils/input"
+	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/session"
+	"github.com/bitrise-tools/go-steputils/stepconf"
 	"github.com/bitrise-tools/go-steputils/tools"
 	"github.com/kballard/go-shellquote"
 )
 
-// ConfigsModel ...
-type ConfigsModel struct {
-	IpaPath string
-	PkgPath string
+// Configs ...
+type Configs struct {
+	IpaPath string `env:"ipa_path"`
+	PkgPath string `env:"pkg_path"`
 
-	ItunesconUser string
-	Password      string
-	AppPassword   string
+	ItunesconUser string          `env:"itunescon_user,required"`
+	Password      stepconf.Secret `env:"password,required"`
+	AppPassword   stepconf.Secret `env:"app_password"`
 
-	AppID                string
-	BundleID             string
-	SubmitForReview      string
-	SkipMetadata         string
-	SkipScreenshots      string
-	SkipAppVersionUpdate string
-	TeamID               string
-	TeamName             string
-	Platform             string
-	Options              string
+	AppID                string `env:"app_id"`
+	BundleID             string `env:"bundle_id"`
+	SubmitForReview      string `env:"submit_for_review,opt[yes,no]"`
+	SkipMetadata         string `env:"skip_metadata,opt[yes,no]"`
+	SkipScreenshots      string `env:"skip_screenshots,opt[yes,no]"`
+	SkipAppVersionUpdate string `env:"skip_app_version_update,opt[yes,no]"`
+	TeamID               string `env:"team_id"`
+	TeamName             string `env:"team_name"`
+	Platform             string `env:"platform,opt[ios,osx,appletvos]"`
+	Options              string `env:"options"`
 
-	GemfilePath     string
-	FastlaneVersion string
-	ITMSParameters  string
-}
-
-func createConfigsModelFromEnvs() ConfigsModel {
-	return ConfigsModel{
-		IpaPath: os.Getenv("ipa_path"),
-		PkgPath: os.Getenv("pkg_path"),
-
-		ItunesconUser: os.Getenv("itunescon_user"),
-		Password:      os.Getenv("password"),
-		AppPassword:   os.Getenv("app_password"),
-
-		AppID:                os.Getenv("app_id"),
-		BundleID:             os.Getenv("bundle_id"),
-		SubmitForReview:      os.Getenv("submit_for_review"),
-		SkipMetadata:         os.Getenv("skip_metadata"),
-		SkipScreenshots:      os.Getenv("skip_screenshots"),
-		SkipAppVersionUpdate: os.Getenv("skip_app_version_update"),
-		TeamID:               os.Getenv("team_id"),
-		TeamName:             os.Getenv("team_name"),
-		Platform:             os.Getenv("platform"),
-		Options:              os.Getenv("options"),
-
-		GemfilePath:     os.Getenv("gemfile_path"),
-		FastlaneVersion: os.Getenv("fastlane_version"),
-		ITMSParameters:  os.Getenv("itms_upload_parameters"),
-	}
-}
-
-func (configs ConfigsModel) print() {
-	log.Infof("Configs:")
-
-	log.Printf("- IpaPath: %s", configs.IpaPath)
-	log.Printf("- PkgPath: %s", configs.PkgPath)
-
-	log.Printf("- ItunesconUser: %s", configs.ItunesconUser)
-	log.Printf("- Password: %s", input.SecureInput(configs.Password))
-	log.Printf("- AppPassword: %s", input.SecureInput(configs.AppPassword))
-
-	log.Printf("- AppID: %s", configs.AppID)
-	log.Printf("- BundleID: %s", configs.BundleID)
-	log.Printf("- SubmitForReview: %s", configs.SubmitForReview)
-	log.Printf("- SkipMetadata: %s", configs.SkipMetadata)
-	log.Printf("- SkipScreenshots: %s", configs.SkipScreenshots)
-	log.Printf("- SkipAppVersionUpdate: %s", configs.SkipAppVersionUpdate)
-	log.Printf("- TeamID: %s", configs.TeamID)
-	log.Printf("- TeamName: %s", configs.TeamName)
-	log.Printf("- Platform: %s", configs.Platform)
-	log.Printf("- Options: %s", configs.Options)
-
-	log.Printf("- GemfilePath: %s", configs.GemfilePath)
-	log.Printf("- FastlaneVersion: %s", configs.FastlaneVersion)
-	log.Printf("- ITMSParameters: %s", configs.ITMSParameters)
-}
-
-func (configs ConfigsModel) validate() error {
-	if configs.IpaPath == "" && configs.PkgPath == "" {
-		return errors.New("no IpaPath nor PkgPath parameter specified")
-	}
-
-	if configs.IpaPath != "" {
-		if err := input.ValidateIfPathExists(configs.IpaPath); err != nil {
-			return fmt.Errorf("IpaPath %s", err)
-		}
-	}
-
-	if configs.PkgPath != "" {
-		if err := input.ValidateIfPathExists(configs.PkgPath); err != nil {
-			return fmt.Errorf("PkgPath %s", err)
-		}
-	}
-
-	if err := input.ValidateIfNotEmpty(configs.ItunesconUser); err != nil {
-		return fmt.Errorf("ItunesconUser %s", err)
-	}
-
-	if err := input.ValidateIfNotEmpty(configs.Password); err != nil {
-		return fmt.Errorf("Password %s", err)
-	}
-
-	if configs.AppID == "" && configs.BundleID == "" {
-		return errors.New("no AppID or BundleID parameter specified")
-	}
-
-	if err := input.ValidateWithOptions(configs.SubmitForReview, "yes", "no"); err != nil {
-		return fmt.Errorf("SubmitForReview, %s", err)
-	}
-
-	if err := input.ValidateWithOptions(configs.SkipMetadata, "yes", "no"); err != nil {
-		return fmt.Errorf("SkipMetadata, %s", err)
-	}
-
-	if err := input.ValidateWithOptions(configs.SkipScreenshots, "yes", "no"); err != nil {
-		return fmt.Errorf("SkipScreenshots, %s", err)
-	}
-
-	if err := input.ValidateWithOptions(configs.SkipAppVersionUpdate, "yes", "no"); err != nil {
-		return fmt.Errorf("SkipAppVersionUpdate, %s", err)
-	}
-
-	if err := input.ValidateWithOptions(configs.Platform, "ios", "osx", "appletvos"); err != nil {
-		return fmt.Errorf("Platform, %s", err)
-	}
-
-	return nil
+	GemfilePath     string `env:"gemfile_path"`
+	FastlaneVersion string `env:"fastlane_version"`
+	ITMSParameters  string `env:"itms_upload_parameters"`
 }
 
 func fail(format string, v ...interface{}) {
@@ -305,13 +200,21 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 }
 
 func main() {
-	configs := createConfigsModelFromEnvs()
-
-	fmt.Println()
-	configs.print()
-
-	if err := configs.validate(); err != nil {
+	var configs Configs
+	if err := stepconf.Parse(&configs); err != nil {
 		fail("Issue with input: %s", err)
+	}
+
+	stepconf.Print(configs)
+
+	//
+	// Validate inputs
+	if configs.IpaPath == "" && configs.PkgPath == "" {
+		fail("no IpaPath nor PkgPath parameter specified")
+	}
+
+	if configs.AppID == "" && configs.BundleID == "" {
+		fail("no AppID or BundleID parameter specified")
 	}
 
 	//
@@ -389,11 +292,11 @@ This means that when the API changes
 	}
 
 	envs := []string{
-		fmt.Sprintf("DELIVER_PASSWORD=%s", configs.Password),
+		fmt.Sprintf("DELIVER_PASSWORD=%s", string(configs.Password)),
 	}
 
-	if configs.AppPassword != "" {
-		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", configs.AppPassword))
+	if string(configs.AppPassword) != "" {
+		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", string(configs.AppPassword)))
 	}
 
 	if configs.ITMSParameters != "" {

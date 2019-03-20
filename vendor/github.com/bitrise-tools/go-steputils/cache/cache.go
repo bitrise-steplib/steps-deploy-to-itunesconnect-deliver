@@ -37,11 +37,7 @@ func (cache *Cache) Commit() error {
 	if err != nil {
 		return err
 	}
-	err = appendCacheIgnoreItem(cache.exclude)
-	if err != nil {
-		return err
-	}
-	return nil
+	return appendCacheIgnoreItem(cache.exclude)
 }
 
 func appendCacheItem(values []string) error {
@@ -57,8 +53,5 @@ func combineEnvContent(envVar string, values []string) error {
 
 	content += "\n" + strings.Join(values, "\n") + "\n"
 
-	if err := tools.ExportEnvironmentWithEnvman(envVar, content); err != nil {
-		return err
-	}
-	return nil
+	return tools.ExportEnvironmentWithEnvman(envVar, content)
 }
