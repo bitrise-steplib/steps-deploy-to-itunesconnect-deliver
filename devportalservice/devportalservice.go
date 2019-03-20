@@ -1,13 +1,14 @@
 package devportalservice
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/bitrise-io/go-utils/log"
 )
@@ -33,25 +34,17 @@ type cookie struct {
 	ForDomain *bool  `json:"for_domain,omitempty"`
 }
 
-const cookieTemplate = `- !ruby/object:HTTP::Cookie
-  name: <NAME>
-  value: <VALUE>
-  domain: <DOMAIN>
-  for_domain: <FOR_DOMAIN>
-  path: "<PATH>"
-`
-
 // SessionData will fetch the session from Bitrise for the connected Apple developer account
 // If the BITRISE_PORTAL_DATA_JSON is provided (for debug purposes) it will use that instead.
-func SessionData() (string, error) {
+func SessionData() (string, []error) {
 	p, err := getDeveloperPortalData(os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN"))
 	if err != nil {
-		return "", err
+		return "", []error{err}
 	}
 
-	cookies := convertDesCookie(p.SessionCookies["https://idmsa.apple.com"])
+	cookies, errors := convertDesCookie(p.SessionCookies["https://idmsa.apple.com"])
 	session := strings.Join(cookies, "")
-	return session, nil
+	return session, errors
 }
 
 func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) {
@@ -83,8 +76,9 @@ func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) 
 	return p, nil
 }
 
-func convertDesCookie(cookies []cookie) []string {
+func convertDesCookie(cookies []cookie) ([]string, []error) {
 	var convertedCookies []string
+	var errors []error
 	for _, c := range cookies {
 		if convertedCookies == nil {
 			convertedCookies = append(convertedCookies, "---"+"\n")
@@ -95,16 +89,29 @@ func convertDesCookie(cookies []cookie) []string {
 			c.ForDomain = &b
 		}
 
-		convertedCookie := strings.Replace(cookieTemplate, "<NAME>", c.Name, 1)
-		convertedCookie = strings.Replace(convertedCookie, "<VALUE>", c.Value, 1)
-		convertedCookie = strings.Replace(convertedCookie, "<DOMAIN>", c.Domain, 1)
-		convertedCookie = strings.Replace(convertedCookie, "<FOR_DOMAIN>", strconv.FormatBool(*c.ForDomain), 1)
-		convertedCookie = strings.Replace(convertedCookie, "<PATH>", c.Path, 1)
+		tmpl, err := template.New("").Parse(`- !ruby/object:HTTP::Cookie
+  name: {{.Name}}
+  value: {{.Value}}
+  domain: {{.Domain}}
+  for_domain: {{.ForDomain}}
+  path: "{{.Path}}"
+`)
+		if err != nil {
+			errors = append(errors, fmt.Errorf("Failed to create golang template for the cookie: %v", c))
+			continue
+		}
 
-		convertedCookies = append(convertedCookies, convertedCookie+"\n")
+		var b bytes.Buffer
+		err = tmpl.Execute(&b, c)
+		if err != nil {
+			errors = append(errors, fmt.Errorf("Failed to parse cookie: %v", c))
+			continue
+		}
+
+		convertedCookies = append(convertedCookies, b.String()+"\n")
 	}
 
-	return convertedCookies
+	return convertedCookies, errors
 }
 
 func performRequest(req *http.Request, requestResponse interface{}) ([]byte, error) {

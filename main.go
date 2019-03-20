@@ -222,9 +222,12 @@ func main() {
 	fmt.Println()
 	log.Infof("Ensure cookies for Apple Developer Portal")
 
-	fs, err := devportalservice.SessionData()
-	if err != nil {
-		log.Warnf("Failed to get the session for the Apple Developer Portal, error: %s", err)
+	fs, errors := devportalservice.SessionData()
+	if errors != nil {
+		log.Warnf("Failed to get the session for the Apple Developer Portal, errors:")
+		for _, err := range errors {
+			log.Errorf("%s\n", err)
+		}
 	} else {
 		if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", fs); err != nil {
 			fail("Failed to export FASTLANE_SESSION, error: %s", err)
