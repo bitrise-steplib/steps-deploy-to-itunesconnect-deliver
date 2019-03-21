@@ -295,15 +295,15 @@ This means that when the API changes
 	}
 
 	envs := []string{
-		fmt.Sprintf("DELIVER_PASSWORD=%s", string(cfg.Password)),
+		"DELIVER_PASSWORD=" + string(cfg.Password),
 	}
 
 	if string(cfg.AppPassword) != "" {
-		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", string(cfg.AppPassword)))
+		envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+string(cfg.AppPassword))
 	}
 
 	if cfg.ITMSParameters != "" {
-		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", cfg.ITMSParameters))
+		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
 	}
 
 	args := []string{
