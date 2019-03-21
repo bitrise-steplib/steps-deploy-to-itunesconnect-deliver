@@ -21,8 +21,8 @@ import (
 	"github.com/kballard/go-shellquote"
 )
 
-// Configs ...
-type Configs struct {
+// configs ...
+type configs struct {
 	IpaPath string `env:"ipa_path"`
 	PkgPath string `env:"pkg_path"`
 
@@ -200,21 +200,21 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 }
 
 func main() {
-	var configs Configs
-	if err := stepconf.Parse(&configs); err != nil {
+	var cfg configs
+	if err := stepconf.Parse(&cfg); err != nil {
 		fail("Issue with input: %s", err)
 	}
 
-	stepconf.Print(configs)
+	stepconf.Print(cfg)
 
 	//
 	// Validate inputs
-	if configs.IpaPath == "" && configs.PkgPath == "" {
-		fail("no IpaPath nor PkgPath parameter specified")
+	if cfg.IpaPath == "" && cfg.PkgPath == "" {
+		fail("Issue with input: no IpaPath nor PkgPath parameter specified")
 	}
 
-	if configs.AppID == "" && configs.BundleID == "" {
-		fail("no AppID or BundleID parameter specified")
+	if cfg.AppID == "" && cfg.BundleID == "" {
+		fail("Issue with input: no AppID or BundleID parameter specified")
 	}
 
 	//
@@ -224,7 +224,7 @@ func main() {
 
 	fs, errors := devportalservice.SessionData()
 	if errors != nil {
-		log.Warnf("Failed to activate the Bitrise Apple Developer Portal connection: %s\nRead more: https://devcenter.bitrise.io/getting-started/signing-up/connecting-apple-dev-account/\n\nerrors:")
+		log.Warnf("Failed to activate the Bitrise Apple Developer Portal connection: %s\nRead more: https://devcenter.bitrise.io/getting-started/signing-up/connecting-apple-dev-account/\nerrors:")
 		for _, err := range errors {
 			log.Errorf("%s\n", err)
 		}
@@ -247,7 +247,7 @@ func main() {
 
 	startTime := time.Now()
 
-	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(configs.FastlaneVersion, configs.GemfilePath)
+	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(cfg.FastlaneVersion, cfg.GemfilePath)
 	if err != nil {
 		fail("Failed to ensure fastlane version, error: %s", err)
 	}
@@ -286,89 +286,89 @@ This means that when the API changes
 	fmt.Println()
 
 	options := []string{}
-	if configs.Options != "" {
-		opts, err := shellquote.Split(configs.Options)
+	if cfg.Options != "" {
+		opts, err := shellquote.Split(cfg.Options)
 		if err != nil {
-			fail("Failed to split options (%s), error: %s", configs.Options, err)
+			fail("Failed to split options (%s), error: %s", cfg.Options, err)
 		}
 		options = opts
 	}
 
 	envs := []string{
-		fmt.Sprintf("DELIVER_PASSWORD=%s", string(configs.Password)),
+		fmt.Sprintf("DELIVER_PASSWORD=%s", string(cfg.Password)),
 	}
 
-	if string(configs.AppPassword) != "" {
-		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", string(configs.AppPassword)))
+	if string(cfg.AppPassword) != "" {
+		envs = append(envs, fmt.Sprintf("FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD=%s", string(cfg.AppPassword)))
 	}
 
-	if configs.ITMSParameters != "" {
-		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", configs.ITMSParameters))
+	if cfg.ITMSParameters != "" {
+		envs = append(envs, fmt.Sprintf("DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS=%s", cfg.ITMSParameters))
 	}
 
 	args := []string{
 		"deliver",
-		"--username", configs.ItunesconUser,
+		"--username", cfg.ItunesconUser,
 	}
 
-	if configs.AppID != "" {
-		args = append(args, "--app", configs.AppID)
+	if cfg.AppID != "" {
+		args = append(args, "--app", cfg.AppID)
 
 		//warn user if BundleID is also set
-		if configs.BundleID != "" {
+		if cfg.BundleID != "" {
 			log.Warnf("AppID parameter specified, BundleID will be ignored")
 		}
-	} else if configs.BundleID != "" {
-		args = append(args, "--app_identifier", configs.BundleID)
+	} else if cfg.BundleID != "" {
+		args = append(args, "--app_identifier", cfg.BundleID)
 	}
 
-	if configs.TeamName != "" {
-		args = append(args, "--team_name", configs.TeamName)
+	if cfg.TeamName != "" {
+		args = append(args, "--team_name", cfg.TeamName)
 
 		//warn user if TeamID is also set
-		if configs.TeamID != "" {
+		if cfg.TeamID != "" {
 			log.Warnf("TeamName parameter specified, TeamID will be ignored")
 		}
-	} else if configs.TeamID != "" {
-		args = append(args, "--team_id", configs.TeamID)
+	} else if cfg.TeamID != "" {
+		args = append(args, "--team_id", cfg.TeamID)
 	}
 
-	if configs.IpaPath != "" {
-		tmpIpaPath, err := normalizeArtifactPath(configs.IpaPath)
+	if cfg.IpaPath != "" {
+		tmpIpaPath, err := normalizeArtifactPath(cfg.IpaPath)
 		if err != nil {
-			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(configs.IpaPath), err)
-			tmpIpaPath = configs.IpaPath
+			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(cfg.IpaPath), err)
+			tmpIpaPath = cfg.IpaPath
 		}
 		args = append(args, "--ipa", tmpIpaPath)
 
-	} else if configs.PkgPath != "" {
-		tmpPkgPath, err := normalizeArtifactPath(configs.PkgPath)
+	} else if cfg.PkgPath != "" {
+		tmpPkgPath, err := normalizeArtifactPath(cfg.PkgPath)
 		if err != nil {
-			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(configs.PkgPath), err)
-			tmpPkgPath = configs.PkgPath
+			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(cfg.PkgPath), err)
+			tmpPkgPath = cfg.PkgPath
 		}
 		args = append(args, "--pkg", tmpPkgPath)
 	}
 
-	if configs.SkipScreenshots == "yes" {
+	if cfg.SkipScreenshots == "yes" {
 		args = append(args, "--skip_screenshots")
 	}
 
-	if configs.SkipMetadata == "yes" {
+	if cfg.SkipMetadata == "yes" {
 		args = append(args, "--skip_metadata")
 	}
 
-	if configs.SkipAppVersionUpdate == "yes" {
+	if cfg.SkipAppVersionUpdate == "yes" {
 		args = append(args, "--skip_app_version_update")
 	}
 
 	args = append(args, "--force")
 
-	if configs.SubmitForReview == "yes" {
+	if cfg.SubmitForReview == "yes" {
 		args = append(args, "--submit_for_review")
 	}
 
-	args = append(args, "--platform", configs.Platform)
+	args = append(args, "--platform", cfg.Platform)
 
 	args = append(args, options...)
 
