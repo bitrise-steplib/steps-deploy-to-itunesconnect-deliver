@@ -276,7 +276,8 @@ to something with only
 alphanumeric characters.`)
 	fmt.Println()
 
-	log.Printf(`**Be advised** log.Printf(that this
+	log.Printf(`**Be advised**
+that this
 step uses a well maintained, open source tool which
 uses *undocumented and unsupported APIs* (because the current
 iTunes Connect platform does not have a documented and supported API)
