@@ -71,7 +71,7 @@ func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) 
 	req.Header.Add("BUILD_API_TOKEN", buildAPIToken)
 
 	if _, err := performRequest(req, &p); err != nil {
-		return portalData{}, fmt.Errorf("Falied to fetch portal data from Bitrise, error: %s", err)
+		return portalData{}, fmt.Errorf("Failed to fetch portal data from Bitrise, error: %s", err)
 	}
 	return p, nil
 }
