@@ -3,11 +3,23 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3d1f26976b10ce0ceeb2becfbe785f4b7c5317abeb3941a758c0744eb661acf6"
+  digest = "1:83cf8830861be653ba3064b3b16c797aa808fd42be1cc1483b965783da9a1106"
+  name = "github.com/bitrise-io/go-steputils"
+  packages = [
+    "stepconf",
+    "tools",
+  ]
+  pruneopts = ""
+  revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
+
+[[projects]]
+  branch = "TOOL-494-bundler-commands"
+  digest = "1:0dba1ff6ff7e8ddea594677e9b7444fcbbb0e4715a4c44de62ed277392bb45a2"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
     "command",
+    "command/gems",
     "command/rubycommand",
     "errorutil",
     "fileutil",
@@ -18,39 +30,38 @@
     "retry",
   ]
   pruneopts = ""
-  revision = "4ea9c35054b7f8cce3940bf73b5dcd395e9c9226"
+  revision = "572316d92ea0177ebff73b959f5d25152f00914e"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3511df2e558e2755b01ce5670ddc536fa031e63e5b4974bb0f35aac53704f06e"
-  name = "github.com/bitrise-tools/go-steputils"
-  packages = [
-    "stepconf",
-    "tools",
-  ]
+  digest = "1:30cc490da12a847b44fc2de5c75f10fe6ca57c59b6f0517e38bea84c6118b3b5"
+  name = "github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver"
+  packages = ["devportalservice"]
   pruneopts = ""
-  revision = "ec226b2359fcd806be64f0ad2217d8e741a1ff11"
+  revision = "b975f2436eb701dfc2328aa9ae3f96c658c0206d"
+  version = "2.15.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:60933a9b794dd76601b4ef174ecc399339460c6484926f643189fd66eb5e3f3c"
+  digest = "1:63e7368fcf6b54804076eaec26fd9cf0c4466166b272393db4b93102e1e962df"
   name = "github.com/kballard/go-shellquote"
   packages = ["."]
   pruneopts = ""
-  revision = "cd60e84ee657ff3dc51de0b4f55dd299a3e136f2"
+  revision = "95032a82bc518f77982ea72343cc1ade730072f0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/bitrise-io/go-steputils/stepconf",
+    "github.com/bitrise-io/go-steputils/tools",
     "github.com/bitrise-io/go-utils/command",
+    "github.com/bitrise-io/go-utils/command/gems",
     "github.com/bitrise-io/go-utils/command/rubycommand",
     "github.com/bitrise-io/go-utils/fileutil",
     "github.com/bitrise-io/go-utils/log",
     "github.com/bitrise-io/go-utils/pathutil",
     "github.com/bitrise-io/go-utils/retry",
-    "github.com/bitrise-tools/go-steputils/stepconf",
-    "github.com/bitrise-tools/go-steputils/tools",
+    "github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/devportalservice",
     "github.com/kballard/go-shellquote",
   ]
   solver-name = "gps-cdcl"

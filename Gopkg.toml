@@ -1,10 +1,6 @@
-[[constraint]]
+[[override]]
   name = "github.com/bitrise-io/go-utils"
-  branch = "master"
-
-[[constraint]]
-  name = "github.com/bitrise-tools/go-steputils"
-  branch = "master"
+  branch = "TOOL-494-bundler-commands"
 
 [[constraint]]
   name = "github.com/kballard/go-shellquote"
