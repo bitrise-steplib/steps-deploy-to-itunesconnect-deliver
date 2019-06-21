@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/gems"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
@@ -15,8 +17,6 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
-	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -129,48 +129,9 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	} else if !exist {
 		log.Printf("Gemfile.lock not exist at: %s, running 'bundle install' ...", gemfileLockPth)
 
-		content, err := fileutil.ReadStringFromFile(gemfileLockPth)
-		if err != nil {
-			return nil, "", fmt.Errorf("failed to read file (%s) contents, error: %s", gemfileLockPth, err)
-		}
-
-		bundlerVersion, err := gems.ParseBundlerVersion(content)
-		if err != nil {
-			return nil, "", fmt.Errorf("failed to parse bundler version form cocoapods, error: %s", err)
-		}
-
-		fmt.Println()
-		log.Infof("Installing bundler")
-
-		// install bundler with `gem install bundler [-v version]`
-		// in some configurations, the command "bunder _1.2.3_" can return 'Command not found', installing bundler solves this
-		installBundlerCommand := gems.InstallBundlerCommand(bundlerVersion)
-		installBundlerCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
-		installBundlerCommand.SetDir(gemfileDir)
-
-		log.Donef("$ %s", installBundlerCommand.PrintableCommandArgs())
-		fmt.Println()
-
-		if err := installBundlerCommand.Run(); err != nil {
-			return nil, "", fmt.Errorf("command failed, error: %s", err)
-		}
-
-		// install Gemfile.lock gems with `bundle [_version_] install ...`
-		fmt.Println()
-		log.Infof("Installing cocoapods with bundler")
-
-		cmd, err := gems.BundleInstallCommand(bundlerVersion)
-		if err != nil {
-			return nil, "", fmt.Errorf("failed to create bundle command model, error: %s", err)
-		}
-		cmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
-		cmd.SetDir(gemfileDir)
-
-		log.Donef("$ %s", cmd.PrintableCommandArgs())
-		fmt.Println()
-
+		cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
 		if err := cmd.Run(); err != nil {
-			return nil, "", fmt.Errorf("command failed, error: %s", err)
+			return nil, "", err
 		}
 
 		bundleInstallCalled = true
@@ -190,14 +151,54 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	if fastlane.Found {
 		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlane.Version)
 
+		var bundlerVersion gems.Version
 		if !bundleInstallCalled {
-			cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+			content, err := fileutil.ReadStringFromFile(gemfileLockPth)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to read file (%s) contents, error: %s", gemfileLockPth, err)
+			}
+
+			bundlerVersion, err = gems.ParseBundlerVersion(content)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to parse bundler version, error: %s", err)
+			}
+
+			fmt.Println()
+			log.Infof("Installing bundler")
+
+			// install bundler with `gem install bundler [-v version]`
+			// in some configurations, the command "bunder _1.2.3_" can return 'Command not found', installing bundler solves this
+			installBundlerCommand := gems.InstallBundlerCommand(bundlerVersion)
+			installBundlerCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
+			installBundlerCommand.SetDir(gemfileDir)
+
+			log.Donef("$ %s", installBundlerCommand.PrintableCommandArgs())
+			fmt.Println()
+
+			if err := installBundlerCommand.Run(); err != nil {
+				return nil, "", fmt.Errorf("command failed, error: %s", err)
+			}
+
+			// install Gemfile.lock gems with `bundle [_version_] install ...`
+			fmt.Println()
+			log.Infof("Installing bundle")
+
+			cmd, err := gems.BundleInstallCommand(bundlerVersion)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to create bundle command model, error: %s", err)
+			}
+			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
+			cmd.SetDir(gemfileDir)
+
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
+			fmt.Println()
+
 			if err := cmd.Run(); err != nil {
-				return nil, "", err
+				return nil, "", fmt.Errorf("command failed, error: %s", err)
 			}
 		}
 
-		return []string{"bundle", "exec", "fastlane"}, gemfileDir, nil
+		return append(gems.BundleExecPrefix(bundlerVersion), "fastlane"), gemfileDir, nil
 	}
 
 	log.Printf("fastlane version not found in Gemfile.lock, using system installed fastlane...")
