@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/command/gems"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
@@ -162,9 +163,51 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	} else if !exist {
 		log.Printf("Gemfile.lock not exist at: %s, running 'bundle install' ...", gemfileLockPth)
 
-		cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+		content, err := fileutil.ReadStringFromFile(gemfileLockPth)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to read file (%s) contents, error: %s", gemfileLockPth, err)
+		}
+
+		bundlerVersion, err := gems.ParseBundlerVersion(content)
+		if err != nil {
+			return nil, "", fmt.Errorf("Failed to parse bundler version form cocoapods, error: %s", err)
+		}
+
+		fmt.Println()
+		log.Infof("Installing bundler")
+
+		// install bundler with `gem install bundler [-v version]`
+		// in some configurations, the command "bunder _1.2.3_" can return 'Command not found', installing bundler solves this
+		installBundlerCommand, err := gems.InstallBundlerCommand(bundlerVersion)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to create command, error: %s", err)
+		}
+		installBundlerCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
+		installBundlerCommand.SetDir(gemfileDir)
+
+		log.Donef("$ %s", installBundlerCommand.PrintableCommandArgs())
+		fmt.Println()
+
+		if err := installBundlerCommand.Run(); err != nil {
+			return nil, "", fmt.Errorf("command failed, error: %s", err)
+		}
+
+		// install Gemfile.lock gems with `bundle [_version_] install ...`
+		fmt.Println()
+		log.Infof("Installing cocoapods with bundler")
+
+		cmd, err := gems.BundleInstallCommand(bundlerVersion)
+		if err != nil {
+			return nil, "", fmt.Errorf("failed to create bundle command model, error: %s", err)
+		}
+		cmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
+		cmd.SetDir(gemfileDir)
+
+		log.Donef("$ %s", cmd.PrintableCommandArgs())
+		fmt.Println()
+
 		if err := cmd.Run(); err != nil {
-			return nil, "", err
+			return nil, "", fmt.Errorf("Command failed, error: %s", err)
 		}
 
 		bundleInstallCalled = true
