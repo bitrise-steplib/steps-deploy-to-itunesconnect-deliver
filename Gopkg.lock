@@ -3,18 +3,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:83cf8830861be653ba3064b3b16c797aa808fd42be1cc1483b965783da9a1106"
+  digest = "1:e875a94349b121ca6fa86bd72f7593f7f0e6f0d07a7d664f31fc000d80eaeec3"
   name = "github.com/bitrise-io/go-steputils"
   packages = [
     "stepconf",
     "tools",
   ]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
 
 [[projects]]
-  branch = "TOOL-494-bundler-commands"
-  digest = "1:0dba1ff6ff7e8ddea594677e9b7444fcbbb0e4715a4c44de62ed277392bb45a2"
+  branch = "master"
+  digest = "1:d881e8eeefabad370f59c1a2b7f3f851a49b1038420789e5ee5f11cf8e587126"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -29,23 +29,15 @@
     "pointers",
     "retry",
   ]
-  pruneopts = ""
-  revision = "572316d92ea0177ebff73b959f5d25152f00914e"
-
-[[projects]]
-  digest = "1:30cc490da12a847b44fc2de5c75f10fe6ca57c59b6f0517e38bea84c6118b3b5"
-  name = "github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver"
-  packages = ["devportalservice"]
-  pruneopts = ""
-  revision = "b975f2436eb701dfc2328aa9ae3f96c658c0206d"
-  version = "2.15.0"
+  pruneopts = "UT"
+  revision = "12d92d0c7b75b6925108e6420eb9b3fabf67db03"
 
 [[projects]]
   branch = "master"
-  digest = "1:63e7368fcf6b54804076eaec26fd9cf0c4466166b272393db4b93102e1e962df"
+  digest = "1:400e113a367b511b9b09ca642ee11d9885485a93838526d697033af334a2fdde"
   name = "github.com/kballard/go-shellquote"
   packages = ["."]
-  pruneopts = ""
+  pruneopts = "UT"
   revision = "95032a82bc518f77982ea72343cc1ade730072f0"
 
 [solve-meta]
@@ -61,7 +53,6 @@
     "github.com/bitrise-io/go-utils/log",
     "github.com/bitrise-io/go-utils/pathutil",
     "github.com/bitrise-io/go-utils/retry",
-    "github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/devportalservice",
     "github.com/kballard/go-shellquote",
   ]
   solver-name = "gps-cdcl"

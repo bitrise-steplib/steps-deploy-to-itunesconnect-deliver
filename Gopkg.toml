@@ -1,7 +1,16 @@
-[[override]]
-  name = "github.com/bitrise-io/go-utils"
-  branch = "TOOL-494-bundler-commands"
 
 [[constraint]]
-  name = "github.com/kballard/go-shellquote"
   branch = "master"
+  name = "github.com/bitrise-io/go-steputils"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/bitrise-io/go-utils"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/kballard/go-shellquote"
+
+[prune]
+  go-tests = true
+  unused-packages = true
