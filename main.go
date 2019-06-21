@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/bitrise-io/go-utils/command"
@@ -17,8 +15,8 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/devportalservice"
-	"github.com/bitrise-tools/go-steputils/stepconf"
-	"github.com/bitrise-tools/go-steputils/tools"
+	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -66,12 +64,12 @@ func gemInstallWithRetry(gemName string, version string) error {
 
 		cmds, err := rubycommand.GemInstall(gemName, versionToInstall)
 		if err != nil {
-			return fmt.Errorf("Failed to create command, error: %s", err)
+			return fmt.Errorf("failed to create command, error: %s", err)
 		}
 
 		for _, cmd := range cmds {
 			if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-				return fmt.Errorf("Gem install failed, output: %s, error: %s", out, err)
+				return fmt.Errorf("gem install command failed, output: %s, error: %s", out, err)
 			}
 		}
 
@@ -79,44 +77,12 @@ func gemInstallWithRetry(gemName string, version string) error {
 	})
 }
 
-func gemVersionFromGemfileLockContent(gem, content string) string {
-	relevantLines := []string{}
-	lines := strings.Split(content, "\n")
-
-	specsStart := false
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			break
-		}
-
-		if trimmed == "specs:" {
-			specsStart = true
-			continue
-		}
-
-		if specsStart {
-			relevantLines = append(relevantLines, trimmed)
-		}
-	}
-
-	exp := regexp.MustCompile(fmt.Sprintf(`^%s \((.+)\)`, gem))
-	for _, line := range relevantLines {
-		match := exp.FindStringSubmatch(line)
-		if match != nil && len(match) == 2 {
-			return match[1]
-		}
-	}
-
-	return ""
-}
-
-func gemVersionFromGemfileLock(gem, gemfileLockPth string) (string, error) {
+func gemVersionFromGemfileLock(gem, gemfileLockPth string) (gems.Version, error) {
 	content, err := fileutil.ReadStringFromFile(gemfileLockPth)
 	if err != nil {
-		return "", err
+		return gems.Version{}, err
 	}
-	return gemVersionFromGemfileLockContent(gem, content), nil
+	return gems.ParseVersionFromBundle(gem, content)
 }
 
 func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]string, string, error) {
@@ -170,7 +136,7 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 
 		bundlerVersion, err := gems.ParseBundlerVersion(content)
 		if err != nil {
-			return nil, "", fmt.Errorf("Failed to parse bundler version form cocoapods, error: %s", err)
+			return nil, "", fmt.Errorf("failed to parse bundler version form cocoapods, error: %s", err)
 		}
 
 		fmt.Println()
@@ -207,7 +173,7 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 		fmt.Println()
 
 		if err := cmd.Run(); err != nil {
-			return nil, "", fmt.Errorf("Command failed, error: %s", err)
+			return nil, "", fmt.Errorf("command failed, error: %s", err)
 		}
 
 		bundleInstallCalled = true
@@ -215,17 +181,17 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 		if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
 			return nil, "", err
 		} else if !exist {
-			return nil, "", errors.New("Gemfile.lock does not exist, even 'bundle install' was called")
+			return nil, "", errors.New("gemfile.lock does not exist, even 'bundle install' was called")
 		}
 	}
 
-	fastlaneVersion, err := gemVersionFromGemfileLock("fastlane", gemfileLockPth)
+	fastlane, err := gemVersionFromGemfileLock("fastlane", gemfileLockPth)
 	if err != nil {
 		return nil, "", err
 	}
 
-	if fastlaneVersion != "" {
-		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlaneVersion)
+	if fastlane.Found {
+		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlane.Version)
 
 		if !bundleInstallCalled {
 			cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
