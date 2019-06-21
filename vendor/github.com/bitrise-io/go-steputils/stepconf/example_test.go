@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bitrise-tools/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/stepconf"
 )
 
 type config struct {

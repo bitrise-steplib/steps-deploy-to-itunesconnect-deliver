@@ -8,7 +8,7 @@ import (
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/ziputil"
-	"github.com/bitrise-tools/go-steputils/tools"
+	"github.com/bitrise-io/go-steputils/tools"
 )
 
 // ExportOutputDir ...

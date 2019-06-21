@@ -1,0 +1,111 @@
+format_version: 7
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+  - SAMPLE_APP_URL: https://github.com/bitrise-samples/sample-apps-itunes-connect-beta-test.git
+  - BRANCH: master
+  - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
+  - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
+  - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
+
+  # define these in your .bitrise.secrets.yml
+  - BITRISE_BUILD_NUMBER: $BITRISE_BUILD_NUMBER
+  - BITRISE_BUILD_VERSION_OFFSET: $BITRISE_BUILD_VERSION_OFFSET
+
+  - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
+  - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+  - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+  - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
+
+workflows:
+  # ----------------------------------------------------------------
+  # --- workflow to Step Test
+  ci:
+    before_run:
+    - audit-this-step
+    steps:
+    - go-list:
+    - golint:
+    - errcheck:
+    - go-test:
+    after_run:
+    - test
+
+  test:
+    steps:
+    - script:
+        inputs:
+        - content: rm -rf ./_tmp
+    - change-workdir:
+        run_if: true
+        inputs:
+        - path: ./_tmp
+        - is_create_path: true
+    - script:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            if [[ -z "${SAMPLE_APP_URL}" ]]; then
+              echo "error: there is no SAMPLE_APP_URL env var specified"
+              exit 1
+            elif [[ -z "${COMMIT}" && -z "${BRANCH}" ]]; then
+              echo "error: can't checkout: there is no BRANCH or COMMIT env var specified"
+              exit 1
+            fi
+            git init
+            git remote add origin "${SAMPLE_APP_URL}"
+            git fetch || exit 1
+            [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
+    - ios-auto-provision@1.3.1:
+        inputs:
+        - generate_profiles: 'yes'
+        - distribution_type: app-store
+    - set-xcode-build-number:
+        title: Set Build Number
+        run_if: true
+        inputs:
+        - build_version: $BITRISE_BUILD_NUMBER
+        - plist_path: $INFO_PLIST_PATH
+        - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
+    - xcode-archive:
+        title: Create Archive
+        inputs:
+        - output_dir: $BITRISE_DEPLOY_DIR
+        - project_path: $BITRISE_PROJECT_PATH
+        - export_method: app-store
+    - path::./:
+        title: Step Test
+        inputs:
+        - itunescon_user: $ITUNES_CONNECT_USER
+        - password: $ITUNES_CONNECT_PASSWORD
+        - team_id: $ITUNES_CONNECT_TEAM_ID
+        - app_id: $ITUNES_CONNECT_APP_ID
+
+  # ----------------------------------------------------------------
+  # --- Utility workflows
+  dep-update:
+    title: Dep update
+    description: |
+      Used for updating bitrise dependencies with dep
+    steps:
+    - script:
+        title: Dependency update
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            go get -u -v github.com/golang/dep/cmd/dep
+            dep ensure -v
+            dep ensure -v -update
+
+  # ----------------------------------------------------------------
+  # --- workflows to Share this step into a Step Library
+  audit-this-step:
+    steps:
+    - script:
+        inputs:
+        - content: |-
+            #!/bin/bash
+            set -ex
+            stepman audit --step-yml ./step.yml

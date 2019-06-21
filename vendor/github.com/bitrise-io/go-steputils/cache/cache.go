@@ -1,6 +1,6 @@
 package cache
 
-import "github.com/bitrise-tools/go-steputils/tools"
+import "github.com/bitrise-io/go-steputils/tools"
 import "os"
 import "strings"
 
