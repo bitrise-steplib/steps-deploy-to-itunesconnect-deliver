@@ -399,7 +399,7 @@ This means that when the API changes
 	}
 
 	log.Donef("Success")
-	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
+	log.Printf("The app (.ipa) was successfully uploaded to [App Store Connect](https://appstoreconnect.apple.com), you should see it in the *Prerelease* section on the app's page!")
 }
 
 func normalizeArtifactPath(pth string) (string, error) {
