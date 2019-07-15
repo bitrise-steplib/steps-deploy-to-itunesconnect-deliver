@@ -9,9 +9,9 @@ description: |-
   * Register an app on the **My Apps** page of iTunes Connect. Click on the *plus sign* and select the **New App** option. This requires an **admin** account.
   * Requires an app signed with **App Store iOS distibution Provisioning Profile**.
   * Every build that you want to push to iTunes Connect must have a **unique build and version number** pair (*increment either or both before a new deploy to iTunes Connect*).
-website: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
-source_code_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
-support_url: https://github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/issues
+website: https://github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver
+source_code_url: https://github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver
+support_url: https://github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/issues
 host_os_tags:
 - "osx-10.10"
 project_type_tags:
@@ -34,7 +34,7 @@ deps:
     bin_name: go
 toolkit:
   go:
-    package_name: github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver
+    package_name: github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver
 inputs:
   - ipa_path: "$BITRISE_IPA_PATH"
     opts:

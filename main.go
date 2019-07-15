@@ -5,19 +5,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
+	"github.com/bitrise-io/go-steputils/stepconf"
+	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
+	"github.com/bitrise-io/go-utils/command/gems"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
-	"github.com/bitrise-io/steps-deploy-to-itunesconnect-deliver/devportalservice"
-	"github.com/bitrise-tools/go-steputils/stepconf"
-	"github.com/bitrise-tools/go-steputils/tools"
+	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -65,12 +64,12 @@ func gemInstallWithRetry(gemName string, version string) error {
 
 		cmds, err := rubycommand.GemInstall(gemName, versionToInstall)
 		if err != nil {
-			return fmt.Errorf("Failed to create command, error: %s", err)
+			return fmt.Errorf("failed to create command, error: %s", err)
 		}
 
 		for _, cmd := range cmds {
 			if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
-				return fmt.Errorf("Gem install failed, output: %s, error: %s", out, err)
+				return fmt.Errorf("gem install command failed, output: %s, error: %s", out, err)
 			}
 		}
 
@@ -78,44 +77,12 @@ func gemInstallWithRetry(gemName string, version string) error {
 	})
 }
 
-func gemVersionFromGemfileLockContent(gem, content string) string {
-	relevantLines := []string{}
-	lines := strings.Split(content, "\n")
-
-	specsStart := false
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" {
-			break
-		}
-
-		if trimmed == "specs:" {
-			specsStart = true
-			continue
-		}
-
-		if specsStart {
-			relevantLines = append(relevantLines, trimmed)
-		}
-	}
-
-	exp := regexp.MustCompile(fmt.Sprintf(`^%s \((.+)\)`, gem))
-	for _, line := range relevantLines {
-		match := exp.FindStringSubmatch(line)
-		if match != nil && len(match) == 2 {
-			return match[1]
-		}
-	}
-
-	return ""
-}
-
-func gemVersionFromGemfileLock(gem, gemfileLockPth string) (string, error) {
+func gemVersionFromGemfileLock(gem, gemfileLockPth string) (gems.Version, error) {
 	content, err := fileutil.ReadStringFromFile(gemfileLockPth)
 	if err != nil {
-		return "", err
+		return gems.Version{}, err
 	}
-	return gemVersionFromGemfileLockContent(gem, content), nil
+	return gems.ParseVersionFromBundle(gem, content)
 }
 
 func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]string, string, error) {
@@ -172,26 +139,66 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 		if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
 			return nil, "", err
 		} else if !exist {
-			return nil, "", errors.New("Gemfile.lock does not exist, even 'bundle install' was called")
+			return nil, "", errors.New("gemfile.lock does not exist, even 'bundle install' was called")
 		}
 	}
 
-	fastlaneVersion, err := gemVersionFromGemfileLock("fastlane", gemfileLockPth)
+	fastlane, err := gemVersionFromGemfileLock("fastlane", gemfileLockPth)
 	if err != nil {
 		return nil, "", err
 	}
 
-	if fastlaneVersion != "" {
-		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlaneVersion)
+	if fastlane.Found {
+		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlane.Version)
 
+		var bundlerVersion gems.Version
 		if !bundleInstallCalled {
-			cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+			content, err := fileutil.ReadStringFromFile(gemfileLockPth)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to read file (%s) contents, error: %s", gemfileLockPth, err)
+			}
+
+			bundlerVersion, err = gems.ParseBundlerVersion(content)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to parse bundler version, error: %s", err)
+			}
+
+			fmt.Println()
+			log.Infof("Installing bundler")
+
+			// install bundler with `gem install bundler [-v version]`
+			// in some configurations, the command "bunder _1.2.3_" can return 'Command not found', installing bundler solves this
+			installBundlerCommand := gems.InstallBundlerCommand(bundlerVersion)
+			installBundlerCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
+			installBundlerCommand.SetDir(gemfileDir)
+
+			log.Donef("$ %s", installBundlerCommand.PrintableCommandArgs())
+			fmt.Println()
+
+			if err := installBundlerCommand.Run(); err != nil {
+				return nil, "", fmt.Errorf("command failed, error: %s", err)
+			}
+
+			// install Gemfile.lock gems with `bundle [_version_] install ...`
+			fmt.Println()
+			log.Infof("Installing bundle")
+
+			cmd, err := gems.BundleInstallCommand(bundlerVersion)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to create bundle command model, error: %s", err)
+			}
+			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
+			cmd.SetDir(gemfileDir)
+
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
+			fmt.Println()
+
 			if err := cmd.Run(); err != nil {
-				return nil, "", err
+				return nil, "", fmt.Errorf("command failed, error: %s", err)
 			}
 		}
 
-		return []string{"bundle", "exec", "fastlane"}, gemfileDir, nil
+		return append(gems.BundleExecPrefix(bundlerVersion), "fastlane"), gemfileDir, nil
 	}
 
 	log.Printf("fastlane version not found in Gemfile.lock, using system installed fastlane...")
@@ -224,7 +231,7 @@ func main() {
 
 	fs, errors := devportalservice.SessionData()
 	if errors != nil {
-		log.Warnf("Failed to activate the Bitrise Apple Developer Portal connection: %s\nRead more: https://devcenter.bitrise.io/getting-started/signing-up/connecting-apple-dev-account/\nerrors:")
+		log.Warnf("Failed to activate the Bitrise Apple Developer Portal connection: %s\nRead more: https://devcenter.bitrise.io/getting-started/connecting-apple-dev-account/ \nerrors:")
 		for _, err := range errors {
 			log.Errorf("%s\n", err)
 		}
@@ -392,7 +399,7 @@ This means that when the API changes
 	}
 
 	log.Donef("Success")
-	log.Printf("The app (.ipa) was successfully uploaded to [iTunes Connect](https://itunesconnect.apple.com), you should see it in the *Prerelease* section on the app's iTunes Connect page!")
+	log.Printf("The app (.ipa) was successfully uploaded to [App Store Connect](https://appstoreconnect.apple.com), you should see it in the *Prerelease* section on the app's page!")
 }
 
 func normalizeArtifactPath(pth string) (string, error) {

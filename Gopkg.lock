@@ -3,11 +3,23 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3d1f26976b10ce0ceeb2becfbe785f4b7c5317abeb3941a758c0744eb661acf6"
+  digest = "1:e875a94349b121ca6fa86bd72f7593f7f0e6f0d07a7d664f31fc000d80eaeec3"
+  name = "github.com/bitrise-io/go-steputils"
+  packages = [
+    "stepconf",
+    "tools",
+  ]
+  pruneopts = "UT"
+  revision = "cecc766da84859e37e780d9d1c416f0f3993e6b1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:81bbb5d8dd4e0fd2ed572dc5f2c0de310600823ca4951ddb92b64c4c1e382765"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
     "command",
+    "command/gems",
     "command/rubycommand",
     "errorutil",
     "fileutil",
@@ -17,40 +29,30 @@
     "pointers",
     "retry",
   ]
-  pruneopts = ""
-  revision = "4ea9c35054b7f8cce3940bf73b5dcd395e9c9226"
+  pruneopts = "UT"
+  revision = "10ba6612803187a89b6935f06a617e9e1cd9d2bf"
 
 [[projects]]
   branch = "master"
-  digest = "1:3511df2e558e2755b01ce5670ddc536fa031e63e5b4974bb0f35aac53704f06e"
-  name = "github.com/bitrise-tools/go-steputils"
-  packages = [
-    "stepconf",
-    "tools",
-  ]
-  pruneopts = ""
-  revision = "ec226b2359fcd806be64f0ad2217d8e741a1ff11"
-
-[[projects]]
-  branch = "master"
-  digest = "1:60933a9b794dd76601b4ef174ecc399339460c6484926f643189fd66eb5e3f3c"
+  digest = "1:400e113a367b511b9b09ca642ee11d9885485a93838526d697033af334a2fdde"
   name = "github.com/kballard/go-shellquote"
   packages = ["."]
-  pruneopts = ""
-  revision = "cd60e84ee657ff3dc51de0b4f55dd299a3e136f2"
+  pruneopts = "UT"
+  revision = "95032a82bc518f77982ea72343cc1ade730072f0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/bitrise-io/go-steputils/stepconf",
+    "github.com/bitrise-io/go-steputils/tools",
     "github.com/bitrise-io/go-utils/command",
+    "github.com/bitrise-io/go-utils/command/gems",
     "github.com/bitrise-io/go-utils/command/rubycommand",
     "github.com/bitrise-io/go-utils/fileutil",
     "github.com/bitrise-io/go-utils/log",
     "github.com/bitrise-io/go-utils/pathutil",
     "github.com/bitrise-io/go-utils/retry",
-    "github.com/bitrise-tools/go-steputils/stepconf",
-    "github.com/bitrise-tools/go-steputils/tools",
     "github.com/kballard/go-shellquote",
   ]
   solver-name = "gps-cdcl"
