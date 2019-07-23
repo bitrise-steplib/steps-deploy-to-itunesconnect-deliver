@@ -159,11 +159,8 @@ func Test_convertDesCookie(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, errors := convertDesCookie(tt.cookies); errors != nil {
-				t.Errorf("Failed to get the session for the Apple Developer Portal, errors:")
-				for _, err := range errors {
-					t.Errorf("%s\n", err)
-				}
+			if got, err := convertDesCookie(tt.cookies); err != nil {
+				t.Errorf("Failed to get the session for the Apple Developer Portal, error: %s", err)
 			} else if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("convertDesCookie() = \n%v, want \n%v", got, tt.want)
 			}
