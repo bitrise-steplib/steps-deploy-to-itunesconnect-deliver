@@ -44,6 +44,8 @@ type configs struct {
 	GemfilePath     string `env:"gemfile_path"`
 	FastlaneVersion string `env:"fastlane_version"`
 	ITMSParameters  string `env:"itms_upload_parameters"`
+
+	VerboseLog bool `env:"verbose_log,opt[yes,no]"`
 }
 
 func fail(format string, v ...interface{}) {
@@ -214,6 +216,7 @@ func main() {
 	}
 
 	stepconf.Print(cfg)
+	log.SetEnableDebugLog(cfg.VerboseLog)
 
 	//
 	// Validate inputs

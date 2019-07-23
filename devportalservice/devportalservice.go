@@ -20,6 +20,19 @@ type NetworkError struct {
 	Body   string
 }
 
+func (e NetworkError) Error() string {
+	return fmt.Sprintf("response %d %s", e.Status, e.Body)
+}
+
+// CIEnvMissingError ...
+type CIEnvMissingError struct {
+	Key string
+}
+
+func (e CIEnvMissingError) Error() string {
+	return fmt.Sprintf("%s env is not exported", e.Key)
+}
+
 // portalData ...
 type portalData struct {
 	AppleID              string              `json:"apple_id"`
@@ -56,10 +69,6 @@ func SessionData() (string, error) {
 	return strings.Join(cookies, ""), nil
 }
 
-func (e NetworkError) Error() string {
-	return fmt.Sprintf("response %d %s", e.Status, e.Body)
-}
-
 func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) {
 	var p portalData
 
@@ -69,11 +78,11 @@ func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) 
 	}
 
 	if buildURL == "" {
-		return portalData{}, fmt.Errorf("BITRISE_BUILD_URL env is not exported")
+		return portalData{}, CIEnvMissingError{Key: "BITRISE_BUILD_URL"}
 	}
 
 	if buildAPIToken == "" {
-		return portalData{}, fmt.Errorf("BITRISE_BUILD_API_TOKEN env is not exported")
+		return portalData{}, CIEnvMissingError{Key: "BITRISE_BUILD_API_TOKEN env is not exported"}
 	}
 
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/apple_developer_portal_data.json", buildURL), nil)
@@ -110,14 +119,14 @@ func convertDesCookie(cookies []cookie) ([]string, error) {
   path: "{{.Path}}"
 `)
 		if err != nil {
-			errs = append(errs, fmt.Sprintf("failed to create golang template for the cookie: %v", c))
+			errs = append(errs, fmt.Sprintf("Failed to create golang template for the cookie: %v", c))
 			continue
 		}
 
 		var b bytes.Buffer
 		err = tmpl.Execute(&b, c)
 		if err != nil {
-			errs = append(errs, fmt.Sprintf("failed to parse cookie: %v", c))
+			errs = append(errs, fmt.Sprintf("Failed to parse cookie: %v", c))
 			continue
 		}
 
