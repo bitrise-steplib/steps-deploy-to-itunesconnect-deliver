@@ -133,7 +133,10 @@ func convertDesCookie(cookies []cookie) ([]string, error) {
 		convertedCookies = append(convertedCookies, b.String()+"\n")
 	}
 
-	return convertedCookies, errors.New(strings.Join(errs, "\n"))
+	if len(errs) > 0 {
+		return nil, errors.New(strings.Join(errs, "\n"))
+	}
+	return convertedCookies, nil
 }
 
 func performRequest(req *http.Request, requestResponse interface{}) ([]byte, error) {
