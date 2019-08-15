@@ -310,7 +310,7 @@ This means that when the API changes
 **this step might fail until the tool is updated**.`)
 	fmt.Println()
 
-	options := []string{}
+	var options []string
 	if cfg.Options != "" {
 		opts, err := shellquote.Split(cfg.Options)
 		if err != nil {
@@ -405,6 +405,9 @@ This means that when the API changes
 	cmd.SetStdout(os.Stdout)
 	cmd.SetStderr(os.Stderr)
 	cmd.SetStdin(os.Stdin)
+	if err := os.Unsetenv("FASTLANE_PASSWORD"); err != nil {
+		fail("Could not unset Fastlane password, reason: ", err)
+	}
 	cmd.AppendEnvs(envs...)
 	if workDir != "" {
 		cmd.SetDir(workDir)
