@@ -131,9 +131,8 @@ inputs:
         processed which might take a couple of minutes after the
         new version is deployed to iTunes Connect*.
 
-        **NOTE:** if this option is enabled, then this step will
-        fail, even if the version was successfully uploaded
-        to iTunes Connect and only the review submission failed.
+        **NOTE:** with this option enabled, the step will only
+        be successful, if the submission is accepted by iTunes Connect.
       value_options: ["yes", "no"]
       is_required: true
   - skip_metadata: "yes"
