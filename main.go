@@ -27,7 +27,7 @@ type configs struct {
 	PkgPath string `env:"pkg_path"`
 
 	ItunesconUser string          `env:"itunescon_user,required"`
-	Password      stepconf.Secret `env:"password,required"`
+	Password      stepconf.Secret `env:"password"`
 	AppPassword   stepconf.Secret `env:"app_password"`
 
 	AppID                string `env:"app_id"`
