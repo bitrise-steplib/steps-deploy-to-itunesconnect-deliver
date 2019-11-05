@@ -123,26 +123,27 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 
 	log.Printf("Gemfile exist, checking fastlane version from Gemfile.lock")
 
-	gemfileDir := filepath.Dir(gemfilePth)
-	gemfileLockPth := filepath.Join(gemfileDir, "Gemfile.lock")
-
 	bundleInstallCalled := false
-	if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
-		return nil, "", err
-	} else if !exist {
-		log.Printf("Gemfile.lock not exist at: %s, running 'bundle install' ...", gemfileLockPth)
+	gemfileDir := filepath.Dir(gemfilePth)
+	gemfileLockPth, err := gems.GemFileLockPth(gemfileDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("Gemfile.lock not exist at: %s, running 'bundle install' ...", gemfileLockPth)
 
-		cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
-		if err := cmd.Run(); err != nil {
+			cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+			if err := cmd.Run(); err != nil {
+				return nil, "", err
+			}
+
+			bundleInstallCalled = true
+
+			if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
+				return nil, "", err
+			} else if !exist {
+				return nil, "", errors.New("gemfile.lock does not exist, even 'bundle install' was called")
+			}
+		} else {
 			return nil, "", err
-		}
-
-		bundleInstallCalled = true
-
-		if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
-			return nil, "", err
-		} else if !exist {
-			return nil, "", errors.New("gemfile.lock does not exist, even 'bundle install' was called")
 		}
 	}
 
