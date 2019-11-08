@@ -121,28 +121,31 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 		return []string{"fastlane"}, "", nil
 	}
 
-	log.Printf("Gemfile exist, checking fastlane version from Gemfile.lock")
-
-	gemfileDir := filepath.Dir(gemfilePth)
-	gemfileLockPth := filepath.Join(gemfileDir, "Gemfile.lock")
+	log.Printf("Gemfile exist, checking Fastlane version from gem lockfile")
 
 	bundleInstallCalled := false
-	if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
-		return nil, "", err
-	} else if !exist {
-		log.Printf("Gemfile.lock not exist at: %s, running 'bundle install' ...", gemfileLockPth)
+	gemfileDir := filepath.Dir(gemfilePth)
+	gemfileLockPth, err := gems.GemFileLockPth(gemfileDir)
+	if err != nil {
+		if err == gems.ErrGemLockNotFound {
+			log.Printf("gem lockfile not exist at: %s, running 'bundle install' ...", gemfileDir)
 
-		cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
-		if err := cmd.Run(); err != nil {
+			cmd := command.NewWithStandardOuts("bundle", "install").SetStdin(os.Stdin).SetDir(gemfileDir)
+			if err := cmd.Run(); err != nil {
+				return nil, "", err
+			}
+
+			bundleInstallCalled = true
+
+			gemfileLockPth, err = gems.GemFileLockPth(gemfileDir)
+			if err != nil {
+				if err == gems.ErrGemLockNotFound {
+					return nil, "", errors.New("gem lockfile still not exist, even after 'bundle install' was called")
+				}
+				return nil, "", err
+			}
+		} else {
 			return nil, "", err
-		}
-
-		bundleInstallCalled = true
-
-		if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
-			return nil, "", err
-		} else if !exist {
-			return nil, "", errors.New("gemfile.lock does not exist, even 'bundle install' was called")
 		}
 	}
 
@@ -152,7 +155,7 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	}
 
 	if fastlane.Found {
-		log.Printf("fastlane version defined in Gemfile.lock: %s, using bundler to call fastlane commands...", fastlane.Version)
+		log.Printf("fastlane version defined in gem lockfile: %s, using bundler to call fastlane commands...", fastlane.Version)
 
 		var bundlerVersion gems.Version
 		if !bundleInstallCalled {
@@ -182,7 +185,7 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 				return nil, "", fmt.Errorf("command failed, error: %s", err)
 			}
 
-			// install Gemfile.lock gems with `bundle [_version_] install ...`
+			// install gem lockfile gems with `bundle [_version_] install ...`
 			fmt.Println()
 			log.Infof("Installing bundle")
 
@@ -204,7 +207,7 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 		return append(gems.BundleExecPrefix(bundlerVersion), "fastlane"), gemfileDir, nil
 	}
 
-	log.Printf("fastlane version not found in Gemfile.lock, using system installed fastlane...")
+	log.Printf("Fastlane version not found in gem lockfile, using system installed Fastlane...")
 
 	return []string{"fastlane"}, "", nil
 }
@@ -274,14 +277,14 @@ func main() {
 
 	fastlaneCmdSlice, workDir, err := ensureFastlaneVersionAndCreateCmdSlice(cfg.FastlaneVersion, cfg.GemfilePath)
 	if err != nil {
-		fail("Failed to ensure fastlane version, error: %s", err)
+		fail("Failed to ensure Fastlane version, error: %s", err)
 	}
 
 	versionCmdSlice := append(fastlaneCmdSlice, "-v")
 	versionCmd := command.NewWithStandardOuts(versionCmdSlice[0], versionCmdSlice[1:]...)
 	log.Printf("$ %s", versionCmd.PrintableCommandArgs())
 	if err := versionCmd.Run(); err != nil {
-		fail("Failed to print fastlane version, error: %s", err)
+		fail("Failed to print Fastlane version, error: %s", err)
 	}
 
 	elapsed := time.Since(startTime)
