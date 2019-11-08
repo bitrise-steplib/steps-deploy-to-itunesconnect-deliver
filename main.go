@@ -137,10 +137,12 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 
 			bundleInstallCalled = true
 
-			if exist, err := pathutil.IsPathExists(gemfileLockPth); err != nil {
+			gemfileLockPth, err = gems.GemFileLockPth(gemfileDir)
+			if err != nil {
+				if err == gems.ErrGemLockNotFound {
+					return nil, "", errors.New("gem lockfile still not exist, even after 'bundle install' was called")
+				}
 				return nil, "", err
-			} else if !exist {
-				return nil, "", errors.New("gem lockfile does not exist, even 'bundle install' was called")
 			}
 		} else {
 			return nil, "", err
