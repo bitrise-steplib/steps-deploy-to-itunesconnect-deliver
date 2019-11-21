@@ -61,6 +61,7 @@ workflows:
         inputs:
         - generate_profiles: 'yes'
         - distribution_type: app-store
+        - team_id: 72SA8V3WYL
     - set-xcode-build-number:
         title: Set Build Number
         run_if: true
