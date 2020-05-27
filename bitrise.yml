@@ -77,8 +77,8 @@ workflows:
     - path::./:
         title: Step Test
         inputs:
-        # - itunescon_user: $ITUNES_CONNECT_USER
-        # - password: $ITUNES_CONNECT_PASSWORD
+        - itunescon_user: $ITUNES_CONNECT_USER
+        - password: $ITUNES_CONNECT_PASSWORD
         - team_id: $ITUNES_CONNECT_TEAM_ID
         - app_id: $ITUNES_CONNECT_APP_ID
 
