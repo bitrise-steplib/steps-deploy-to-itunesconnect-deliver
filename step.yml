@@ -163,7 +163,7 @@ inputs:
 
         If `Gemfile` doesn't exist or doesn't contain fastlane gem and
         if `fastlane version` input isn't specified, latest fastlen version will be used.
-  - fastlane_version: "latest"
+  - fastlane_version: "2.150.0.rc1"
     opts:
       category: Debug
       title: "fastlane version"
