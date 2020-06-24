@@ -3,8 +3,8 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - SAMPLE_APP_URL: https://github.com/lpusok/sample-apps-itunes-connect-beta-test.git
-  - BRANCH: TOOL-2331-add-screenshots
+  - SAMPLE_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
+  - BRANCH: master
   - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
