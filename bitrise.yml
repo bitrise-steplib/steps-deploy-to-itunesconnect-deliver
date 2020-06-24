@@ -3,8 +3,8 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - SAMPLE_APP_URL: https://github.com/bitrise-samples/sample-apps-itunes-connect-beta-test.git
-  - BRANCH: master
+  - SAMPLE_APP_URL: https://github.com/lpusok/sample-apps-itunes-connect-beta-test.git
+  - BRANCH: TOOL-2331-add-screenshots
   - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
@@ -15,6 +15,7 @@ app:
 
   - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
   - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+  - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
   - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
   - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
@@ -79,8 +80,12 @@ workflows:
         inputs:
         - itunescon_user: $ITUNES_CONNECT_USER
         - password: $ITUNES_CONNECT_PASSWORD
+        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
         - team_id: $ITUNES_CONNECT_TEAM_ID
         - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
 
   # ----------------------------------------------------------------
   # --- Utility workflows
