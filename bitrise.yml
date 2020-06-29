@@ -86,6 +86,7 @@ workflows:
         - skip_screenshots: "no"
         - skip_metadata: "yes"
         - submit_for_review: "no"
+        - fastlane_version: "latest"
 
   # ----------------------------------------------------------------
   # --- Utility workflows

@@ -13,8 +13,8 @@
   revision = "94490ca44ddb645764676a94988f6fc7e3187383"
 
 [[projects]]
-  branch = "TOOL-2331-prerelese-gem-support"
-  digest = "1:fb3f1a0a052a6a0fc54a6f2e1253fde4c25a87b56d297c56cc70937ec3fc762c"
+  branch = "master"
+  digest = "1:cd18486521a5b69ffbadc131bce3a24f36af78297e807f11bd4a6368997a0afc"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -30,7 +30,7 @@
     "retry",
   ]
   pruneopts = "UT"
-  revision = "0700c31b53765154d24a61d1c8a73d638fd1d57f"
+  revision = "0c47c16813a4209321c9d0dba2e75867d6901ff2"
 
 [[projects]]
   branch = "master"
