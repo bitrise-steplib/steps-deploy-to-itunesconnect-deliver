@@ -4,7 +4,7 @@
   name = "github.com/bitrise-io/go-steputils"
 
 [[constraint]]
-  branch = "master"
+  branch = "TOOL-2331-prerelese-gem-support"
   name = "github.com/bitrise-io/go-utils"
 
 [[constraint]]

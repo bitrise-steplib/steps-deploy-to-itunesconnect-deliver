@@ -3,18 +3,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:89562e1ecde606efbc12f60b41582279cccea8f4d39b31290e2d64bd1f08ee29"
+  digest = "1:ba6694e16cc02ad534ba0e2443323379159c978bbba876b01a7286c326cafeb8"
   name = "github.com/bitrise-io/go-steputils"
   packages = [
     "stepconf",
     "tools",
   ]
   pruneopts = "UT"
-  revision = "3c98d95a94d51624a26e99419d0fc03d2aab0055"
+  revision = "94490ca44ddb645764676a94988f6fc7e3187383"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a6e5fb3bcfb8b72898bc15cd75f57cd5e3d81b650059ee847c4e9d436564a40e"
+  branch = "TOOL-2331-prerelese-gem-support"
+  digest = "1:fb3f1a0a052a6a0fc54a6f2e1253fde4c25a87b56d297c56cc70937ec3fc762c"
   name = "github.com/bitrise-io/go-utils"
   packages = [
     "colorstring",
@@ -30,7 +30,7 @@
     "retry",
   ]
   pruneopts = "UT"
-  revision = "5067a2a682f21030f379f88e853b9e0734a24516"
+  revision = "0700c31b53765154d24a61d1c8a73d638fd1d57f"
 
 [[projects]]
   branch = "master"
