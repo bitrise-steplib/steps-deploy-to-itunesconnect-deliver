@@ -48,6 +48,9 @@ type configs struct {
 	VerboseLog bool `env:"verbose_log,opt[yes,no]"`
 }
 
+const latestStable = "latest-stable"
+const latestPrerelease = "latest"
+
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
 	os.Exit(1)
@@ -61,13 +64,21 @@ func gemInstallWithRetry(gemName string, version string) error {
 
 		versionToInstall := version
 
-		if versionToInstall == "latest" {
+		if version == latestStable ||
+			version == latestPrerelease {
 			versionToInstall = ""
 		}
 
-		cmds, err := rubycommand.GemInstall(gemName, versionToInstall)
-		if err != nil {
-			return fmt.Errorf("failed to create command, error: %s", err)
+		cmds := []*command.Model{}
+		var err error
+		if version == latestPrerelease {
+			if cmds, err = rubycommand.GemInstallPrerelease(gemName); err != nil {
+				return fmt.Errorf("failed to create command, error: %s", err)
+			}
+		} else {
+			if cmds, err = rubycommand.GemInstall(gemName, versionToInstall); err != nil {
+				return fmt.Errorf("failed to create command, error: %s", err)
+			}
 		}
 
 		for _, cmd := range cmds {
@@ -92,18 +103,13 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	if forceVersion != "" {
 		log.Printf("fastlane version defined: %s, installing...", forceVersion)
 
-		newVersion := forceVersion
-		if forceVersion == "latest" {
-			newVersion = ""
-		}
-
-		if err := gemInstallWithRetry("fastlane", newVersion); err != nil {
+		if err := gemInstallWithRetry("fastlane", forceVersion); err != nil {
 			return nil, "", err
 		}
 
 		fastlaneCmdSlice := []string{"fastlane"}
-		if newVersion != "" {
-			fastlaneCmdSlice = append(fastlaneCmdSlice, fmt.Sprintf("_%s_", newVersion))
+		if forceVersion != latestPrerelease && forceVersion != latestPrerelease {
+			fastlaneCmdSlice = append(fastlaneCmdSlice, fmt.Sprintf("_%s_", forceVersion))
 		}
 
 		return fastlaneCmdSlice, "", nil
