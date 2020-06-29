@@ -58,7 +58,7 @@ workflows:
             git remote add origin "${SAMPLE_APP_URL}"
             git fetch || exit 1
             [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
-    - ios-auto-provision:
+    - ios-auto-provision-appstoreconnect:
         inputs:
         - generate_profiles: 'yes'
         - distribution_type: app-store
