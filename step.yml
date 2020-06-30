@@ -171,7 +171,7 @@ inputs:
         This option lets you specify a specific version of the **fastlane** gem to be installed.
 
         - `latest-stable` installs the latest stable version.
-        - `latest` installs the latest version of fastlane including prerelease (release candidate) versions
+        - `latest` installs the latest version of fastlane including prerelease (release candidate) versions.
   - options:
     opts:
       category: Debug

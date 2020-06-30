@@ -422,6 +422,10 @@ This means that when the API changes
 	fmt.Println()
 
 	if err := cmd.Run(); err != nil {
+		if cfg.FastlaneVersion != latestPrerelease {
+			log.Warnf(fmt.Sprintf(`If you have issues, use the latest prerelease version of fastlane.
+Set the fastlane version input to "%s" to enable prerelease versions.`, latestPrerelease))
+		}
 		fail("Deploy failed, error: %s", err)
 	}
 
