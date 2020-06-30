@@ -48,6 +48,9 @@ type configs struct {
 	VerboseLog bool `env:"verbose_log,opt[yes,no]"`
 }
 
+const latestStable = "latest-stable"
+const latestPrerelease = "latest"
+
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
 	os.Exit(1)
@@ -61,16 +64,19 @@ func gemInstallWithRetry(gemName string, version string) error {
 
 		versionToInstall := version
 
-		if versionToInstall == "latest" {
+		if version == latestStable ||
+			version == latestPrerelease {
 			versionToInstall = ""
 		}
 
-		cmds, err := rubycommand.GemInstall(gemName, versionToInstall)
+		cmds, err := rubycommand.GemInstall(gemName, versionToInstall, version == latestPrerelease)
 		if err != nil {
 			return fmt.Errorf("failed to create command, error: %s", err)
 		}
 
 		for _, cmd := range cmds {
+			fmt.Println()
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
 			if out, err := cmd.RunAndReturnTrimmedCombinedOutput(); err != nil {
 				return fmt.Errorf("gem install command failed, output: %s, error: %s", out, err)
 			}
@@ -92,18 +98,13 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	if forceVersion != "" {
 		log.Printf("fastlane version defined: %s, installing...", forceVersion)
 
-		newVersion := forceVersion
-		if forceVersion == "latest" {
-			newVersion = ""
-		}
-
-		if err := gemInstallWithRetry("fastlane", newVersion); err != nil {
+		if err := gemInstallWithRetry("fastlane", forceVersion); err != nil {
 			return nil, "", err
 		}
 
 		fastlaneCmdSlice := []string{"fastlane"}
-		if newVersion != "" {
-			fastlaneCmdSlice = append(fastlaneCmdSlice, fmt.Sprintf("_%s_", newVersion))
+		if forceVersion != latestStable && forceVersion != latestPrerelease {
+			fastlaneCmdSlice = append(fastlaneCmdSlice, fmt.Sprintf("_%s_", forceVersion))
 		}
 
 		return fastlaneCmdSlice, "", nil
@@ -178,8 +179,8 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 			installBundlerCommand.SetStdout(os.Stdout).SetStderr(os.Stderr)
 			installBundlerCommand.SetDir(gemfileDir)
 
-			log.Donef("$ %s", installBundlerCommand.PrintableCommandArgs())
 			fmt.Println()
+			log.Donef("$ %s", installBundlerCommand.PrintableCommandArgs())
 
 			if err := installBundlerCommand.Run(); err != nil {
 				return nil, "", fmt.Errorf("command failed, error: %s", err)
@@ -196,8 +197,8 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 			cmd.SetStdout(os.Stdout).SetStderr(os.Stderr)
 			cmd.SetDir(gemfileDir)
 
-			log.Donef("$ %s", cmd.PrintableCommandArgs())
 			fmt.Println()
+			log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 			if err := cmd.Run(); err != nil {
 				return nil, "", fmt.Errorf("command failed, error: %s", err)
@@ -282,7 +283,8 @@ func main() {
 
 	versionCmdSlice := append(fastlaneCmdSlice, "-v")
 	versionCmd := command.NewWithStandardOuts(versionCmdSlice[0], versionCmdSlice[1:]...)
-	log.Printf("$ %s", versionCmd.PrintableCommandArgs())
+	fmt.Println()
+	log.Donef(fmt.Sprintf("$ %s", versionCmd.PrintableCommandArgs()))
 	if err := versionCmd.Run(); err != nil {
 		fail("Failed to print Fastlane version, error: %s", err)
 	}
@@ -403,6 +405,7 @@ This means that when the API changes
 	cmdSlice := append(fastlaneCmdSlice, args...)
 
 	cmd := command.New(cmdSlice[0], cmdSlice[1:]...)
+	fmt.Println()
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
 
 	cmd.SetStdout(os.Stdout)
@@ -419,6 +422,10 @@ This means that when the API changes
 	fmt.Println()
 
 	if err := cmd.Run(); err != nil {
+		if cfg.FastlaneVersion != latestPrerelease {
+			log.Warnf(fmt.Sprintf(`If you have issues, use the latest prerelease version of fastlane.
+Set the fastlane version input to "%s" to enable prerelease versions.`, latestPrerelease))
+		}
 		fail("Deploy failed, error: %s", err)
 	}
 

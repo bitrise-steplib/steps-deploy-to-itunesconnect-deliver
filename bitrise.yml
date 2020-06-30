@@ -3,7 +3,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - SAMPLE_APP_URL: https://github.com/bitrise-samples/sample-apps-itunes-connect-beta-test.git
+  - SAMPLE_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
   - BRANCH: master
   - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
@@ -15,6 +15,7 @@ app:
 
   - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
   - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+  - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
   - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
   - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
@@ -57,7 +58,7 @@ workflows:
             git remote add origin "${SAMPLE_APP_URL}"
             git fetch || exit 1
             [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
-    - ios-auto-provision:
+    - ios-auto-provision-appstoreconnect:
         inputs:
         - generate_profiles: 'yes'
         - distribution_type: app-store
@@ -79,8 +80,13 @@ workflows:
         inputs:
         - itunescon_user: $ITUNES_CONNECT_USER
         - password: $ITUNES_CONNECT_PASSWORD
+        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
         - team_id: $ITUNES_CONNECT_TEAM_ID
         - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
+        - fastlane_version: "latest"
 
   # ----------------------------------------------------------------
   # --- Utility workflows
