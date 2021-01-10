@@ -14,6 +14,12 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
+const (
+	appleDevConnDataJSONKey = "BITRISE_PORTAL_DATA_JSON"
+	bitriseBuildURLKey      = "BITRISE_BUILD_URL"
+	bitriseBuildAPITokenKey = "BITRISE_BUILD_API_TOKEN"
+)
+
 // NetworkError represents a networking issue.
 type NetworkError struct {
 	Status int
@@ -58,7 +64,7 @@ type cookie struct {
 // SessionData will fetch the session from Bitrise for the connected Apple developer account
 // If the BITRISE_PORTAL_DATA_JSON is provided (for debug purposes) it will use that instead.
 func SessionData() (string, error) {
-	p, err := getDeveloperPortalData(os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN"))
+	p, err := getDeveloperPortalData(os.Getenv(bitriseBuildURLKey), os.Getenv(bitriseBuildAPITokenKey))
 	if err != nil {
 		return "", err
 	}
@@ -73,17 +79,17 @@ func SessionData() (string, error) {
 func getDeveloperPortalData(buildURL, buildAPIToken string) (portalData, error) {
 	var p portalData
 
-	j, exists := os.LookupEnv("BITRISE_PORTAL_DATA_JSON")
+	j, exists := os.LookupEnv(appleDevConnDataJSONKey)
 	if exists && j != "" {
 		return p, json.Unmarshal([]byte(j), &p)
 	}
 
 	if buildURL == "" {
-		return portalData{}, CIEnvMissingError{Key: "BITRISE_BUILD_URL"}
+		return portalData{}, CIEnvMissingError{Key: bitriseBuildURLKey}
 	}
 
 	if buildAPIToken == "" {
-		return portalData{}, CIEnvMissingError{Key: "BITRISE_BUILD_API_TOKEN env is not exported"}
+		return portalData{}, CIEnvMissingError{Key: bitriseBuildAPITokenKey}
 	}
 
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/apple_developer_portal_data.json", buildURL), nil)
