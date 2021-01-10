@@ -33,8 +33,8 @@ type BitriseClient struct {
 }
 
 // NewBitriseClient ...
-func NewBitriseClient(client httpClient) BitriseClient {
-	return BitriseClient{
+func NewBitriseClient(client httpClient) *BitriseClient {
+	return &BitriseClient{
 		httpClient: client,
 	}
 }
@@ -75,6 +75,7 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 	if err := json.Unmarshal([]byte(body), &connection); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response (%s), error: %s", body, err)
 	}
+
 	return &connection, nil
 }
 
@@ -99,8 +100,8 @@ type cookie struct {
 	ForDomain *bool  `json:"for_domain,omitempty"`
 }
 
-// SessionEnvValue ...
-func (c *AppleDeveloperConnection) SessionEnvValue() (string, error) {
+// TFASession ...
+func (c *AppleDeveloperConnection) TFASession() (string, error) {
 	var rubyCookies []string
 	for _, cookie := range c.SessionCookies["https://idmsa.apple.com"] {
 		if rubyCookies == nil {
@@ -120,13 +121,13 @@ func (c *AppleDeveloperConnection) SessionEnvValue() (string, error) {
   path: "{{.Path}}"
 `)
 		if err != nil {
-			return "", fmt.Errorf("failed to create template: %s", err)
+			return "", fmt.Errorf("failed to parse template: %s", err)
 		}
 
 		var b bytes.Buffer
 		err = tmpl.Execute(&b, cookie)
 		if err != nil {
-			return "", fmt.Errorf("failed to execute template: %s", err)
+			return "", fmt.Errorf("failed to execute template on cookie: %s: %s", cookie.Name, err)
 		}
 
 		rubyCookies = append(rubyCookies, b.String()+"\n")

@@ -251,18 +251,28 @@ func main() {
 
 	//
 	// Fastlane session
-	fs, err := devportalservice.SessionData()
+	var provider devportalservice.AppleDeveloperConnectionProvider
+	provider = devportalservice.NewBitriseClient(http.DefaultClient)
+
+	conn, err := provider.GetAppleDeveloperConnection(os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN"))
 	if err != nil {
 		handleSessionDataError(err)
-	} else {
+	}
+
+	if conn != nil {
+		session, err := conn.TFASession()
+		if err != nil {
+			handleSessionDataError(err)
+		}
+
 		fmt.Println()
 		log.Infof("Connected Apple Developer Portal Account found, exposing FASTLANE_SESSION env var")
 
-		if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", fs); err != nil {
+		if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", session); err != nil {
 			fail("Failed to export FASTLANE_SESSION, error: %s", err)
 		}
 
-		if err := os.Setenv("FASTLANE_SESSION", fs); err != nil {
+		if err := os.Setenv("FASTLANE_SESSION", session); err != nil {
 			fail("Failed to set FASTLANE_SESSION env, error: %s", err)
 		}
 

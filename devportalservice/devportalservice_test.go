@@ -61,7 +61,7 @@ func TestSessionEnvValue(t *testing.T) {
 			conn, err := c.GetAppleDeveloperConnection("dummy url", "dummy token")
 			require.NoError(t, err)
 
-			got, err := conn.SessionEnvValue()
+			got, err := conn.TFASession()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SessionData() error = %v, wantErr %v", err, tt.wantErr)
 				return
