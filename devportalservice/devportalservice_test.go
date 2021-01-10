@@ -1,64 +1,114 @@
 package devportalservice
 
 import (
-	"encoding/json"
-	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
-	"reflect"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestGetDeveloperPortalDataFromEnv(t *testing.T) {
-	// If the BITRISE_PORTAL_DATA_JSON env is already set (e.g for local testing the step),
-	// then we don't want to modify it during the test
-	envAlreadyPresented := true
-	if os.Getenv("BITRISE_PORTAL_DATA_JSON") == "" {
-		envAlreadyPresented = false
+func TestSessionData(t *testing.T) {
+	tests := []struct {
+		name string
 
-		if err := os.Setenv("BITRISE_PORTAL_DATA_JSON", dummyPortalDataJSON); err != nil {
-			t.Errorf("Failed to set BITRISE_PORTAL_DATA_JSON env to test getDeveloperPortalData() error = %v", err)
-		}
+		portalDataEnv string
+
+		response *http.Response
+		err      error
+
+		want    string
+		wantErr bool
+	}{
+		{
+			name:          "Session data can be specified by BITRISE_PORTAL_DATA_JSON env",
+			portalDataEnv: testAppleDevConnDataJSON,
+			want:          testAppleDevConnSession,
+			wantErr:       false,
+		},
+		{
+			name: "No Apple Developer Connection set for the build (and no test devices available for the build)",
+			response: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(strings.NewReader("{}")),
+			},
+			want:    "",
+			wantErr: false,
+		},
 	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.portalDataEnv != "" {
+				restoreFunc := restorableSetEnv(t, appleDevConnDataJSONKey, testAppleDevConnDataJSON)
+				defer restoreFunc()
+			} else {
+				urlRestoreFunc := restorableSetEnv(t, bitriseBuildURLKey, "dummy url")
+				tokenRestoreFunc := restorableSetEnv(t, bitriseBuildAPITokenKey, "dummy token")
+				defer func() {
+					urlRestoreFunc()
+					tokenRestoreFunc()
+				}()
+			}
 
-	got, err := getDeveloperPortalData("", "")
-	if err != nil {
-		t.Errorf("getDeveloperPortalData() error = %v", err)
-		return
-	}
+			if tt.response != nil {
+				defaultHTTPClient = newMockHTTPClient(tt.response, nil)
+			}
 
-	if !envAlreadyPresented {
-		if !reflect.DeepEqual(got, dummyPortalData) {
-			t.Errorf("getDeveloperPortalData() = %v, want %v", sPretty(got), sPretty(dummyPortalData))
-		}
-
-		// Reset the dummy BITRISE_PORTAL_DATA_JSON
-		if err := os.Setenv("BITRISE_PORTAL_DATA_JSON", ""); err != nil {
-			t.Errorf("Failed to reset BITRISE_PORTAL_DATA_JSON env after testing getDeveloperPortalData() error = %v", err)
-		}
+			got, err := SessionData()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SessionData() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("SessionData() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
-// TestGetDeveloperPortalData
-func TestGetDeveloperPortalData(t *testing.T) {
-	buildURL, builAPIToken := os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN")
-	if buildURL == "" {
-		t.Skip("Failed to run TestGetDeveloperPortalData() test because the BITRISE_BUILD_URL env is not exported")
-	}
-	if builAPIToken == "" {
-		t.Skip("Failed to run TestGetDeveloperPortalData() test because the BITRISE_BUILD_API_TOKEN env is not exported")
-	}
+type mockHTTPClient struct {
+	response *http.Response
+	err      error
+}
 
-	got, err := getDeveloperPortalData(buildURL, builAPIToken)
-	if err != nil {
-		t.Errorf("getDeveloperPortalData() error = %v", err)
-	}
+func newMockHTTPClient(response *http.Response, err error) mockHTTPClient {
+	return mockHTTPClient{response: response}
+}
 
-	if reflect.DeepEqual(got, portalData{}) {
-		t.Errorf("getDeveloperPortalData() = nil")
+func (c mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
+	return c.response, c.err
+}
+
+func restorableSetEnv(t *testing.T, key, value string) func() {
+	origValue, set := os.LookupEnv(key)
+	require.NoError(t, os.Setenv(key, value))
+	if set {
+		return func() { require.NoError(t, os.Setenv(key, origValue)) }
+	} else {
+		return func() { require.NoError(t, os.Unsetenv(key)) }
 	}
 }
 
-const dummyPortalDataJSON = `{
+const testAppleDevConnSession = `---
+- !ruby/object:HTTP::Cookie
+  name: DES58b0eba556d80ed2b98707e15ffafd344
+  value: HSARMTKNSRVTWFlaFrGQTmfmFBwJuiX/aaaaaaaaa+A7FbJa4V8MmWijnJknnX06ME0KrI9V8vFg==SRVT
+  domain: idmsa.apple.com
+  for_domain: true
+  path: "/"
+
+- !ruby/object:HTTP::Cookie
+  name: myacinfo
+  value: DAWTKNV26a0a6db3ae43acd203d0d03e8bc45000cd4bdc668e90953f22ca3b36eaab0e18634660a10cf28cc65d8ddf633c017de09477dfb18c8a3d6961f96cbbf064be616e80cee62d3d7f39a485bf826377c5b5dbbfc4a97dcdb462052db73a3a1d9b4a325d5bdd496190b3088878cecce17e4d6db9230e0575cfbe7a8754d1de0c937080ef84569b6e4a75237c2ec01cf07db060a11d92e7220707dd00a2a565ee9e06074d8efa6a1b7f83db3e1b2acdafb5fc0708443e77e6d71e168ae2a83b848122264b2da5cadfd9e451f9fe3f6eebc71904d4bc36acc528cc2a844d4f2eb527649a69523756ec9955457f704c28a3b6b9f97d6df900bd60044d5bc50408260f096954f03c53c16ac40a796dc439b859f882a50390b1c7517a9f4479fb1ce9ba2db241d6b8f2eb127c46ef96e0ccccccccc
+  domain: apple.com
+  for_domain: true
+  path: "/"
+
+`
+
+const testAppleDevConnDataJSON = `{
     "apple_id": "example@example.io",
     "password": "highSecurityPassword",
     "connection_expiry_date": "2019-04-06T12:04:59.000Z",
@@ -98,7 +148,7 @@ const dummyPortalDataJSON = `{
     "default_team_id": null
 }`
 
-var dummyPortalData = portalData{
+var testAppleDevConnData = portalData{
 	AppleID:              "example@example.io",
 	Password:             "highSecurityPassword",
 	ConnectionExpiryDate: "2019-04-06T12:04:59.000Z",
@@ -124,55 +174,4 @@ var dummyPortalData = portalData{
 			},
 		},
 	},
-}
-
-func Test_convertDesCookie(t *testing.T) {
-	tests := []struct {
-		name    string
-		cookies []cookie
-		want    []string
-	}{
-		{
-			name: "Convert one cookie",
-			cookies: []cookie{
-				cookie{
-					Name:     "DES58b0eba556d80ed2b98707e15ffafd344",
-					Path:     "/",
-					Value:    "HSARMTKNSRVTWFlaFrGQTmfmFBwJuiX/aaaaaaaaa+A7FbJa4V8MmWijnJknnX06ME0KrI9V8vFg==SRVT",
-					Domain:   "idmsa.apple.com",
-					Secure:   true,
-					Expires:  "2019-04-06T12:04:59Z",
-					MaxAge:   2592000,
-					Httponly: true,
-				},
-			},
-			want: []string{"---\n",
-				"- !ruby/object:HTTP::Cookie\n" +
-					"  name: DES58b0eba556d80ed2b98707e15ffafd344\n" +
-					"  value: HSARMTKNSRVTWFlaFrGQTmfmFBwJuiX/aaaaaaaaa+A7FbJa4V8MmWijnJknnX06ME0KrI9V8vFg==SRVT\n" +
-					"  domain: idmsa.apple.com\n" +
-					"  for_domain: true\n" +
-					`  path: "/"` + "\n" +
-					"\n",
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, err := convertDesCookie(tt.cookies); err != nil {
-				t.Errorf("Failed to get the session for the Apple Developer Portal, error: %s", err)
-			} else if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("convertDesCookie() = \n%v, want \n%v", got, tt.want)
-			}
-		})
-	}
-}
-
-func sPretty(v interface{}) string {
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-
-	return fmt.Sprintf("%v\n", string(b))
 }
