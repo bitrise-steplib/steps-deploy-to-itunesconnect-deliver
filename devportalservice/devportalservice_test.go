@@ -91,7 +91,7 @@ func restorableSetEnv(t *testing.T, key, value string) func() {
 	require.NoError(t, os.Setenv(key, value))
 	if set {
 		return func() { require.NoError(t, os.Setenv(key, origValue)) }
-	} else {
-		return func() { require.NoError(t, os.Unsetenv(key)) }
 	}
+	return func() { require.NoError(t, os.Unsetenv(key)) }
+
 }
