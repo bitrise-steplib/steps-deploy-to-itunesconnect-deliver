@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/bitrise-io/go-utils/log"
 )
@@ -79,14 +80,6 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 	return &connection, nil
 }
 
-// AppleDeveloperConnection ...
-type AppleDeveloperConnection struct {
-	AppleID              string              `json:"apple_id"`
-	Password             string              `json:"password"`
-	ConnectionExpiryDate string              `json:"connection_expiry_date"`
-	SessionCookies       map[string][]cookie `json:"session_cookies"`
-}
-
 // cookie ...
 type cookie struct {
 	Name      string `json:"name"`
@@ -98,6 +91,23 @@ type cookie struct {
 	MaxAge    int    `json:"max_age,omitempty"`
 	Httponly  bool   `json:"httponly"`
 	ForDomain *bool  `json:"for_domain,omitempty"`
+}
+
+// AppleDeveloperConnection ...
+type AppleDeveloperConnection struct {
+	AppleID              string              `json:"apple_id"`
+	Password             string              `json:"password"`
+	ConnectionExpiryDate string              `json:"connection_expiry_date"`
+	SessionCookies       map[string][]cookie `json:"session_cookies"`
+}
+
+// IsExpired ...
+func (c *AppleDeveloperConnection) IsExpired() bool {
+	t, err := time.Parse(time.RFC3339, c.ConnectionExpiryDate)
+	if err != nil {
+		return false
+	}
+	return t.Before(time.Now())
 }
 
 // TFASession ...

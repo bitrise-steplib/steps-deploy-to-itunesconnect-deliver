@@ -260,23 +260,29 @@ func main() {
 	}
 
 	if conn != nil {
-		session, err := conn.TFASession()
-		if err != nil {
-			handleSessionDataError(err)
-		}
-
 		fmt.Println()
-		log.Infof("Connected Apple Developer Portal Account found, exposing FASTLANE_SESSION env var")
+		log.Infof("Connected Apple Developer Portal Account found")
 
-		if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", session); err != nil {
-			fail("Failed to export FASTLANE_SESSION, error: %s", err)
+		if conn.AppleID != cfg.ItunesconUser {
+			log.Warnf("Connected Apple Developer and App Store login account missmatch")
+		} else if conn.IsExpired() {
+			log.Warnf("Apple Developer connection expired")
+		} else {
+			session, err := conn.TFASession()
+			if err != nil {
+				handleSessionDataError(err)
+			}
+
+			if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", session); err != nil {
+				fail("Failed to export FASTLANE_SESSION, error: %s", err)
+			}
+
+			if err := os.Setenv("FASTLANE_SESSION", session); err != nil {
+				fail("Failed to set FASTLANE_SESSION env, error: %s", err)
+			}
+
+			log.Donef("Session exported")
 		}
-
-		if err := os.Setenv("FASTLANE_SESSION", session); err != nil {
-			fail("Failed to set FASTLANE_SESSION env, error: %s", err)
-		}
-
-		log.Donef("Session exported")
 	}
 
 	//
