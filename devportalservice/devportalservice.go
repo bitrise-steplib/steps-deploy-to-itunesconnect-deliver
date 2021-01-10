@@ -20,6 +20,12 @@ const (
 	bitriseBuildAPITokenKey = "BITRISE_BUILD_API_TOKEN"
 )
 
+type httpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+var defaultHTTPClient httpClient = http.DefaultClient
+
 // NetworkError represents a networking issue.
 type NetworkError struct {
 	Status int
@@ -147,8 +153,7 @@ func convertDesCookie(cookies []cookie) ([]string, error) {
 }
 
 func performRequest(req *http.Request, requestResponse interface{}) ([]byte, error) {
-	client := http.Client{}
-	response, err := client.Do(req)
+	response, err := defaultHTTPClient.Do(req)
 	if err != nil {
 		// On error, any Response can be ignored
 		return nil, fmt.Errorf("failed to perform request, error: %s", err)
