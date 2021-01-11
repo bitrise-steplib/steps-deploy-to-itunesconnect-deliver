@@ -221,11 +221,11 @@ func handleSessionDataError(err error) {
 		log.Debugf("")
 		log.Debugf("Connected Apple Developer Portal Account not found")
 		log.Debugf("Most likely because there is no Apple Developer Portal Account connected to the build, or the build is running locally.")
-		log.Debugf("Read more: https://devcenter.bitrise.io/getting-started/connecting-apple-dev-account/")
+		log.Debugf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
 	} else {
 		fmt.Println()
 		log.Errorf("Failed to activate Bitrise Apple Developer Portal connection: %s", err)
-		log.Warnf("Read more: https://devcenter.bitrise.io/getting-started/connecting-apple-dev-account/")
+		log.Warnf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
 	}
 }
 
