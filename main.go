@@ -269,7 +269,7 @@ func main() {
 				log.Warnf("Connected Apple Developer and App Store login account missmatch")
 			} else if expiry := conn.Expiry(); expiry != nil && conn.Expired() {
 				log.Warnf("TFA session expired on %s", expiry.String())
-			} else if session, err := conn.TFASession(); err != nil {
+			} else if session, err := conn.FastlaneLoginSession(); err != nil {
 				handleSessionDataError(err)
 			} else {
 				fastlaneSession = session
