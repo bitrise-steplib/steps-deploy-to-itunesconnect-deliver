@@ -104,7 +104,7 @@ type AppleDeveloperConnection struct {
 func (c *AppleDeveloperConnection) Expiry() *time.Time {
 	t, err := time.Parse(time.RFC3339, c.ConnectionExpiryDate)
 	if err != nil {
-		log.Warnf("Could not pare session-based connection expiry date: %s", err)
+		log.Warnf("Could not parse session-based connection expiry date: %s", err)
 		return nil
 	}
 	return &t
