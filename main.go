@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
-	"github.com/bitrise-io/go-steputils/tools"
 	"github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/command/gems"
 	"github.com/bitrise-io/go-utils/command/rubycommand"
@@ -259,6 +258,7 @@ func main() {
 		handleSessionDataError(err)
 	}
 
+	fastlaneSession := ""
 	if conn != nil {
 		fmt.Println()
 		log.Infof("Connected Apple Developer Portal Account found")
@@ -267,21 +267,10 @@ func main() {
 			log.Warnf("Connected Apple Developer and App Store login account missmatch")
 		} else if conn.IsExpired() {
 			log.Warnf("Apple Developer connection expired")
+		} else if session, err := conn.TFASession(); err != nil {
+			handleSessionDataError(err)
 		} else {
-			session, err := conn.TFASession()
-			if err != nil {
-				handleSessionDataError(err)
-			}
-
-			if err := tools.ExportEnvironmentWithEnvman("FASTLANE_SESSION", session); err != nil {
-				fail("Failed to export FASTLANE_SESSION, error: %s", err)
-			}
-
-			if err := os.Setenv("FASTLANE_SESSION", session); err != nil {
-				fail("Failed to set FASTLANE_SESSION env, error: %s", err)
-			}
-
-			log.Donef("Session exported")
+			fastlaneSession = session
 		}
 	}
 
@@ -342,6 +331,10 @@ This means that when the API changes
 
 	envs := []string{
 		"DELIVER_PASSWORD=" + string(cfg.Password),
+	}
+
+	if fastlaneSession != "" {
+		envs = append(envs, "FASTLANE_SESSION="+fastlaneSession)
 	}
 
 	if string(cfg.AppPassword) != "" {
