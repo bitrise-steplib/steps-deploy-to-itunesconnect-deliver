@@ -39,7 +39,7 @@ func TestSessionEnvValue(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "No Apple Developer Connection set for the build, test devices available",
+			name: "Session-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(strings.NewReader(testAppleDevConnDataJSON)),
