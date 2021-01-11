@@ -14,7 +14,6 @@ import (
 )
 
 const (
-	appleDevConnDataJSONKey = "BITRISE_PORTAL_DATA_JSON"
 	bitriseBuildURLKey      = "BITRISE_BUILD_URL"
 	bitriseBuildAPITokenKey = "BITRISE_BUILD_API_TOKEN"
 )
