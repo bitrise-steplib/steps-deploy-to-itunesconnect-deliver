@@ -265,8 +265,8 @@ func main() {
 
 		if conn.AppleID != cfg.ItunesconUser {
 			log.Warnf("Connected Apple Developer and App Store login account missmatch")
-		} else if conn.IsExpired() {
-			log.Warnf("TFA session expired")
+		} else if expiry := conn.Expiry(); expiry != nil && conn.Expired() {
+			log.Warnf("TFA session expired on %s", expiry.String())
 		} else if session, err := conn.TFASession(); err != nil {
 			handleSessionDataError(err)
 		} else {

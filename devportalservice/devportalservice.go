@@ -100,13 +100,22 @@ type AppleDeveloperConnection struct {
 	SessionCookies       map[string][]cookie `json:"session_cookies"`
 }
 
-// IsExpired ...
-func (c *AppleDeveloperConnection) IsExpired() bool {
+// Expiry ...
+func (c *AppleDeveloperConnection) Expiry() *time.Time {
 	t, err := time.Parse(time.RFC3339, c.ConnectionExpiryDate)
 	if err != nil {
+		return nil
+	}
+	return &t
+}
+
+// Expired ...
+func (c *AppleDeveloperConnection) Expired() bool {
+	expiry := c.Expiry()
+	if expiry == nil {
 		return false
 	}
-	return t.Before(time.Now())
+	return expiry.Before(time.Now())
 }
 
 // TFASession ...
