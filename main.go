@@ -334,8 +334,9 @@ This means that when the API changes
 		options = opts
 	}
 
-	envs := []string{
-		"DELIVER_PASSWORD=" + string(cfg.Password),
+	envs := []string{}
+	if cfg.Password != "" {
+		envs = append(envs, "DELIVER_PASSWORD="+string(cfg.Password))
 	}
 
 	if fastlaneSession != "" {
