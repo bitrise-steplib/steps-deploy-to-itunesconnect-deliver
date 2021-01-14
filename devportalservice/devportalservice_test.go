@@ -50,13 +50,6 @@ func TestSessionEnvValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			urlRestoreFunc := restorableSetEnv(t, bitriseBuildURLKey, "dummy url")
-			tokenRestoreFunc := restorableSetEnv(t, bitriseBuildAPITokenKey, "dummy token")
-			defer func() {
-				urlRestoreFunc()
-				tokenRestoreFunc()
-			}()
-
 			c := NewBitriseClient(newMockHTTPClient(tt.response, nil))
 			conn, err := c.GetAppleDeveloperConnection("dummy url", "dummy token")
 			require.NoError(t, err)

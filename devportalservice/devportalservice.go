@@ -13,11 +13,6 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-const (
-	bitriseBuildURLKey      = "BITRISE_BUILD_URL"
-	bitriseBuildAPITokenKey = "BITRISE_BUILD_API_TOKEN"
-)
-
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
