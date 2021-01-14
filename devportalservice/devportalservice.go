@@ -68,6 +68,7 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 
 	type data struct {
 		*SessionBasedConnection
+		*JWTConnection
 		TestDevices []TestDevice `json:"test_devices"`
 	}
 	var d data
@@ -77,6 +78,7 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 
 	return &AppleDeveloperConnection{
 		SessionBasedConnection: d.SessionBasedConnection,
+		JWTConnection:          d.JWTConnection,
 		TestDevices:            d.TestDevices,
 	}, nil
 }
@@ -101,6 +103,13 @@ type SessionBasedConnection struct {
 	SessionCookies       map[string][]cookie `json:"session_cookies"`
 }
 
+// JWTConnection ...
+type JWTConnection struct {
+	KeyID      string `json:"key_id"`
+	IssuerID   string `json:"issuer_id"`
+	PrivateKey string `json:"private_key"`
+}
+
 // TestDevice ...
 type TestDevice struct {
 	ID         int    `json:"id"`
@@ -116,6 +125,7 @@ type TestDevice struct {
 // https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/
 type AppleDeveloperConnection struct {
 	SessionBasedConnection *SessionBasedConnection
+	JWTConnection          *JWTConnection
 	TestDevices            []TestDevice `json:"test_devices"`
 }
 

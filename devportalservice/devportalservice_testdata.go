@@ -25,6 +25,8 @@ const testDevicesResponseBody = `{
 `
 
 var testDevices = AppleDeveloperConnection{
+	SessionBasedConnection: nil,
+	JWTConnection:          nil,
 	TestDevices: []TestDevice{
 		{
 			ID:         24,
@@ -120,4 +122,22 @@ var testSessionBasedConnection = AppleDeveloperConnection{
 			},
 		},
 	},
+	JWTConnection: nil,
+	TestDevices:   nil,
+}
+
+const testJWTConnectionResponseBody = `{
+    "key_id": "ASDF4H9LNQ",
+    "issuer_id": "asdf1234-7325-47e3-e053-5b8c7c11a4d1",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nASdf1234MBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg9O4G/HVLgSqc2i7x\nasDF12346UNzKCEwOfQ1ixC0G9agCgYIKoZIzj0DAQehRANCAARcJQItGFcefLRc\naSDf1234ka9BMpRjjr3NWyCWl817HCdXXckuc22RjnKxRnYMBBDv8zPDX0k9TbST\nacgZ04Gg\n-----END PRIVATE KEY-----"
+}`
+
+var testJWTConnecton = AppleDeveloperConnection{
+	SessionBasedConnection: nil,
+	JWTConnection: &JWTConnection{
+		KeyID:      "ASDF4H9LNQ",
+		IssuerID:   "asdf1234-7325-47e3-e053-5b8c7c11a4d1",
+		PrivateKey: "-----BEGIN PRIVATE KEY-----\nASdf1234MBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg9O4G/HVLgSqc2i7x\nasDF12346UNzKCEwOfQ1ixC0G9agCgYIKoZIzj0DAQehRANCAARcJQItGFcefLRc\naSDf1234ka9BMpRjjr3NWyCWl817HCdXXckuc22RjnKxRnYMBBDv8zPDX0k9TbST\nacgZ04Gg\n-----END PRIVATE KEY-----",
+	},
+	TestDevices: nil,
 }
