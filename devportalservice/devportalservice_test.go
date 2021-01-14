@@ -35,16 +35,16 @@ func TestGetAppleDeveloperConnection(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(strings.NewReader(testDevicesResponseBody)),
 			},
-			want:    &testDevicesAppleDevConnData,
+			want:    &testDevices,
 			wantErr: false,
 		},
 		{
 			name: "Session-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testAppleDevConnDataJSON)),
+				Body:       ioutil.NopCloser(strings.NewReader(testSessionBasedConnectionResponseBody)),
 			},
-			want:    &testAppleDevConnData,
+			want:    &testSessionBasedConnection,
 			wantErr: false,
 		},
 	}
@@ -81,9 +81,9 @@ func TestSessionEnvValue(t *testing.T) {
 			name: "Session-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testAppleDevConnDataJSON)),
+				Body:       ioutil.NopCloser(strings.NewReader(testSessionBasedConnectionResponseBody)),
 			},
-			want:    testAppleDevConnSession,
+			want:    testFastlaneSession,
 			wantErr: false,
 		},
 	}
