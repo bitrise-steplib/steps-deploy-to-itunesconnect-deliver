@@ -10,6 +10,54 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestGetAppleDeveloperConnection(t *testing.T) {
+	tests := []struct {
+		name string
+
+		response *http.Response
+		err      error
+
+		want    *AppleDeveloperConnection
+		wantErr bool
+	}{
+		{
+			name: "No Apple Developer Connection set for the build",
+			response: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(strings.NewReader("{}")),
+			},
+			want:    &AppleDeveloperConnection{},
+			wantErr: false,
+		},
+		{
+			name: "No Apple Developer Connection set for the build, test devices available",
+			response: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(strings.NewReader(testDevicesResponseBody)),
+			},
+			want:    &testDevicesAppleDevConnData,
+			wantErr: false,
+		},
+		{
+			name: "Session-based Apple Developer Connection set for the build",
+			response: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(strings.NewReader(testAppleDevConnDataJSON)),
+			},
+			want:    &testAppleDevConnData,
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewBitriseClient(newMockHTTPClient(tt.response, nil))
+			got, err := c.GetAppleDeveloperConnection("dummy url", "dummy token")
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestSessionEnvValue(t *testing.T) {
 	tests := []struct {
 		name string
@@ -25,15 +73,6 @@ func TestSessionEnvValue(t *testing.T) {
 			response: &http.Response{
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(strings.NewReader("{}")),
-			},
-			want:    "",
-			wantErr: false,
-		},
-		{
-			name: "No Apple Developer Connection set for the build, test devices available",
-			response: &http.Response{
-				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testDevicesResponseBody)),
 			},
 			want:    "",
 			wantErr: false,

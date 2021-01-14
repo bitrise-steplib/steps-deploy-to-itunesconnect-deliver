@@ -24,6 +24,29 @@ const testDevicesResponseBody = `{
 }
 `
 
+var testDevicesAppleDevConnData = AppleDeveloperConnection{
+	TestDevices: []TestDevice{
+		{
+			ID:         24,
+			UserID:     4,
+			DeviceID:   "asdf12345ad9b298cb9a9f28555c49573d8bc322",
+			Title:      "iPhone 6",
+			CreatedAt:  "2015-03-13T16:16:13.665Z",
+			UpdatedAt:  "2015-03-13T16:16:13.665Z",
+			DeviceType: "ios",
+		},
+		{
+			ID:         28,
+			UserID:     4,
+			DeviceID:   "asdf12341e73b76df6e99d0d713133c3e078418f",
+			Title:      "iPad mini 2 (Wi-Fi)",
+			CreatedAt:  "2015-03-19T13:25:43.487Z",
+			UpdatedAt:  "2015-03-19T13:25:43.487Z",
+			DeviceType: "ios",
+		},
+	},
+}
+
 const testAppleDevConnSession = `---
 - !ruby/object:HTTP::Cookie
   name: DES58b0eba556d80ed2b98707e15ffafd344
@@ -66,19 +89,7 @@ const testAppleDevConnDataJSON = `{
                 "httponly": true
             }
         ]
-    },
-    "test_devices": [
-        {
-            "id": 8414,
-            "user_id": 52411,
-            "device_identifier": "1b78ac4bad2e8911139287ac5dd152fbe86eb2b9",
-            "title": "iPhone 7",
-            "created_at": "2018-08-30T09:09:36.332Z",
-            "updated_at": "2018-08-30T09:09:36.332Z",
-            "device_type": "ios"
-        }
-    ],
-    "default_team_id": null
+    }
 }`
 
 var testAppleDevConnData = AppleDeveloperConnection{

@@ -68,6 +68,7 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 
 	type data struct {
 		*SessionBasedConnection
+		TestDevices []TestDevice `json:"test_devices"`
 	}
 	var d data
 	if err := json.Unmarshal([]byte(body), &d); err != nil {
@@ -76,6 +77,7 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 
 	return &AppleDeveloperConnection{
 		SessionBasedConnection: d.SessionBasedConnection,
+		TestDevices:            d.TestDevices,
 	}, nil
 }
 
@@ -99,10 +101,22 @@ type SessionBasedConnection struct {
 	SessionCookies       map[string][]cookie `json:"session_cookies"`
 }
 
+// TestDevice ...
+type TestDevice struct {
+	ID         int    `json:"id"`
+	UserID     int    `json:"user_id"`
+	DeviceID   string `json:"device_identifier"`
+	Title      string `json:"title"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+	DeviceType string `json:"device_type"`
+}
+
 // AppleDeveloperConnection represents a Bitrise.io Apple Developer connection.
 // https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/
 type AppleDeveloperConnection struct {
 	SessionBasedConnection *SessionBasedConnection
+	TestDevices            []TestDevice `json:"test_devices"`
 }
 
 // Expiry returns the expiration of the Bitrise session-based Apple Developer connection.
