@@ -433,11 +433,11 @@ func main() {
 			handleSessionDataError(err)
 		}
 
-		if conn != nil && conn.SessionBasedConnection != nil {
+		if conn != nil && conn.SessionConnection != nil {
 			fmt.Println()
 			log.Infof("Connected session-based Apple Developer Portal Account found")
 
-			sessionConn := conn.SessionBasedConnection
+			sessionConn := conn.SessionConnection
 
 			if sessionConn.AppleID != cfg.ItunesConnectUser {
 				log.Warnf("Connected Apple Developer and App Store login account missmatch")

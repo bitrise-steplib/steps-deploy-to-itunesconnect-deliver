@@ -35,16 +35,16 @@ func TestGetAppleDeveloperConnection(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(strings.NewReader(testDevicesResponseBody)),
 			},
-			want:    &testDevices,
+			want:    &testConnectionOnlyDevices,
 			wantErr: false,
 		},
 		{
 			name: "Session-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testSessionBasedConnectionResponseBody)),
+				Body:       ioutil.NopCloser(strings.NewReader(testSessionConnectionResponseBody)),
 			},
-			want:    &testSessionBasedConnection,
+			want:    &testConnectionWithSessionConnection,
 			wantErr: false,
 		},
 		{
@@ -53,7 +53,16 @@ func TestGetAppleDeveloperConnection(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(strings.NewReader(testJWTConnectionResponseBody)),
 			},
-			want:    &testJWTConnecton,
+			want:    &testConnectionWithJWTConnection,
+			wantErr: false,
+		},
+		{
+			name: "Session-based and JWT Apple Developer Connection set for the build, test device available",
+			response: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(strings.NewReader(testSessionAndJWTConnectionResponseBody)),
+			},
+			want:    &testConnectionWithSessionAndJWTConnection,
 			wantErr: false,
 		},
 	}
@@ -90,7 +99,7 @@ func TestSessionEnvValue(t *testing.T) {
 			name: "Session-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testSessionBasedConnectionResponseBody)),
+				Body:       ioutil.NopCloser(strings.NewReader(testSessionConnectionResponseBody)),
 			},
 			want:    testFastlaneSession,
 			wantErr: false,
@@ -103,11 +112,11 @@ func TestSessionEnvValue(t *testing.T) {
 			require.NoError(t, err)
 
 			if tt.want == "" {
-				require.Nil(t, conn.SessionBasedConnection)
+				require.Nil(t, conn.SessionConnection)
 				return
 			}
 
-			got, err := conn.SessionBasedConnection.FastlaneLoginSession()
+			got, err := conn.SessionConnection.FastlaneLoginSession()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SessionData() error = %v, wantErr %v", err, tt.wantErr)
 				return

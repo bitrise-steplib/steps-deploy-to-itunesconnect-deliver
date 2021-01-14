@@ -67,7 +67,7 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 	}
 
 	type data struct {
-		*SessionBasedConnection
+		*SessionConnection
 		*JWTConnection
 		TestDevices []TestDevice `json:"test_devices"`
 	}
@@ -77,9 +77,9 @@ func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken stri
 	}
 
 	return &AppleDeveloperConnection{
-		SessionBasedConnection: d.SessionBasedConnection,
-		JWTConnection:          d.JWTConnection,
-		TestDevices:            d.TestDevices,
+		SessionConnection: d.SessionConnection,
+		JWTConnection:     d.JWTConnection,
+		TestDevices:       d.TestDevices,
 	}, nil
 }
 
@@ -95,8 +95,8 @@ type cookie struct {
 	ForDomain *bool  `json:"for_domain,omitempty"`
 }
 
-// SessionBasedConnection represents a Bitrise.io session-based Apple Developer connection.
-type SessionBasedConnection struct {
+// SessionConnection represents a Bitrise.io session-based Apple Developer connection.
+type SessionConnection struct {
 	AppleID              string              `json:"apple_id"`
 	Password             string              `json:"password"`
 	ConnectionExpiryDate string              `json:"connection_expiry_date"`
@@ -124,13 +124,13 @@ type TestDevice struct {
 // AppleDeveloperConnection represents a Bitrise.io Apple Developer connection.
 // https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/
 type AppleDeveloperConnection struct {
-	SessionBasedConnection *SessionBasedConnection
-	JWTConnection          *JWTConnection
-	TestDevices            []TestDevice `json:"test_devices"`
+	SessionConnection *SessionConnection
+	JWTConnection     *JWTConnection
+	TestDevices       []TestDevice `json:"test_devices"`
 }
 
 // Expiry returns the expiration of the Bitrise session-based Apple Developer connection.
-func (c *SessionBasedConnection) Expiry() *time.Time {
+func (c *SessionConnection) Expiry() *time.Time {
 	t, err := time.Parse(time.RFC3339, c.ConnectionExpiryDate)
 	if err != nil {
 		log.Warnf("Could not parse session-based connection expiry date: %s", err)
@@ -140,7 +140,7 @@ func (c *SessionBasedConnection) Expiry() *time.Time {
 }
 
 // Expired returns whether the Bitrise session-based Apple Developer connection is expired.
-func (c *SessionBasedConnection) Expired() bool {
+func (c *SessionConnection) Expired() bool {
 	expiry := c.Expiry()
 	if expiry == nil {
 		return false
@@ -150,7 +150,7 @@ func (c *SessionBasedConnection) Expired() bool {
 
 // FastlaneLoginSession returns the Apple ID login session in a ruby/object:HTTP::Cookie format.
 // The session can be used as a value for FASTLANE_SESSION environment variable: https://docs.fastlane.tools/best-practices/continuous-integration/#two-step-or-two-factor-auth.
-func (c *SessionBasedConnection) FastlaneLoginSession() (string, error) {
+func (c *SessionConnection) FastlaneLoginSession() (string, error) {
 	var rubyCookies []string
 	for _, cookie := range c.SessionCookies["https://idmsa.apple.com"] {
 		if rubyCookies == nil {
