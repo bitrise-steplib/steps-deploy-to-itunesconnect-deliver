@@ -1,11 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
@@ -20,14 +25,16 @@ import (
 	"github.com/kballard/go-shellquote"
 )
 
-// configs ...
-type configs struct {
+// Config ...
+type Config struct {
 	IpaPath string `env:"ipa_path"`
 	PkgPath string `env:"pkg_path"`
 
-	ItunesconUser string          `env:"itunescon_user,required"`
-	Password      stepconf.Secret `env:"password"`
-	AppPassword   stepconf.Secret `env:"app_password"`
+	ItunesConnectUser     string          `env:"itunescon_user"`
+	Password              stepconf.Secret `env:"password"`
+	AppPassword           stepconf.Secret `env:"app_password"`
+	APIKeyPath            string          `env:"api_key_path"`
+	APIIssuer             string          `env:"api_issuer"`
 
 	AppID                string `env:"app_id"`
 	BundleID             string `env:"bundle_id"`
@@ -229,8 +236,172 @@ func handleSessionDataError(err error) {
 	}
 }
 
+func (cfg Config) validate() error {
+	if cfg.IpaPath == "" && cfg.PkgPath == "" {
+		return fmt.Errorf("Issue with input: no IpaPath nor PkgPath parameter specified")
+	}
+
+	if cfg.AppID == "" && cfg.BundleID  == "" {
+		return fmt.Errorf("Issue with input: no AppID or BundleID parameter specified")
+	}
+
+	var (
+		isJWTAuthType     = (cfg.APIKeyPath != "" || cfg.APIIssuer != "")
+		isAppleIDAuthType = (cfg.AppPassword != "" || cfg.Password != "" || cfg.ItunesConnectUser != "")
+	)
+
+	switch {
+
+	case isAppleIDAuthType == isJWTAuthType:
+
+		return fmt.Errorf("one type of authentication required, either provide itunescon_user with password/app_password or api_key_path with api_issuer")
+
+	case isAppleIDAuthType:
+
+		if cfg.ItunesConnectUser == "" {
+			return fmt.Errorf("no itunescon_user provided")
+		}
+		if cfg.Password == "" && cfg.AppPassword == "" {
+			return fmt.Errorf("neither password nor app_password is provided")
+		}
+
+	case isJWTAuthType:
+
+		if cfg.APIIssuer == "" {
+			return fmt.Errorf("no api_issuer provided")
+		}
+		if cfg.APIKeyPath == "" {
+			return fmt.Errorf("no api_key_path provided")
+		}
+
+	}
+
+	return nil
+}
+
+func copyOrDownloadFile(u *url.URL, pth string) error {
+	if err := os.MkdirAll(filepath.Dir(pth), 0777); err != nil {
+		return err
+	}
+
+	certFile, err := os.Create(pth)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := certFile.Close(); err != nil {
+			log.Errorf("Failed to close file, error: %s", err)
+		}
+	}()
+
+	// if file -> copy
+	if u.Scheme == "file" {
+		b, err := ioutil.ReadFile(u.Path)
+		if err != nil {
+			return err
+		}
+		_, err = certFile.Write(b)
+		return err
+	}
+
+	// otherwise download
+	f, err := http.Get(u.String())
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := f.Body.Close(); err != nil {
+			log.Errorf("Failed to close file, error: %s", err)
+		}
+	}()
+
+	_, err = io.Copy(certFile, f.Body)
+	return err
+}
+
+func getKeyID(u *url.URL) string {
+	var keyID = "Bitrise" // as default if no ID found in file name
+
+	// get the ID of the key from the file
+	if matches := regexp.MustCompile(`AuthKey_(.+)\.p8`).FindStringSubmatch(filepath.Base(u.Path)); len(matches) == 2 {
+		keyID = matches[1]
+	}
+
+	return keyID
+}
+
+func getKeyPath(keyID string, keyPaths []string) (string, bool, error) {
+	certName := fmt.Sprintf("AuthKey_%s.p8", keyID)
+
+	for _, path := range keyPaths {
+		certPath := filepath.Join(path, certName)
+
+		switch exists, err := pathutil.IsPathExists(certPath); {
+		case err != nil:
+			return "", false, err
+		case exists:
+			return certPath, true, err
+		}
+	}
+
+	return filepath.Join(keyPaths[0], certName), false, nil
+}
+
+type ApiKey struct {
+	KeyID					string `json:"key_id"`
+	IssuerID			string `json:"issuer_id"`
+	Key						string `json:"key"`
+}
+
+func prepareAPIKey(apiKeyPath string, apiIssuer string) (string, error) {
+	// see these in the altool's man page
+	var keyPaths = []string{
+		filepath.Join(os.Getenv("HOME"), ".appstoreconnect/private_keys"),
+		filepath.Join(os.Getenv("HOME"), ".private_keys"),
+		filepath.Join(os.Getenv("HOME"), "private_keys"),
+		"./private_keys",
+	}
+
+	fileURL, err := url.Parse(apiKeyPath)
+	if err != nil {
+		return "", err
+	}
+
+	keyID := getKeyID(fileURL)
+
+	keyPath, keyExists, err := getKeyPath(keyID, keyPaths)
+	if err != nil {
+		return "", err
+	}
+
+	if !keyExists {
+		if err := copyOrDownloadFile(fileURL, keyPath); err != nil {
+			return "", err
+		}
+	}
+
+ 	key, err := ioutil.ReadFile(keyPath)
+	if err != nil {
+    return "", err
+	}
+
+	json, _ := json.Marshal(ApiKey{keyID, apiIssuer, string(key)})
+	
+	tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
+	if err != nil {
+    return "", err
+	}
+  tmpPath := filepath.Join(tmpDir, "api_key.json")
+
+	if err := ioutil.WriteFile(tmpPath, json, os.ModePerm); err != nil {
+			return "", err
+	}  
+
+	return tmpPath, nil
+}
+
 func main() {
-	var cfg configs
+	var cfg Config
 	if err := stepconf.Parse(&cfg); err != nil {
 		fail("Issue with input: %s", err)
 	}
@@ -240,12 +411,8 @@ func main() {
 
 	//
 	// Validate inputs
-	if cfg.IpaPath == "" && cfg.PkgPath == "" {
-		fail("Issue with input: no IpaPath nor PkgPath parameter specified")
-	}
-
-	if cfg.AppID == "" && cfg.BundleID == "" {
-		fail("Issue with input: no AppID or BundleID parameter specified")
+	if err := cfg.validate(); err != nil {
+		fail("Input error: %s", err)
 	}
 
 	//
@@ -265,7 +432,7 @@ func main() {
 			fmt.Println()
 			log.Infof("Connected session-based Apple Developer Portal Account found")
 
-			if conn.AppleID != cfg.ItunesconUser {
+			if conn.AppleID != cfg.ItunesConnectUser {
 				log.Warnf("Connected Apple Developer and App Store login account missmatch")
 			} else if expiry := conn.Expiry(); expiry != nil && conn.Expired() {
 				log.Warnf("TFA session expired on %s", expiry.String())
@@ -353,7 +520,18 @@ This means that when the API changes
 
 	args := []string{
 		"deliver",
-		"--username", cfg.ItunesconUser,
+	}
+
+	if cfg.ItunesConnectUser != "" {
+		args = append(args, "--username", cfg.ItunesConnectUser)
+	}
+
+  if string(cfg.APIKeyPath) != "" {
+		apiKey, err := prepareAPIKey(cfg.APIKeyPath, cfg.APIIssuer)
+		if err != nil {
+			fail("Failed to prepare api key json for authentication, error: %s", err)
+		}
+		args = append(args, "--api_key_path", apiKey)
 	}
 
 	if cfg.AppID != "" {
