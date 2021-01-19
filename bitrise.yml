@@ -25,13 +25,16 @@ workflows:
   ci:
     before_run:
     - audit-this-step
+    - go-tests
+    after_run:
+    - test
+
+  go-tests:
     steps:
     - go-list:
     - golint:
     - errcheck:
     - go-test:
-    after_run:
-    - test
 
   test:
     steps:
