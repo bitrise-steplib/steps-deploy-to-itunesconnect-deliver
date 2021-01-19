@@ -30,11 +30,11 @@ type Config struct {
 	IpaPath string `env:"ipa_path"`
 	PkgPath string `env:"pkg_path"`
 
-	ItunesConnectUser     string          `env:"itunescon_user"`
-	Password              stepconf.Secret `env:"password"`
-	AppPassword           stepconf.Secret `env:"app_password"`
-	APIKeyPath            string          `env:"api_key_path"`
-	APIIssuer             string          `env:"api_issuer"`
+	ItunesConnectUser string          `env:"itunescon_user"`
+	Password          stepconf.Secret `env:"password"`
+	AppPassword       stepconf.Secret `env:"app_password"`
+	APIKeyPath        string          `env:"api_key_path"`
+	APIIssuer         string          `env:"api_issuer"`
 
 	AppID                string `env:"app_id"`
 	BundleID             string `env:"bundle_id"`
@@ -241,7 +241,7 @@ func (cfg Config) validate() error {
 		return fmt.Errorf("Issue with input: no IpaPath nor PkgPath parameter specified")
 	}
 
-	if cfg.AppID == "" && cfg.BundleID  == "" {
+	if cfg.AppID == "" && cfg.BundleID == "" {
 		return fmt.Errorf("Issue with input: no AppID or BundleID parameter specified")
 	}
 
@@ -347,10 +347,11 @@ func getKeyPath(keyID string, keyPaths []string) (string, bool, error) {
 	return filepath.Join(keyPaths[0], certName), false, nil
 }
 
-type ApiKey struct {
-	KeyID					string `json:"key_id"`
-	IssuerID			string `json:"issuer_id"`
-	Key						string `json:"key"`
+// APIKey ...
+type APIKey struct {
+	KeyID    string `json:"key_id"`
+	IssuerID string `json:"issuer_id"`
+	Key      string `json:"key"`
 }
 
 func prepareAPIKey(apiKeyPath string, apiIssuer string) (string, error) {
@@ -380,22 +381,25 @@ func prepareAPIKey(apiKeyPath string, apiIssuer string) (string, error) {
 		}
 	}
 
- 	key, err := ioutil.ReadFile(keyPath)
+	key, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-    return "", err
+		return "", err
 	}
 
-	json, _ := json.Marshal(ApiKey{keyID, apiIssuer, string(key)})
-	
+	json, err := json.Marshal(APIKey{keyID, apiIssuer, string(key)})
+	if err != nil {
+		return "", err
+	}
+
 	tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
 	if err != nil {
-    return "", err
+		return "", err
 	}
-  tmpPath := filepath.Join(tmpDir, "api_key.json")
+	tmpPath := filepath.Join(tmpDir, "api_key.json")
 
 	if err := ioutil.WriteFile(tmpPath, json, os.ModePerm); err != nil {
-			return "", err
-	}  
+		return "", err
+	}
 
 	return tmpPath, nil
 }
@@ -526,7 +530,7 @@ This means that when the API changes
 		args = append(args, "--username", cfg.ItunesConnectUser)
 	}
 
-  if string(cfg.APIKeyPath) != "" {
+	if string(cfg.APIKeyPath) != "" {
 		apiKey, err := prepareAPIKey(cfg.APIKeyPath, cfg.APIIssuer)
 		if err != nil {
 			fail("Failed to prepare api key json for authentication, error: %s", err)
