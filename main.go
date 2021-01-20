@@ -254,15 +254,15 @@ func (cfg Config) validate() error {
 
 	case isAppleIDAuthType == isJWTAuthType:
 
-		return fmt.Errorf("one type of authentication required, either provide itunescon_user with password/app_password or api_key_path with api_issuer")
+		return fmt.Errorf("one type of authentication required, either provide itunescon_user with password and optionally app_password or api_key_path with api_issuer")
 
 	case isAppleIDAuthType:
 
 		if cfg.ItunesConnectUser == "" {
 			return fmt.Errorf("no itunescon_user provided")
 		}
-		if cfg.Password == "" && cfg.AppPassword == "" {
-			return fmt.Errorf("neither password nor app_password is provided")
+		if cfg.Password == "" {
+			return fmt.Errorf("no password provided")
 		}
 
 	case isJWTAuthType:
