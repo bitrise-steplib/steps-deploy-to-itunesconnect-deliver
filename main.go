@@ -541,6 +541,8 @@ This means that when the API changes
 			fail("Failed to prepare api key json for authentication, error: %s", err)
 		}
 		args = append(args, "--api_key_path", apiKey)
+		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
+		args = append(args, "--precheck_include_in_app_purchases", "false")
 	}
 
 	if cfg.AppID != "" {
