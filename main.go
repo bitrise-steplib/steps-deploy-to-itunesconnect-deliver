@@ -480,22 +480,26 @@ func main() {
 	fmt.Println()
 	log.Infof("Deploy")
 
-	log.Printf(`**Note:** if your password
+    if cfg.password != "" {
+	    log.Printf(`**Note:** if your password
 contains special characters
 and you experience problems, please
 consider changing your password
 to something with only
 alphanumeric characters.`)
-	fmt.Println()
+	    fmt.Println()
+    }
 
-	log.Printf(`**Be advised**
+    if cfg.APIKeyPath == "" {
+	    log.Printf(`**Be advised**
 that this step uses a well maintained, open source tool which
 uses *undocumented and unsupported APIs* (because the current
 iTunes Connect platform does not have a documented and supported API)
 to perform the deployment.
 This means that when the API changes
 **this step might fail until the tool is updated**.`)
-	fmt.Println()
+	    fmt.Println()
+    }
 
 	var options []string
 	if cfg.Options != "" {
