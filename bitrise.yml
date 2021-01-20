@@ -10,9 +10,6 @@ app:
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
 
   # define these in your .bitrise.secrets.yml
-  - BITRISE_BUILD_NUMBER: $BITRISE_BUILD_NUMBER
-  - BITRISE_BUILD_VERSION_OFFSET: $BITRISE_BUILD_VERSION_OFFSET
-
   - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
   - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
   - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
@@ -60,8 +57,6 @@ workflows:
         - submit_for_review: "no"
         - fastlane_version: "latest"
         - verbose_log: "yes"
-    after_run:
-      - increment-build-number
 
   test-api-key-auth:
     title: Test API Key authentication
@@ -112,6 +107,16 @@ workflows:
         inputs:
         - generate_profiles: 'yes'
         - distribution_type: app-store
+    - script:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            BITRISE_BUILD_NUMBER=$(($(gdate +%Y%m%d%H%M)-200000000000))
+            if [[ -z "${$BITRISE_BUILD_NUMBER}" ]]; then
+              echo "error: failed to calculated build number"
+              exit 1
+            fi
+            envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
     - set-xcode-build-number:
         title: Set Build Number
         run_if: true
@@ -125,18 +130,6 @@ workflows:
         - output_dir: $BITRISE_DEPLOY_DIR
         - project_path: $BITRISE_PROJECT_PATH
         - export_method: app-store
-
-  increment-build-number:
-    steps:
-    - script:
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            if [[ -z "${$BITRISE_BUILD_NUMBER}" ]]; then
-              echo "error: there is no $BITRISE_BUILD_NUMBER env var specified"
-              exit 1
-            fi  
-            envman add --key BITRISE_BUILD_NUMBER --value "$((BITRISE_BUILD_NUMBER + 1))"
 
   # ----------------------------------------------------------------
   # --- Utility workflows
