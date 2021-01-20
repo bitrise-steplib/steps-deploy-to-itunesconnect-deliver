@@ -70,7 +70,7 @@ workflows:
     steps:
     - path::./:
         inputs:
-          - api_key_path: $ITUNES_CONNECT_API_KEY_ISSUER
+          - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
           - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
           - team_id: $ITUNES_CONNECT_TEAM_ID
           - app_id: $ITUNES_CONNECT_APP_ID
