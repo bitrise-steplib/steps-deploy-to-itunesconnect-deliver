@@ -44,11 +44,11 @@ workflows:
     #- test-api-key-auth
 
   test-password-auth:
+    title: Test password authentication
     before_run:
     - prepare-test
     steps:
     - path::./:
-        title: Step Test password authentication
         inputs:
         - itunescon_user: $ITUNES_CONNECT_USER
         - password: $ITUNES_CONNECT_PASSWORD
@@ -64,11 +64,11 @@ workflows:
       - increment-build-number
 
   test-api-key-auth:
+    title: Test API Key authentication
     before_run:
       - prepare-test
     steps:
     - path::./:
-        title: Step Test password authentication
         inputs:
           - api_key_path: $ITUNES_CONNECT_API_KEY_ISSUER
           - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
@@ -81,6 +81,9 @@ workflows:
           - verbose_log: "yes"
 
   prepare-test:
+    title: Prepare test
+    description: |
+      This downloads and archives an example app as an input for deliver
     steps:
     - script:
         inputs:
