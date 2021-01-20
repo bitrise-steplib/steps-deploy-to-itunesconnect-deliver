@@ -480,7 +480,7 @@ func main() {
 	fmt.Println()
 	log.Infof("Deploy")
 
-    if cfg.password != "" {
+    if cfg.Password != "" {
 	    log.Printf(`**Note:** if your password
 contains special characters
 and you experience problems, please
