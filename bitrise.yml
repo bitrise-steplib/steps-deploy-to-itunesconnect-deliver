@@ -41,7 +41,7 @@ workflows:
   test:
     before_run:
     - test-password-auth
-    #- test-api-key-auth
+    - test-api-key-auth
 
   test-password-auth:
     title: Test password authentication
