@@ -347,7 +347,8 @@ func getKeyPath(keyID string, keyPaths []string) (string, bool, error) {
 	return filepath.Join(keyPaths[0], certName), false, nil
 }
 
-// APIKey ...
+// APIKey is used to serialize App Store Connect API Key into JSON for fastlane
+// see: https://docs.fastlane.tools/app-store-connect-api/#using-fastlane-api-key-json-file
 type APIKey struct {
 	KeyID    string `json:"key_id"`
 	IssuerID string `json:"issuer_id"`
