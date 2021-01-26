@@ -433,15 +433,17 @@ func main() {
 			handleSessionDataError(err)
 		}
 
-		if conn != nil && conn.AppleID != "" {
+		if conn != nil && conn.SessionConnection != nil {
 			fmt.Println()
 			log.Infof("Connected session-based Apple Developer Portal Account found")
 
-			if conn.AppleID != cfg.ItunesConnectUser {
+			sessionConn := conn.SessionConnection
+
+			if sessionConn.AppleID != cfg.ItunesConnectUser {
 				log.Warnf("Connected Apple Developer and App Store login account missmatch")
-			} else if expiry := conn.Expiry(); expiry != nil && conn.Expired() {
+			} else if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
 				log.Warnf("TFA session expired on %s", expiry.String())
-			} else if session, err := conn.FastlaneLoginSession(); err != nil {
+			} else if session, err := sessionConn.FastlaneLoginSession(); err != nil {
 				handleSessionDataError(err)
 			} else {
 				fastlaneSession = session
