@@ -54,7 +54,12 @@ func TestSessionEnvValue(t *testing.T) {
 			conn, err := c.GetAppleDeveloperConnection("dummy url", "dummy token")
 			require.NoError(t, err)
 
-			got, err := conn.FastlaneLoginSession()
+			if tt.want == "" {
+				require.Nil(t, conn.SessionBasedConnection)
+				return
+			}
+
+			got, err := conn.SessionBasedConnection.FastlaneLoginSession()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SessionData() error = %v, wantErr %v", err, tt.wantErr)
 				return
