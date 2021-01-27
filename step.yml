@@ -99,7 +99,7 @@ inputs:
         You can choose which type of Apple Developer Connection to use, or use Step inputs for configuring authentication:
         - `automatic`: Use Apple Developer Connection if found, Step inputs are used as a fallback. Both cases API key (JWT) authentication has priority over Apple ID (legacy), if set.
         - `api_key`: Use Apple Developer Connection. Only API key (JWT) authentication is used. Authentication related Step inputs are ignored.
-        - `apple_id`: Use Apple Developer Connection. Only Apple ID (legacy) authentication is used. Authentication related Step inputs are ignored.
+        - `apple_id`: Use Apple Developer Connection and Application-specific password Step input. Only Apple ID (legacy) authentication is used. Other authentication related Step inputs are ignored.
         - `disabled`: Do not use Apple Developer Connection. Only authentication related Step inputs are considered.
       is_required: true
       value_options:
@@ -137,7 +137,7 @@ inputs:
       is_sensitive: true
   - app_password: ""
     opts:
-      title: "Apple ID (legacy): Application-specific password"
+      title: "Apple ID (legacy): Application-specific password (Required if using legacy Bitrise Apple Developer Connection)"
       description: |-
         An application-specific password for the Apple ID.
         **NOTE:** Application-specific passwords can be created on the

@@ -1,16 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
+	"strings"
 	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
@@ -30,11 +26,12 @@ type Config struct {
 	IpaPath string `env:"ipa_path"`
 	PkgPath string `env:"pkg_path"`
 
-	ItunesConnectUser string          `env:"itunescon_user"`
-	Password          stepconf.Secret `env:"password"`
-	AppPassword       stepconf.Secret `env:"app_password"`
-	APIKeyPath        string          `env:"api_key_path"`
-	APIIssuer         string          `env:"api_issuer"`
+	BitriseAppleConnection string          `env:"connection,opt[automatic,api_key,apple_id,disabled]"`
+	ItunesConnectUser      string          `env:"itunescon_user"`
+	Password               stepconf.Secret `env:"password"`
+	AppPassword            stepconf.Secret `env:"app_password"`
+	APIKeyPath             string          `env:"api_key_path"`
+	APIIssuer              string          `env:"api_issuer"`
 
 	AppID                string `env:"app_id"`
 	BundleID             string `env:"bundle_id"`
@@ -56,6 +53,31 @@ type Config struct {
 
 const latestStable = "latest-stable"
 const latestPrerelease = "latest"
+
+type bitriseAppleConnection int
+
+const (
+	invalid bitriseAppleConnection = iota
+	connectionAutomatic
+	connectionAPIKey
+	connectionAppleID
+	connectionDisabled
+)
+
+func parseAppleConnection(param string) bitriseAppleConnection {
+	switch param {
+	case "automatic":
+		return connectionAutomatic
+	case "api_key":
+		return connectionAPIKey
+	case "apple_id":
+		return connectionAppleID
+	case "disabled":
+		return connectionDisabled
+	default:
+		return invalid
+	}
+}
 
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
@@ -245,6 +267,9 @@ func (cfg Config) validate() error {
 		return fmt.Errorf("Issue with input: no AppID or BundleID parameter specified")
 	}
 
+	cfg.APIIssuer = strings.TrimSpace(cfg.APIIssuer)
+	cfg.APIKeyPath = strings.TrimSpace(cfg.APIKeyPath)
+	cfg.ItunesConnectUser = strings.TrimSpace(cfg.ItunesConnectUser)
 	var (
 		isJWTAuthType     = (cfg.APIKeyPath != "" || cfg.APIIssuer != "")
 		isAppleIDAuthType = (cfg.AppPassword != "" || cfg.Password != "" || cfg.ItunesConnectUser != "")
@@ -279,132 +304,6 @@ func (cfg Config) validate() error {
 	return nil
 }
 
-func copyOrDownloadFile(u *url.URL, pth string) error {
-	if err := os.MkdirAll(filepath.Dir(pth), 0777); err != nil {
-		return err
-	}
-
-	certFile, err := os.Create(pth)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err := certFile.Close(); err != nil {
-			log.Errorf("Failed to close file, error: %s", err)
-		}
-	}()
-
-	// if file -> copy
-	if u.Scheme == "file" {
-		b, err := ioutil.ReadFile(u.Path)
-		if err != nil {
-			return err
-		}
-		_, err = certFile.Write(b)
-		return err
-	}
-
-	// otherwise download
-	f, err := http.Get(u.String())
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err := f.Body.Close(); err != nil {
-			log.Errorf("Failed to close file, error: %s", err)
-		}
-	}()
-
-	_, err = io.Copy(certFile, f.Body)
-	return err
-}
-
-func getKeyID(u *url.URL) string {
-	var keyID = "Bitrise" // as default if no ID found in file name
-
-	// get the ID of the key from the file
-	if matches := regexp.MustCompile(`AuthKey_(.+)\.p8`).FindStringSubmatch(filepath.Base(u.Path)); len(matches) == 2 {
-		keyID = matches[1]
-	}
-
-	return keyID
-}
-
-func getKeyPath(keyID string, keyPaths []string) (string, bool, error) {
-	certName := fmt.Sprintf("AuthKey_%s.p8", keyID)
-
-	for _, path := range keyPaths {
-		certPath := filepath.Join(path, certName)
-
-		switch exists, err := pathutil.IsPathExists(certPath); {
-		case err != nil:
-			return "", false, err
-		case exists:
-			return certPath, true, err
-		}
-	}
-
-	return filepath.Join(keyPaths[0], certName), false, nil
-}
-
-// APIKey is used to serialize App Store Connect API Key into JSON for fastlane
-// see: https://docs.fastlane.tools/app-store-connect-api/#using-fastlane-api-key-json-file
-type APIKey struct {
-	KeyID    string `json:"key_id"`
-	IssuerID string `json:"issuer_id"`
-	Key      string `json:"key"`
-}
-
-func prepareAPIKey(apiKeyPath string, apiIssuer string) (string, error) {
-	// see these in the altool's man page
-	var keyPaths = []string{
-		filepath.Join(os.Getenv("HOME"), ".appstoreconnect/private_keys"),
-		filepath.Join(os.Getenv("HOME"), ".private_keys"),
-		filepath.Join(os.Getenv("HOME"), "private_keys"),
-		"./private_keys",
-	}
-
-	fileURL, err := url.Parse(apiKeyPath)
-	if err != nil {
-		return "", err
-	}
-
-	keyID := getKeyID(fileURL)
-
-	keyPath, keyExists, err := getKeyPath(keyID, keyPaths)
-	if err != nil {
-		return "", err
-	}
-
-	if !keyExists {
-		if err := copyOrDownloadFile(fileURL, keyPath); err != nil {
-			return "", err
-		}
-	}
-
-	key, err := ioutil.ReadFile(keyPath)
-	if err != nil {
-		return "", err
-	}
-
-	json, err := json.Marshal(APIKey{keyID, apiIssuer, string(key)})
-	if err != nil {
-		return "", err
-	}
-
-	tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
-	if err != nil {
-		return "", err
-	}
-	tmpPath := filepath.Join(tmpDir, "api_key.json")
-
-	if err := ioutil.WriteFile(tmpPath, json, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return tmpPath, nil
-}
-
 func main() {
 	var cfg Config
 	if err := stepconf.Parse(&cfg); err != nil {
@@ -419,38 +318,22 @@ func main() {
 	if err := cfg.validate(); err != nil {
 		fail("Input error: %s", err)
 	}
+	connection := parseAppleConnection(cfg.BitriseAppleConnection)
+	if connection == invalid {
+		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseAppleConnection)
+	}
 
 	//
 	// Fastlane session
-	fastlaneSession := ""
-	buildURL, buildAPIToken := os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN")
-	if buildURL != "" && buildAPIToken != "" {
-		var provider devportalservice.AppleDeveloperConnectionProvider
-		provider = devportalservice.NewBitriseClient(http.DefaultClient)
-
-		conn, err := provider.GetAppleDeveloperConnection(buildURL, buildAPIToken)
-		if err != nil {
-			handleSessionDataError(err)
-		}
-
-		if conn != nil && conn.SessionConnection != nil {
-			fmt.Println()
-			log.Infof("Connected session-based Apple Developer Portal Account found")
-
-			sessionConn := conn.SessionConnection
-
-			if sessionConn.AppleID != cfg.ItunesConnectUser {
-				log.Warnf("Connected Apple Developer and App Store login account missmatch")
-			} else if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
-				log.Warnf("TFA session expired on %s", expiry.String())
-			} else if session, err := sessionConn.FastlaneLoginSession(); err != nil {
-				handleSessionDataError(err)
-			} else {
-				fastlaneSession = session
-			}
-		}
-	} else {
-		log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
+	authConfig, err := authParams(connection, authInputs{
+		itunesConnectUser:     cfg.ItunesConnectUser,
+		itunesConnectPassword: string(cfg.Password),
+		appSpecificPassword:   string(cfg.AppPassword),
+		APIIssuer:             cfg.APIIssuer,
+		APIKeyPath:            cfg.APIKeyPath,
+	})
+	if err != nil {
+		fail("Could not configure App Store Connect authentication: %v", err)
 	}
 
 	//
@@ -482,26 +365,26 @@ func main() {
 	fmt.Println()
 	log.Infof("Deploy")
 
-    if cfg.Password != "" {
-	    log.Printf(`**Note:** if your password
+	if cfg.Password != "" {
+		log.Printf(`**Note:** if your password
 contains special characters
 and you experience problems, please
 consider changing your password
 to something with only
 alphanumeric characters.`)
-	    fmt.Println()
-    }
+		fmt.Println()
+	}
 
-    if cfg.APIKeyPath == "" {
-	    log.Printf(`**Be advised**
+	if cfg.APIKeyPath == "" {
+		log.Printf(`**Be advised**
 that this step uses a well maintained, open source tool which
 uses *undocumented and unsupported APIs* (because the current
 iTunes Connect platform does not have a documented and supported API)
 to perform the deployment.
 This means that when the API changes
 **this step might fail until the tool is updated**.`)
-	    fmt.Println()
-    }
+		fmt.Println()
+	}
 
 	var options []string
 	if cfg.Options != "" {
@@ -513,16 +396,19 @@ This means that when the API changes
 	}
 
 	envs := []string{}
-	if cfg.Password != "" {
-		envs = append(envs, "DELIVER_PASSWORD="+string(cfg.Password))
-	}
 
-	if fastlaneSession != "" {
-		envs = append(envs, "FASTLANE_SESSION="+fastlaneSession)
-	}
+	if authConfig.AppleID != nil {
+		if authConfig.AppleID.password != "" {
+			envs = append(envs, "DELIVER_PASSWORD="+string(cfg.Password))
+		}
 
-	if string(cfg.AppPassword) != "" {
-		envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+string(cfg.AppPassword))
+		if authConfig.AppleID.session != "" {
+			envs = append(envs, "FASTLANE_SESSION="+authConfig.AppleID.session)
+		}
+
+		if authConfig.AppleID.appSpecificPassword != "" {
+			envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+string(authConfig.AppleID.appSpecificPassword))
+		}
 	}
 
 	if cfg.ITMSParameters != "" {
@@ -533,16 +419,17 @@ This means that when the API changes
 		"deliver",
 	}
 
-	if cfg.ItunesConnectUser != "" {
-		args = append(args, "--username", cfg.ItunesConnectUser)
+	if authConfig.AppleID != nil && authConfig.AppleID.username != "" {
+		args = append(args, "--username", authConfig.AppleID.username)
 	}
 
-	if string(cfg.APIKeyPath) != "" {
-		apiKey, err := prepareAPIKey(cfg.APIKeyPath, cfg.APIIssuer)
+	if authConfig.JWT != nil {
+		fastlaneAuthFile, err := writeFastlaneAPIKeyToFile(*authConfig.JWT)
 		if err != nil {
-			fail("Failed to prepare api key json for authentication, error: %s", err)
+			fail("Failed to write Fastane API Key configuration to file: %v", err)
 		}
-		args = append(args, "--api_key_path", apiKey)
+
+		args = append(args, "--api_key_path", fastlaneAuthFile)
 		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
 		args = append(args, "--precheck_include_in_app_purchases", "false")
 	}
