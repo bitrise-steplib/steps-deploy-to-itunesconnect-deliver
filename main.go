@@ -3,10 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
@@ -17,7 +15,6 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
-	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -241,23 +238,6 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	return []string{"fastlane"}, "", nil
 }
 
-func handleSessionDataError(err error) {
-	if err == nil {
-		return
-	}
-
-	if networkErr, ok := err.(devportalservice.NetworkError); ok && networkErr.Status == http.StatusNotFound {
-		log.Debugf("")
-		log.Debugf("Connected Apple Developer Portal Account not found")
-		log.Debugf("Most likely because there is no Apple Developer Portal Account connected to the build, or the build is running locally.")
-		log.Debugf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
-	} else {
-		fmt.Println()
-		log.Errorf("Failed to activate Bitrise Apple Developer Portal connection: %s", err)
-		log.Warnf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
-	}
-}
-
 func (cfg Config) validate() error {
 	if cfg.IpaPath == "" && cfg.PkgPath == "" {
 		return fmt.Errorf("Issue with input: no IpaPath nor PkgPath parameter specified")
@@ -265,40 +245,6 @@ func (cfg Config) validate() error {
 
 	if cfg.AppID == "" && cfg.BundleID == "" {
 		return fmt.Errorf("Issue with input: no AppID or BundleID parameter specified")
-	}
-
-	cfg.APIIssuer = strings.TrimSpace(cfg.APIIssuer)
-	cfg.APIKeyPath = strings.TrimSpace(cfg.APIKeyPath)
-	cfg.ItunesConnectUser = strings.TrimSpace(cfg.ItunesConnectUser)
-	var (
-		isJWTAuthType     = (cfg.APIKeyPath != "" || cfg.APIIssuer != "")
-		isAppleIDAuthType = (cfg.AppPassword != "" || cfg.Password != "" || cfg.ItunesConnectUser != "")
-	)
-
-	switch {
-
-	case isAppleIDAuthType == isJWTAuthType:
-
-		return fmt.Errorf("one type of authentication required, either provide itunescon_user with password and optionally app_password or api_key_path with api_issuer")
-
-	case isAppleIDAuthType:
-
-		if cfg.ItunesConnectUser == "" {
-			return fmt.Errorf("no itunescon_user provided")
-		}
-		if cfg.Password == "" {
-			return fmt.Errorf("no password provided")
-		}
-
-	case isJWTAuthType:
-
-		if cfg.APIIssuer == "" {
-			return fmt.Errorf("no api_issuer provided")
-		}
-		if cfg.APIKeyPath == "" {
-			return fmt.Errorf("no api_key_path provided")
-		}
-
 	}
 
 	return nil
@@ -324,13 +270,25 @@ func main() {
 	}
 
 	//
-	// Fastlane session
-	authConfig, err := authParams(connection, authInputs{
-		itunesConnectUser:     cfg.ItunesConnectUser,
-		itunesConnectPassword: string(cfg.Password),
-		appSpecificPassword:   string(cfg.AppPassword),
-		APIIssuer:             cfg.APIIssuer,
-		APIKeyPath:            cfg.APIKeyPath,
+	// Select and fetch Apple authenication source
+	var authSources []AppleAuthSource
+	switch connection {
+	case connectionAutomatic:
+		authSources = []AppleAuthSource{&ServiceAPIKey{}, &ServiceAppleID{}, &InputAPIKey{}, &InputAppleID{}}
+	case connectionAppleID:
+		authSources = []AppleAuthSource{&ServiceAppleID{}}
+	case connectionAPIKey:
+		authSources = []AppleAuthSource{&ServiceAPIKey{}}
+	case connectionDisabled:
+		authSources = []AppleAuthSource{&InputAPIKey{}, &InputAppleID{}}
+	}
+
+	authConfig, err := FetchAppleAuthData(authSources, AppleAuthInputs{
+		Username:            cfg.ItunesConnectUser,
+		Password:            string(cfg.Password),
+		AppSpecificPassword: string(cfg.AppPassword),
+		APIIssuer:           cfg.APIIssuer,
+		APIKeyPath:          cfg.APIKeyPath,
 	})
 	if err != nil {
 		fail("Could not configure App Store Connect authentication: %v", err)
@@ -423,8 +381,12 @@ This means that when the API changes
 		args = append(args, "--username", authConfig.AppleID.username)
 	}
 
-	if authConfig.JWT != nil {
-		fastlaneAuthFile, err := writeFastlaneAPIKeyToFile(*authConfig.JWT)
+	if authConfig.APIKey != nil {
+		fastlaneAuthFile, err := writeFastlaneAPIKeyToFile(fastlaneAPIKey{
+			IssuerID:   authConfig.APIKey.IssuerID,
+			KeyID:      authConfig.APIKey.KeyID,
+			PrivateKey: authConfig.APIKey.PrivateKey,
+		})
 		if err != nil {
 			fail("Failed to write Fastane API Key configuration to file: %v", err)
 		}

@@ -9,15 +9,15 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 )
 
-// fastlaneJWTAuth is used to serialize App Store Connect API Key into JSON for fastlane
+// fastlaneAPIKey is used to serialize App Store Connect API Key into JSON for fastlane
 // see: https://docs.fastlane.tools/app-store-connect-api/#using-fastlane-api-key-json-file
-type fastlaneJWTAuth struct {
+type fastlaneAPIKey struct {
 	KeyID      string `json:"key_id"`
 	IssuerID   string `json:"issuer_id"`
 	PrivateKey string `json:"key"`
 }
 
-func writeFastlaneAPIKeyToFile(authData fastlaneJWTAuth) (string, error) {
+func writeFastlaneAPIKeyToFile(authData fastlaneAPIKey) (string, error) {
 	json, err := json.Marshal(authData)
 	if err != nil {
 		return "", err
