@@ -51,28 +51,18 @@ type Config struct {
 const latestStable = "latest-stable"
 const latestPrerelease = "latest"
 
-type bitriseAppleConnection int
-
-const (
-	invalid bitriseAppleConnection = iota
-	connectionAutomatic
-	connectionAPIKey
-	connectionAppleID
-	connectionDisabled
-)
-
-func parseAppleConnection(param string) bitriseAppleConnection {
-	switch param {
+func parseAuthSources(connectionParam string) ([]AppleAuthSource, error) {
+	switch connectionParam {
 	case "automatic":
-		return connectionAutomatic
+		return []AppleAuthSource{&ServiceAPIKey{}, &ServiceAppleID{}, &InputAPIKey{}, &InputAppleID{}}, nil
 	case "api_key":
-		return connectionAPIKey
+		return []AppleAuthSource{&ServiceAPIKey{}}, nil
 	case "apple_id":
-		return connectionAppleID
+		return []AppleAuthSource{&ServiceAppleID{}}, nil
 	case "disabled":
-		return connectionDisabled
+		return []AppleAuthSource{&InputAPIKey{}, &InputAppleID{}}, nil
 	default:
-		return invalid
+		return nil, fmt.Errorf("invalid connection input: %s", connectionParam)
 	}
 }
 
@@ -264,25 +254,14 @@ func main() {
 	if err := cfg.validate(); err != nil {
 		fail("Input error: %s", err)
 	}
-	connection := parseAppleConnection(cfg.BitriseAppleConnection)
-	if connection == invalid {
+	// Select authentication source
+	authSources, err := parseAuthSources(cfg.BitriseAppleConnection)
+	if err != nil {
 		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseAppleConnection)
 	}
 
 	//
-	// Select and fetch Apple authenication source
-	var authSources []AppleAuthSource
-	switch connection {
-	case connectionAutomatic:
-		authSources = []AppleAuthSource{&ServiceAPIKey{}, &ServiceAppleID{}, &InputAPIKey{}, &InputAppleID{}}
-	case connectionAppleID:
-		authSources = []AppleAuthSource{&ServiceAppleID{}}
-	case connectionAPIKey:
-		authSources = []AppleAuthSource{&ServiceAPIKey{}}
-	case connectionDisabled:
-		authSources = []AppleAuthSource{&InputAPIKey{}, &InputAppleID{}}
-	}
-
+	// Fetch Apple authenication source
 	authConfig, err := FetchAppleAuthData(authSources, AppleAuthInputs{
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
