@@ -50,8 +50,8 @@ workflows:
     - path::./:
         inputs:
         - connection: apple_id
-        - itunescon_user: $ITUNES_CONNECT_USER
-        - password: $ITUNES_CONNECT_PASSWORD
+        - itunescon_user: ""
+        - password: ""
         - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
         - team_id: $ITUNES_CONNECT_TEAM_ID
         - app_id: $ITUNES_CONNECT_APP_ID
@@ -62,7 +62,7 @@ workflows:
         - verbose_log: "yes"
 
   test-apple-id-input-auth:
-    title: Test Apple ID service connection authentication
+    title: Test Apple ID Step input authentication
     before_run:
     - prepare-test
     steps:
@@ -88,8 +88,8 @@ workflows:
     - path::./:
         inputs:
           - connection: api_key
-          - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
-          - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
+          - api_key_path: ""
+          - api_issuer: ""
           - team_id: $ITUNES_CONNECT_TEAM_ID
           - app_id: $ITUNES_CONNECT_APP_ID
           - skip_screenshots: "no"
