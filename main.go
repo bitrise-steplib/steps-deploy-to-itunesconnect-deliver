@@ -272,6 +272,9 @@ func main() {
 	if err != nil {
 		fail("Could not configure App Store Connect authentication: %v", err)
 	}
+	if authConfig.AppleID != nil && authConfig.AppleID.appSpecificPassword == "" {
+		log.Warnf("Application-specific password is required when using Apple ID (legacy) authentication.")
+	}
 
 	//
 	// Setup

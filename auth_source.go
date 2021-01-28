@@ -10,56 +10,52 @@ import (
 // AppleAuthSource returns a specific kind (Apple ID/API Key) Apple authentication data from a specific source (Bitrise Service, manual input)
 type AppleAuthSource interface {
 	Fetch(connection *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error)
+	Description() string
+	RequiresConnection() bool
 }
-
-// ServiceAppleID provides Apple ID from Bitrise Service
-type ServiceAppleID struct{}
 
 // ServiceAPIKey provides API Key from Bitrise Service
 type ServiceAPIKey struct{}
 
-// InputAppleID provides Apple ID from manual input
-type InputAppleID struct{}
-
 // InputAPIKey provides API Key from manual input
 type InputAPIKey struct{}
 
-// Fetch ...
-func (*ServiceAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
-	if conn == nil || conn.SessionConnection == nil { // No Apple ID configured
+// ServiceAppleID provides Apple ID from Bitrise Service
+type ServiceAppleID struct{}
+
+// InputAppleID provides Apple ID from manual input
+type InputAppleID struct{}
+
+// ServiceAPIKey
+
+func (*ServiceAPIKey) Description() string {
+	return "Connected Apple Developer Portal Account for App Store Connect API found"
+}
+
+func (*ServiceAPIKey) RequiresConnection() bool {
+	return true
+}
+
+func (*ServiceAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
+	if conn == nil || conn.JWTConnection == nil { // Not configured
 		return nil, nil
 	}
 
-	fmt.Println()
-	log.Infof("Connected session-based Apple Developer Portal Account found")
-
-	sessionConn := conn.SessionConnection
-	if sessionConn.AppleID != inputs.Username {
-		log.Warnf("Connected Apple Developer and App Store login account missmatch")
-		return nil, nil
-	}
-	if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
-		log.Warnf("TFA session expired on %s", expiry.String())
-		return nil, nil
-	}
-	session, err := sessionConn.FastlaneLoginSession()
-	if err != nil {
-		handleSessionDataError(err)
-		return nil, nil
-	}
-
-	if inputs.AppSpecificPassword == "" {
-		log.Warnf("Application-specific password input is required if using Apple ID (legacy) authentication.")
-	}
 	return &AppleAuth{
-		AppleID: &AppleIDAuth{
-			session:             session,
-			appSpecificPassword: inputs.AppSpecificPassword,
-		},
+		APIKey: conn.JWTConnection,
 	}, nil
 }
 
-// Fetch ...
+// InputAPIKey
+
+func (*InputAPIKey) Description() string {
+	return "Authenticating using Step inputs (App Store Connect API)"
+}
+
+func (*InputAPIKey) RequiresConnection() bool {
+	return false
+}
+
 func (*InputAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if inputs.APIKeyPath == "" { // Not configured
 		return nil, nil
@@ -82,29 +78,59 @@ func (*InputAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, input
 	}, nil
 }
 
-// Fetch ...
-func (*ServiceAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
-	if conn == nil || conn.JWTConnection == nil { // Not configured
+// ServiceAppleID
+
+func (*ServiceAppleID) Description() string {
+	return "Connected session-based Apple Developer Portal Account found"
+}
+
+func (*ServiceAppleID) RequiresConnection() bool {
+	return true
+}
+
+func (*ServiceAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
+	if conn == nil || conn.SessionConnection == nil { // No Apple ID configured
 		return nil, nil
 	}
 
-	fmt.Println()
-	log.Infof("Connected Apple Developer Portal Account using  App Store Connect API found")
+	sessionConn := conn.SessionConnection
+	if sessionConn.AppleID != inputs.Username {
+		log.Warnf("Connected Apple Developer (%s) and App Store login account (%s) do not match.", sessionConn.AppleID, inputs.Username)
+		return nil, nil
+	}
+	if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
+		log.Warnf("TFA session expired on %s.", expiry.String())
+		return nil, nil
+	}
+	session, err := sessionConn.FastlaneLoginSession()
+	if err != nil {
+		handleSessionDataError(err)
+		return nil, nil
+	}
 
 	return &AppleAuth{
-		APIKey: conn.JWTConnection,
+		AppleID: &AppleIDAuth{
+			session:             session,
+			appSpecificPassword: inputs.AppSpecificPassword,
+		},
 	}, nil
 }
 
-// Fetch ...
+// InputAppleID
+
+func (*InputAppleID) Description() string {
+	return "Authenticating using Step inputs (session-based)"
+}
+
+func (*InputAppleID) RequiresConnection() bool {
+	return false
+}
+
 func (*InputAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if inputs.Username == "" { // Not configured
 		return nil, nil
 	}
 
-	if inputs.AppSpecificPassword == "" {
-		log.Warnf("Application-specific password input is required if using Apple ID (legacy) authentication.")
-	}
 	return &AppleAuth{
 		AppleID: &AppleIDAuth{
 			username:            inputs.Username,

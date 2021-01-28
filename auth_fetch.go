@@ -39,18 +39,25 @@ func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (
 		return AppleAuth{}, fmt.Errorf("invalid authentication inputs: %s", err)
 	}
 
-	var conn *devportalservice.AppleDeveloperConnection
-	buildURL, buildAPIToken := os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN")
-	if buildURL != "" && buildAPIToken != "" {
-		provider := devportalservice.NewBitriseClient(http.DefaultClient)
+	requiresConnection := false
+	for _, source := range authSources {
+		requiresConnection = requiresConnection || source.RequiresConnection()
+	}
 
-		var err error
-		conn, err = provider.GetAppleDeveloperConnection(buildURL, buildAPIToken)
-		if err != nil {
-			handleSessionDataError(err)
+	var conn *devportalservice.AppleDeveloperConnection
+	if requiresConnection {
+		buildURL, buildAPIToken := os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN")
+		if buildURL != "" && buildAPIToken != "" {
+			provider := devportalservice.NewBitriseClient(http.DefaultClient)
+
+			var err error
+			conn, err = provider.GetAppleDeveloperConnection(buildURL, buildAPIToken)
+			if err != nil {
+				handleSessionDataError(err)
+			}
+		} else {
+			log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
 		}
-	} else {
-		log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
 	}
 
 	for _, source := range authSources {
@@ -60,6 +67,9 @@ func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (
 		}
 
 		if auth != nil {
+			fmt.Println()
+			log.Infof("%s", source.Description())
+
 			return *auth, nil
 		}
 	}
