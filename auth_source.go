@@ -122,6 +122,7 @@ func (*ServiceAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, in
 
 	return &AppleAuth{
 		AppleID: &AppleIDAuth{
+			username:            inputs.Username,
 			session:             session,
 			appSpecificPassword: inputs.AppSpecificPassword,
 		},
