@@ -14,14 +14,14 @@ type AppleAuthSource interface {
 	RequiresConnection() bool
 }
 
-// SourceConnectionServiceAPIKey provides API Key from Bitrise Service
-type SourceConnectionServiceAPIKey struct{}
+// SourceConnectionAPIKey provides API Key from Bitrise Service
+type SourceConnectionAPIKey struct{}
 
 // SourceInputAPIKey provides API Key from manual input
 type SourceInputAPIKey struct{}
 
-// SourceConnectionServiceAppleID provides Apple ID from Bitrise Service
-type SourceConnectionServiceAppleID struct{}
+// SourceConnectionAppleID provides Apple ID from Bitrise Service
+type SourceConnectionAppleID struct{}
 
 // SourceInputAppleID provides Apple ID from manual input
 type SourceInputAppleID struct{}
@@ -30,17 +30,17 @@ type SourceInputAppleID struct{}
 // ServiceAPIKey
 
 // Description ...
-func (*SourceConnectionServiceAPIKey) Description() string {
+func (*SourceConnectionAPIKey) Description() string {
 	return "Connected Apple Developer Portal Account for App Store Connect API found"
 }
 
 // RequiresConnection ...
-func (*SourceConnectionServiceAPIKey) RequiresConnection() bool {
+func (*SourceConnectionAPIKey) RequiresConnection() bool {
 	return true
 }
 
 // Fetch ...
-func (*SourceConnectionServiceAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
+func (*SourceConnectionAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if conn == nil || conn.JWTConnection == nil { // Not configured
 		return nil, nil
 	}
@@ -90,17 +90,17 @@ func (*SourceInputAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection,
 // ServiceAppleID
 
 // Description ...
-func (*SourceConnectionServiceAppleID) Description() string {
+func (*SourceConnectionAppleID) Description() string {
 	return "Connected session-based Apple Developer Portal Account found"
 }
 
 // RequiresConnection ...
-func (*SourceConnectionServiceAppleID) RequiresConnection() bool {
+func (*SourceConnectionAppleID) RequiresConnection() bool {
 	return true
 }
 
 // Fetch ...
-func (*SourceConnectionServiceAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
+func (*SourceConnectionAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if conn == nil || conn.SessionConnection == nil { // No Apple ID configured
 		return nil, nil
 	}

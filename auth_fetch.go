@@ -39,6 +39,9 @@ func (*MissingAuthConfigError) Error() string {
 }
 
 // FetchAppleAuthData return valid Apple ID or API Key based authentication data, from the provided Bitrise Service or manual inputs
+// authSources: required, array of checked sources
+//	 for example: []AppleAuthSource{&SourceConnectionAPIKey{}, &SourceConnectionAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}
+// inputs: optional, user provided inputs that are not centrally managed (by setting up connections)
 func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (AppleAuth, error) {
 	if err := inputs.Validate(); err != nil {
 		return AppleAuth{}, fmt.Errorf("input configuration is invalid: %s", err)

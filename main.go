@@ -54,11 +54,11 @@ const latestPrerelease = "latest"
 func parseAuthSources(connectionParam string) ([]AppleAuthSource, error) {
 	switch connectionParam {
 	case "automatic":
-		return []AppleAuthSource{&SourceConnectionServiceAPIKey{}, &SourceConnectionServiceAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}, nil
+		return []AppleAuthSource{&SourceConnectionAPIKey{}, &SourceConnectionAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}, nil
 	case "api_key":
-		return []AppleAuthSource{&SourceConnectionServiceAPIKey{}}, nil
+		return []AppleAuthSource{&SourceConnectionAPIKey{}}, nil
 	case "apple_id":
-		return []AppleAuthSource{&SourceConnectionServiceAppleID{}}, nil
+		return []AppleAuthSource{&SourceConnectionAppleID{}}, nil
 	case "disabled":
 		return []AppleAuthSource{&SourceInputAPIKey{}, &SourceInputAppleID{}}, nil
 	default:
