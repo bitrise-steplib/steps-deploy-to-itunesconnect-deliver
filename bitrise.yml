@@ -153,7 +153,7 @@ workflows:
         - content: |-
             #!/usr/bin/env bash
             CURRENT_BUILD_NUMBER=BITRISE_BUILD_NUMBER
-            BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*10000))
+            BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*100000))
             if [[ -z "${$BITRISE_BUILD_NUMBER}" ]]; then
               echo "error: failed to calculated build number"
               exit 1

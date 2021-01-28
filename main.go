@@ -270,10 +270,10 @@ func main() {
 		APIKeyPath:          cfg.APIKeyPath,
 	})
 	if err != nil {
-		fail("Could not configure App Store Connect authentication: %v", err)
+		fail("Could not configure Apple Service authentication: %v", err)
 	}
 	if authConfig.AppleID != nil && authConfig.AppleID.appSpecificPassword == "" {
-		log.Warnf("Application-specific password is required when using Apple ID (legacy) authentication.")
+		log.Warnf("If 2FA enabled, Application-specific password is required when using Apple ID (legacy) authentication.")
 	}
 
 	//
@@ -336,8 +336,16 @@ This means that when the API changes
 	}
 
 	envs := []string{}
+	if cfg.ITMSParameters != "" {
+		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
+	}
+
+	args := []string{
+		"deliver",
+	}
 
 	if authConfig.AppleID != nil {
+		// Set as environment variables
 		if authConfig.AppleID.password != "" {
 			envs = append(envs, "DELIVER_PASSWORD="+string(cfg.Password))
 		}
@@ -349,22 +357,15 @@ This means that when the API changes
 		if authConfig.AppleID.appSpecificPassword != "" {
 			envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+string(authConfig.AppleID.appSpecificPassword))
 		}
-	}
 
-	if cfg.ITMSParameters != "" {
-		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
-	}
-
-	args := []string{
-		"deliver",
-	}
-
-	if authConfig.AppleID != nil && authConfig.AppleID.username != "" {
-		args = append(args, "--username", authConfig.AppleID.username)
+		// Add as an argument
+		if authConfig.AppleID.username != "" {
+			args = append(args, "--username", authConfig.AppleID.username)
+		}
 	}
 
 	if authConfig.APIKey != nil {
-		fastlaneAuthFile, err := writeFastlaneAPIKeyToFile(fastlaneAPIKey{
+		fastlaneAuthFile, err := WriteFastlaneAPIKeyToFile(FastlaneAPIKey{
 			IssuerID:   authConfig.APIKey.IssuerID,
 			KeyID:      authConfig.APIKey.KeyID,
 			PrivateKey: authConfig.APIKey.PrivateKey,
