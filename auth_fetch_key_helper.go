@@ -11,37 +11,22 @@ import (
 	"regexp"
 
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/bitrise-io/go-utils/pathutil"
 )
 
-func fetchPrivateKey(apiKeyPath string) ([]byte, string, error) {
-	// see these in the altool's man page
-	var keyPaths = []string{
-		filepath.Join(os.Getenv("HOME"), ".appstoreconnect/private_keys"),
-		filepath.Join(os.Getenv("HOME"), ".private_keys"),
-		filepath.Join(os.Getenv("HOME"), "private_keys"),
-		"./private_keys",
-	}
-
-	fileURL, err := url.Parse(apiKeyPath)
+func fetchPrivateKey(privateKeyURL string) ([]byte, string, error) {
+	fileURL, err := url.Parse(privateKeyURL)
 	if err != nil {
 		return nil, "", err
 	}
 
 	keyID := getKeyID(fileURL)
-
-	keyPath, keyExists, err := getKeyPath(keyID, keyPaths)
-	if err != nil {
+	// .appstoreconnect/private_keys is a  path searched by altool (see altool's man page)
+	keyFile := filepath.Join(os.Getenv("HOME"), ".appstoreconnect/private_keys", fmt.Sprintf("AuthKey_%s.p8", keyID))
+	if err := copyOrDownloadFile(fileURL, keyFile); err != nil {
 		return nil, "", err
 	}
 
-	if !keyExists {
-		if err := copyOrDownloadFile(fileURL, keyPath); err != nil {
-			return nil, "", err
-		}
-	}
-
-	key, err := ioutil.ReadFile(keyPath)
+	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
 		return nil, "", err
 	}
@@ -98,21 +83,4 @@ func getKeyID(u *url.URL) string {
 	}
 
 	return keyID
-}
-
-func getKeyPath(keyID string, keyPaths []string) (string, bool, error) {
-	certName := fmt.Sprintf("AuthKey_%s.p8", keyID)
-
-	for _, path := range keyPaths {
-		certPath := filepath.Join(path, certName)
-
-		switch exists, err := pathutil.IsPathExists(certPath); {
-		case err != nil:
-			return "", false, err
-		case exists:
-			return certPath, true, err
-		}
-	}
-
-	return filepath.Join(keyPaths[0], certName), false, nil
 }
