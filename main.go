@@ -52,23 +52,23 @@ type Config struct {
 const latestStable = "latest-stable"
 const latestPrerelease = "latest"
 
-func parseAuthSources(connectionParam string) ([]appleauth.AppleAuthSource, error) {
+func parseAuthSources(connectionParam string) ([]appleauth.Source, error) {
 	switch connectionParam {
 	case "automatic":
-		return []appleauth.AppleAuthSource{
-			&appleauth.SourceConnectionAPIKey{},
-			&appleauth.SourceConnectionAppleID{},
-			&appleauth.SourceInputAPIKey{},
-			&appleauth.SourceInputAppleID{},
+		return []appleauth.Source{
+			&appleauth.ConnectionAPIKeySource{},
+			&appleauth.ConnectionAppleIDSource{},
+			&appleauth.InputAPIKeySource{},
+			&appleauth.InputAppleIDSource{},
 		}, nil
 	case "api_key":
-		return []appleauth.AppleAuthSource{&appleauth.SourceConnectionAPIKey{}}, nil
+		return []appleauth.Source{&appleauth.ConnectionAPIKeySource{}}, nil
 	case "apple_id":
-		return []appleauth.AppleAuthSource{&appleauth.SourceConnectionAppleID{}}, nil
+		return []appleauth.Source{&appleauth.ConnectionAppleIDSource{}}, nil
 	case "disabled":
-		return []appleauth.AppleAuthSource{
-			&appleauth.SourceInputAPIKey{},
-			&appleauth.SourceInputAppleID{},
+		return []appleauth.Source{
+			&appleauth.InputAPIKeySource{},
+			&appleauth.InputAppleIDSource{},
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid connection input: %s", connectionParam)
@@ -271,7 +271,7 @@ func main() {
 
 	//
 	// Fetch Apple authenication source
-	authConfig, err := appleauth.FetchAppleAuthData(authSources, appleauth.AppleAuthInputs{
+	authConfig, err := appleauth.Fetch(authSources, appleauth.Inputs{
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
 		AppSpecificPassword: string(cfg.AppPassword),

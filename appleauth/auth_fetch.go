@@ -9,13 +9,13 @@ import (
 	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
 )
 
-// AppleAuth contains either Apple ID or APIKey auth info
-type AppleAuth struct {
-	AppleID *AppleIDAuth
+// Credentials contains either Apple ID or APIKey auth info
+type Credentials struct {
+	AppleID *AppleID
 	APIKey  *devportalservice.JWTConnection
 }
 
-// AppleIDAuth contains Apple ID auth info
+// AppleID contains Apple ID auth info
 //
 // Without 2FA:
 //   Required: username, password
@@ -25,7 +25,7 @@ type AppleAuth struct {
 // As Fastlane spaceship uses:
 //  - iTMSTransporter: it requires Username + Password (or App-specific password with 2FA)
 //  - TunesAPI: it requires Username + Password (+ 2FA session with 2FA)
-type AppleIDAuth struct {
+type AppleID struct {
 	Username, Password           string
 	Session, AppSpecificPassword string
 }
@@ -38,13 +38,13 @@ func (*MissingAuthConfigError) Error() string {
 	return "Apple Service authentication not configured"
 }
 
-// FetchAppleAuthData return valid Apple ID or API Key based authentication data, from the provided Bitrise Service or manual inputs
+// Fetch return valid Apple ID or API Key based authentication data, from the provided Bitrise Service or manual inputs
 // authSources: required, array of checked sources
 //	 for example: []AppleAuthSource{&SourceConnectionAPIKey{}, &SourceConnectionAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}
 // inputs: optional, user provided inputs that are not centrally managed (by setting up connections)
-func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (AppleAuth, error) {
+func Fetch(authSources []Source, inputs Inputs) (Credentials, error) {
 	if err := inputs.Validate(); err != nil {
-		return AppleAuth{}, fmt.Errorf("input configuration is invalid: %s", err)
+		return Credentials{}, fmt.Errorf("input configuration is invalid: %s", err)
 	}
 
 	initializeConnection := false
@@ -71,7 +71,7 @@ func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (
 	for _, source := range authSources {
 		auth, err := source.Fetch(conn, inputs)
 		if err != nil {
-			return AppleAuth{}, err
+			return Credentials{}, err
 		}
 
 		if auth != nil {
@@ -82,7 +82,7 @@ func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (
 		}
 	}
 
-	return AppleAuth{}, &MissingAuthConfigError{}
+	return Credentials{}, &MissingAuthConfigError{}
 }
 
 func handleSessionDataError(err error) {

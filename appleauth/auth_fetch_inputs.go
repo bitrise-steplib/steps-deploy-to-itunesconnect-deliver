@@ -7,8 +7,8 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 )
 
-// AppleAuthInputs are Apple Service authentication configuration provided by end user
-type AppleAuthInputs struct {
+// Inputs is Apple Service authentication configuration provided by end user
+type Inputs struct {
 	// Apple ID (legacy)
 	Username, Password, AppSpecificPassword string
 	// API key (JWT)
@@ -16,7 +16,7 @@ type AppleAuthInputs struct {
 }
 
 // Validate trims extra spaces and checks input grouping
-func (cfg *AppleAuthInputs) Validate() error {
+func (cfg *Inputs) Validate() error {
 	cfg.APIIssuer = strings.TrimSpace(cfg.APIIssuer)
 	cfg.APIKeyPath = strings.TrimSpace(cfg.APIKeyPath)
 	cfg.Username = strings.TrimSpace(cfg.Username)
