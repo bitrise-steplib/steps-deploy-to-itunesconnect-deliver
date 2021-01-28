@@ -106,10 +106,6 @@ func (*SourceConnectionServiceAppleID) Fetch(conn *devportalservice.AppleDevelop
 	}
 
 	sessionConn := conn.SessionConnection
-	if sessionConn.AppleID != inputs.Username {
-		log.Warnf("Connected Apple Developer (%s) and App Store login account (%s) do not match.", sessionConn.AppleID, inputs.Username)
-		return nil, nil
-	}
 	if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
 		log.Warnf("TFA session expired on %s.", expiry.String())
 		return nil, nil
@@ -135,7 +131,7 @@ func (*SourceConnectionServiceAppleID) Fetch(conn *devportalservice.AppleDevelop
 
 // Description ...
 func (*SourceInputAppleID) Description() string {
-	return "Authenticating using Step inputs (session-based)"
+	return "Authenticating using Step inputs (session-based). This method does not support 2FA."
 }
 
 // RequiresConnection ...

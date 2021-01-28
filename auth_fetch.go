@@ -16,13 +16,18 @@ type AppleAuth struct {
 }
 
 // AppleIDAuth contains Apple ID auth info
+//
+// Without 2FA:
+//   Required: username, password
+// With 2FA:
+//   Required: username, password, session, appSpecificPassword
+//
+// As Fastlane spaceship uses:
+//  - iTMSTransporter: it requires apple id + password (or appSpecificPassword in case of TFA)
+//  - TunesAPI: it requires apple id + password (+ TFA session in case of TFA)
 type AppleIDAuth struct {
-	// Either session (if using 2FA) or username+password is required
-	session            string
-	username, password string
-
-	// Needed to deploy IPA to App Store Connect with altool (optional)
-	appSpecificPassword string
+	username, password           string
+	session, appSpecificPassword string
 }
 
 // MissingAuthConfigError is returned in case no usable Apple App Store Connect / Developer Portal authenticaion is found
@@ -30,22 +35,22 @@ type MissingAuthConfigError struct {
 }
 
 func (*MissingAuthConfigError) Error() string {
-	return "Apple authentication not configured"
+	return "Apple Service authentication not configured"
 }
 
 // FetchAppleAuthData return valid Apple ID or API Key based authentication data, from the provided Bitrise Service or manual inputs
 func FetchAppleAuthData(authSources []AppleAuthSource, inputs AppleAuthInputs) (AppleAuth, error) {
 	if err := inputs.Validate(); err != nil {
-		return AppleAuth{}, fmt.Errorf("invalid authentication inputs: %s", err)
+		return AppleAuth{}, fmt.Errorf("input configuration is invalid: %s", err)
 	}
 
-	requiresConnection := false
+	initializeConnection := false
 	for _, source := range authSources {
-		requiresConnection = requiresConnection || source.RequiresConnection()
+		initializeConnection = initializeConnection || source.RequiresConnection()
 	}
 
 	var conn *devportalservice.AppleDeveloperConnection
-	if requiresConnection {
+	if initializeConnection {
 		buildURL, buildAPIToken := os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN")
 		if buildURL != "" && buildAPIToken != "" {
 			provider := devportalservice.NewBitriseClient(http.DefaultClient)

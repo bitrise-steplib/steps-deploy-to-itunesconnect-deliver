@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/bitrise-io/go-utils/log"
 )
 
-// AppleAuthInputs are Apple App Store Connect / Developer Portal authentication configuration provided by end user
+// AppleAuthInputs are Apple Service authentication configuration provided by end user
 type AppleAuthInputs struct {
 	// Apple ID (legacy)
 	Username, Password, AppSpecificPassword string
@@ -18,29 +20,36 @@ func (cfg *AppleAuthInputs) Validate() error {
 	cfg.APIIssuer = strings.TrimSpace(cfg.APIIssuer)
 	cfg.APIKeyPath = strings.TrimSpace(cfg.APIKeyPath)
 	cfg.Username = strings.TrimSpace(cfg.Username)
+	cfg.AppSpecificPassword = strings.TrimSpace(cfg.AppSpecificPassword)
 	var (
 		isAPIKeyAuthType  = (cfg.APIKeyPath != "" || cfg.APIIssuer != "")
 		isAppleIDAuthType = (cfg.AppSpecificPassword != "" || cfg.Username != "" || cfg.Password != "")
 	)
 
 	switch {
-	case isAppleIDAuthType == isAPIKeyAuthType:
-		return fmt.Errorf("one type of authentication required, either provide itunescon_user with password and optionally app_password or api_key_path with api_issuer")
+	case isAppleIDAuthType && isAPIKeyAuthType:
+		log.Warnf("Either provide Apple ID, Password (and  App-specific password if available) OR API Key Path and API Issuer")
+		return fmt.Errorf("both Apple ID (legacy) and API key related configuration provided, but only one of them expected")
 
 	case isAppleIDAuthType:
+		if cfg.AppSpecificPassword != "" {
+			// App Specific Password provided, assuming 2FA is enabled.
+			// In this case 2FA session is required, configured Bitrise account connection required, this contains username+password
+			break
+		}
 		if cfg.Username == "" {
-			return fmt.Errorf("no itunescon_user provided")
+			return fmt.Errorf("no Apple Service Apple ID provided")
 		}
 		if cfg.Password == "" {
-			return fmt.Errorf("no password provided")
+			return fmt.Errorf("no Apple Service Password provided")
 		}
 
 	case isAPIKeyAuthType:
 		if cfg.APIIssuer == "" {
-			return fmt.Errorf("no api_issuer provided")
+			return fmt.Errorf("no Apple Service API Issuer provided")
 		}
 		if cfg.APIKeyPath == "" {
-			return fmt.Errorf("no api_key_path provided")
+			return fmt.Errorf("no Apple Service API Key Path provided")
 		}
 	}
 
