@@ -26,16 +26,20 @@ type ServiceAppleID struct{}
 // InputAppleID provides Apple ID from manual input
 type InputAppleID struct{}
 
+//
 // ServiceAPIKey
 
+// Description ...
 func (*ServiceAPIKey) Description() string {
 	return "Connected Apple Developer Portal Account for App Store Connect API found"
 }
 
+// RequiresConnection ...
 func (*ServiceAPIKey) RequiresConnection() bool {
 	return true
 }
 
+// Fetch ...
 func (*ServiceAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if conn == nil || conn.JWTConnection == nil { // Not configured
 		return nil, nil
@@ -46,16 +50,20 @@ func (*ServiceAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inp
 	}, nil
 }
 
+//
 // InputAPIKey
 
+// Description ...
 func (*InputAPIKey) Description() string {
 	return "Authenticating using Step inputs (App Store Connect API)"
 }
 
+// RequiresConnection ...
 func (*InputAPIKey) RequiresConnection() bool {
 	return false
 }
 
+// Fetch ...
 func (*InputAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if inputs.APIKeyPath == "" { // Not configured
 		return nil, nil
@@ -78,16 +86,20 @@ func (*InputAPIKey) Fetch(conn *devportalservice.AppleDeveloperConnection, input
 	}, nil
 }
 
+//
 // ServiceAppleID
 
+// Description ...
 func (*ServiceAppleID) Description() string {
 	return "Connected session-based Apple Developer Portal Account found"
 }
 
+// RequiresConnection ...
 func (*ServiceAppleID) RequiresConnection() bool {
 	return true
 }
 
+// Fetch ...
 func (*ServiceAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if conn == nil || conn.SessionConnection == nil { // No Apple ID configured
 		return nil, nil
@@ -116,16 +128,20 @@ func (*ServiceAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, in
 	}, nil
 }
 
+//
 // InputAppleID
 
+// Description ...
 func (*InputAppleID) Description() string {
 	return "Authenticating using Step inputs (session-based)"
 }
 
+// RequiresConnection ...
 func (*InputAppleID) RequiresConnection() bool {
 	return false
 }
 
+// Fetch ...
 func (*InputAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs AppleAuthInputs) (*AppleAuth, error) {
 	if inputs.Username == "" { // Not configured
 		return nil, nil
