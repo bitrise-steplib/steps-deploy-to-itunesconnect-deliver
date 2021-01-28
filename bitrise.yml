@@ -37,16 +37,19 @@ workflows:
 
   test:
     before_run:
-    - test-password-auth
-    - test-api-key-auth
+    - test-apple-id-service-auth
+    - test-apple-id-input-auth
+    - test-api-key-service-auth
+    - test-api-key-input-auth
 
-  test-password-auth:
-    title: Test password authentication
+  test-apple-id-service-auth:
+    title: Test Apple ID service connection authentication
     before_run:
     - prepare-test
     steps:
     - path::./:
         inputs:
+        - connection: apple_id
         - itunescon_user: $ITUNES_CONNECT_USER
         - password: $ITUNES_CONNECT_PASSWORD
         - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
@@ -58,13 +61,51 @@ workflows:
         - fastlane_version: "latest"
         - verbose_log: "yes"
 
-  test-api-key-auth:
-    title: Test API Key authentication
+  test-apple-id-input-auth:
+    title: Test Apple ID service connection authentication
+    before_run:
+    - prepare-test
+    steps:
+    - path::./:
+        inputs:
+        - connection: disabled
+        - itunescon_user: $ITUNES_CONNECT_USER
+        - password: $ITUNES_CONNECT_PASSWORD
+        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+        - team_id: $ITUNES_CONNECT_TEAM_ID
+        - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
+        - fastlane_version: "latest"
+        - verbose_log: "yes"
+
+  test-api-key-service-auth:
+    title: Test API Key service connection authentication
     before_run:
       - prepare-test
     steps:
     - path::./:
         inputs:
+          - connection: api_key
+          - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
+          - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
+          - team_id: $ITUNES_CONNECT_TEAM_ID
+          - app_id: $ITUNES_CONNECT_APP_ID
+          - skip_screenshots: "no"
+          - skip_metadata: "yes"
+          - submit_for_review: "no"
+          - fastlane_version: "latest"
+          - verbose_log: "yes"
+
+  test-api-key-input-auth:
+    title: Test API Key service Step input authentication
+    before_run:
+      - prepare-test
+    steps:
+    - path::./:
+        inputs:
+          - connection: disabled
           - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
           - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
           - team_id: $ITUNES_CONNECT_TEAM_ID
