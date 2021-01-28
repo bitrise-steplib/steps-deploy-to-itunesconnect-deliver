@@ -15,6 +15,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
+	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/appleauth"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -51,16 +52,24 @@ type Config struct {
 const latestStable = "latest-stable"
 const latestPrerelease = "latest"
 
-func parseAuthSources(connectionParam string) ([]AppleAuthSource, error) {
+func parseAuthSources(connectionParam string) ([]appleauth.AppleAuthSource, error) {
 	switch connectionParam {
 	case "automatic":
-		return []AppleAuthSource{&SourceConnectionAPIKey{}, &SourceConnectionAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}, nil
+		return []appleauth.AppleAuthSource{
+			&appleauth.SourceConnectionAPIKey{},
+			&appleauth.SourceConnectionAppleID{},
+			&appleauth.SourceInputAPIKey{},
+			&appleauth.SourceInputAppleID{},
+		}, nil
 	case "api_key":
-		return []AppleAuthSource{&SourceConnectionAPIKey{}}, nil
+		return []appleauth.AppleAuthSource{&appleauth.SourceConnectionAPIKey{}}, nil
 	case "apple_id":
-		return []AppleAuthSource{&SourceConnectionAppleID{}}, nil
+		return []appleauth.AppleAuthSource{&appleauth.SourceConnectionAppleID{}}, nil
 	case "disabled":
-		return []AppleAuthSource{&SourceInputAPIKey{}, &SourceInputAppleID{}}, nil
+		return []appleauth.AppleAuthSource{
+			&appleauth.SourceInputAPIKey{},
+			&appleauth.SourceInputAppleID{},
+		}, nil
 	default:
 		return nil, fmt.Errorf("invalid connection input: %s", connectionParam)
 	}
@@ -262,7 +271,7 @@ func main() {
 
 	//
 	// Fetch Apple authenication source
-	authConfig, err := FetchAppleAuthData(authSources, AppleAuthInputs{
+	authConfig, err := appleauth.FetchAppleAuthData(authSources, appleauth.AppleAuthInputs{
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
 		AppSpecificPassword: string(cfg.AppPassword),
@@ -272,7 +281,7 @@ func main() {
 	if err != nil {
 		fail("Could not configure Apple Service authentication: %v", err)
 	}
-	if authConfig.AppleID != nil && authConfig.AppleID.appSpecificPassword == "" {
+	if authConfig.AppleID != nil && authConfig.AppleID.AppSpecificPassword == "" {
 		log.Warnf("If 2FA enabled, Application-specific password is required when using Apple ID (legacy) authentication.")
 	}
 
@@ -346,26 +355,26 @@ This means that when the API changes
 
 	if authConfig.AppleID != nil {
 		// Set as environment variables
-		if authConfig.AppleID.password != "" {
-			envs = append(envs, "DELIVER_PASSWORD="+string(cfg.Password))
+		if authConfig.AppleID.Password != "" {
+			envs = append(envs, "DELIVER_PASSWORD="+authConfig.AppleID.Password)
 		}
 
-		if authConfig.AppleID.session != "" {
-			envs = append(envs, "FASTLANE_SESSION="+authConfig.AppleID.session)
+		if authConfig.AppleID.Session != "" {
+			envs = append(envs, "FASTLANE_SESSION="+authConfig.AppleID.Session)
 		}
 
-		if authConfig.AppleID.appSpecificPassword != "" {
-			envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+string(authConfig.AppleID.appSpecificPassword))
+		if authConfig.AppleID.AppSpecificPassword != "" {
+			envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+authConfig.AppleID.AppSpecificPassword)
 		}
 
 		// Add as an argument
-		if authConfig.AppleID.username != "" {
-			args = append(args, "--username", authConfig.AppleID.username)
+		if authConfig.AppleID.Username != "" {
+			args = append(args, "--username", authConfig.AppleID.Username)
 		}
 	}
 
 	if authConfig.APIKey != nil {
-		fastlaneAuthFile, err := WriteFastlaneAPIKeyToFile(FastlaneAPIKey{
+		fastlaneAuthFile, err := appleauth.WriteFastlaneAPIKeyToFile(appleauth.FastlaneAPIKey{
 			IssuerID:   authConfig.APIKey.IssuerID,
 			KeyID:      authConfig.APIKey.KeyID,
 			PrivateKey: authConfig.APIKey.PrivateKey,

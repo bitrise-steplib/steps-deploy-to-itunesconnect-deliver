@@ -1,4 +1,4 @@
-package main
+package appleauth
 
 import (
 	"fmt"
@@ -118,10 +118,10 @@ func (*SourceConnectionAppleID) Fetch(conn *devportalservice.AppleDeveloperConne
 
 	return &AppleAuth{
 		AppleID: &AppleIDAuth{
-			username:            conn.SessionConnection.AppleID,
-			password:            conn.SessionConnection.Password,
-			session:             session,
-			appSpecificPassword: inputs.AppSpecificPassword,
+			Username:            conn.SessionConnection.AppleID,
+			Password:            conn.SessionConnection.Password,
+			Session:             session,
+			AppSpecificPassword: inputs.AppSpecificPassword,
 		},
 	}, nil
 }
@@ -147,9 +147,9 @@ func (*SourceInputAppleID) Fetch(conn *devportalservice.AppleDeveloperConnection
 
 	return &AppleAuth{
 		AppleID: &AppleIDAuth{
-			username:            inputs.Username,
-			password:            inputs.Password,
-			appSpecificPassword: inputs.AppSpecificPassword,
+			Username:            inputs.Username,
+			Password:            inputs.Password,
+			AppSpecificPassword: inputs.AppSpecificPassword,
 		},
 	}, nil
 }

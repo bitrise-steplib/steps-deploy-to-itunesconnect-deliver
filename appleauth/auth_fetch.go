@@ -1,4 +1,4 @@
-package main
+package appleauth
 
 import (
 	"fmt"
@@ -23,11 +23,11 @@ type AppleAuth struct {
 //   Required: username, password, session, appSpecificPassword
 //
 // As Fastlane spaceship uses:
-//  - iTMSTransporter: it requires apple id + password (or appSpecificPassword in case of TFA)
-//  - TunesAPI: it requires apple id + password (+ TFA session in case of TFA)
+//  - iTMSTransporter: it requires Username + Password (or App-specific password with 2FA)
+//  - TunesAPI: it requires Username + Password (+ 2FA session with 2FA)
 type AppleIDAuth struct {
-	username, password           string
-	session, appSpecificPassword string
+	Username, Password           string
+	Session, AppSpecificPassword string
 }
 
 // MissingAuthConfigError is returned in case no usable Apple App Store Connect / Developer Portal authenticaion is found
