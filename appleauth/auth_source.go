@@ -7,7 +7,7 @@ import (
 	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
 )
 
-// Source returns a specific kind (Apple ID/API Key) Apple authentication data from a specific source (Bitrise Service, manual input)
+// Source returns a specific kind (Apple ID/API Key) Apple authentication data from a specific source (Bitrise Apple developer Connection, Step inputs)
 type Source interface {
 	Fetch(connection *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error)
 	Description() string
@@ -28,7 +28,7 @@ type InputAppleIDSource struct{}
 
 // Description ...
 func (*ConnectionAPIKeySource) Description() string {
-	return "Connected Apple Developer Portal Account for App Store Connect API found"
+	return "API key-based Bitrise Apple Developer Connection found"
 }
 
 // RequiresConnection ...
@@ -51,7 +51,7 @@ func (*ConnectionAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnec
 
 // Description ...
 func (*InputAPIKeySource) Description() string {
-	return "Authenticating using Step inputs (App Store Connect API)"
+	return "API key authentication-related inputs found"
 }
 
 // RequiresConnection ...
@@ -86,7 +86,7 @@ func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection,
 
 // Description ...
 func (*ConnectionAppleIDSource) Description() string {
-	return "Connected session-based Apple Developer Portal Account found. It is Reccomended to use an API Key (App Store Connect API) instead."
+	return "Apple ID based Bitrise Apple Developer Connection found."
 }
 
 // RequiresConnection ...
@@ -117,8 +117,6 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 			Password:            conn.SessionConnection.Password,
 			Session:             session,
 			AppSpecificPassword: inputs.AppSpecificPassword,
-			TeamID:              inputs.TeamID,
-			TeamName:            inputs.TeamName,
 		},
 	}, nil
 }
@@ -127,7 +125,7 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 
 // Description ...
 func (*InputAppleIDSource) Description() string {
-	return "Authenticating using Step inputs (session-based). This method does not support 2FA. It is Reccomended to use an API Key (App Store Connect API) instead."
+	return "Apple ID authentication-related inputs found. This method does not support 2FA."
 }
 
 // RequiresConnection ...
@@ -146,8 +144,6 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 			Username:            inputs.Username,
 			Password:            inputs.Password,
 			AppSpecificPassword: inputs.AppSpecificPassword,
-			TeamID:              inputs.TeamID,
-			TeamName:            inputs.TeamName,
 		},
 	}, nil
 }

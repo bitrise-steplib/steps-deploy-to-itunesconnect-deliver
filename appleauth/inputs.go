@@ -13,7 +13,6 @@ type Inputs struct {
 	Username, Password, AppSpecificPassword string
 	// API key (JWT)
 	APIIssuer, APIKeyPath string
-	TeamID, TeamName      string
 }
 
 // Validate trims extra spaces and checks input grouping
@@ -26,11 +25,6 @@ func (cfg *Inputs) Validate() error {
 		isAPIKeyAuthType  = (cfg.APIKeyPath != "" || cfg.APIIssuer != "")
 		isAppleIDAuthType = (cfg.AppSpecificPassword != "" || cfg.Username != "" || cfg.Password != "")
 	)
-
-	if cfg.TeamName != "" && cfg.TeamID != "" {
-		log.Warnf("TeamName parameter specified, TeamID will be ignored")
-		cfg.TeamID = ""
-	}
 
 	switch {
 	case isAppleIDAuthType && isAPIKeyAuthType:

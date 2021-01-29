@@ -48,18 +48,6 @@ func AppendFastlaneCredentials(inParams FastlaneParams, authConfig Credentials) 
 				p.Args = append(p.Args, usernameKey, authConfig.AppleID.Username)
 			}
 		}
-		if authConfig.AppleID.TeamName != "" {
-			teamNameKey := "--team_name"
-			if !sliceutil.IsStringInSlice(teamNameKey, p.Args) {
-				p.Args = append(p.Args, teamNameKey, authConfig.AppleID.TeamName)
-			}
-		}
-		if authConfig.AppleID.TeamID != "" {
-			teamIDKey := "--team_id"
-			if !sliceutil.IsStringInSlice(teamIDKey, p.Args) {
-				p.Args = append(p.Args, teamIDKey, authConfig.AppleID.TeamID)
-			}
-		}
 	}
 
 	if authConfig.APIKey != nil {

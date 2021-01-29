@@ -127,19 +127,19 @@ inputs:
         **NOTE:** Only available from XCode 11.0 and above.
   - itunescon_user: ""
     opts:
-      title: "Apple ID (legacy): Apple ID"
+      title: "Apple ID: Apple ID"
       description: Login Apple ID for iTunes Connect.
       is_required: false
       is_sensitive: true
   - password: ""
     opts:
-      title: "Apple ID (legacy): Password"
+      title: "Apple ID: Password"
       description: Password for the specified Apple ID.
       is_required: false
       is_sensitive: true
   - app_password: ""
     opts:
-      title: "Apple ID (legacy): Application-specific password (Required if using legacy Bitrise Apple Developer Connection)"
+      title: "Apple ID: Application-specific password (Required if using legacy Bitrise Apple Developer Connection)"
       description: |-
         An application-specific password for the Apple ID.
         **NOTE:** Application-specific passwords can be created on the
@@ -149,14 +149,14 @@ inputs:
       is_sensitive: true
   - team_id: ""
     opts:
-      title: "Apple ID (legacy): Team ID"
+      title: "Apple ID: Team ID"
       description: |-
         The app's *Team ID* on iTunes Connect.
         **NOTE:** This field or the `Team name` is required when using an iTunes Connect account
         that is linked to multiple publishing teams.
   - team_name: ""
     opts:
-      title: "Apple ID (legacy): Team name"
+      title: "Apple ID: Team name"
       description: |-
         The app's *Team Name* on iTunes Connect.
         **NOTE:** This field or the `Team ID` is required when using an iTunes Connect account

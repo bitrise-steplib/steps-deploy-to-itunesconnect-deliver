@@ -274,8 +274,6 @@ func main() {
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
 		AppSpecificPassword: string(cfg.AppPassword),
-		TeamID:              cfg.TeamID,
-		TeamName:            cfg.TeamName,
 		APIIssuer:           cfg.APIIssuer,
 		APIKeyPath:          cfg.APIKeyPath,
 	})
@@ -283,7 +281,7 @@ func main() {
 		fail("Could not configure Apple Service authentication: %v", err)
 	}
 	if authConfig.AppleID != nil && authConfig.AppleID.AppSpecificPassword == "" {
-		log.Warnf("If 2FA enabled, Application-specific password is required when using Apple ID (legacy) authentication.")
+		log.Warnf("If 2FA enabled, Application-specific password is required when using Apple ID authentication.")
 	}
 
 	//
@@ -359,6 +357,17 @@ alphanumeric characters.`)
 		}
 	} else if cfg.BundleID != "" {
 		args = append(args, "--app_identifier", cfg.BundleID)
+	}
+
+	if cfg.TeamName != "" {
+		args = append(args, "--team_name", cfg.TeamName)
+
+		//warn user if TeamID is also set
+		if cfg.TeamID != "" {
+			log.Warnf("TeamName parameter specified, TeamID will be ignored")
+		}
+	} else if cfg.TeamID != "" {
+		args = append(args, "--team_id", cfg.TeamID)
 	}
 
 	if cfg.IpaPath != "" {
