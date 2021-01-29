@@ -93,23 +93,25 @@ inputs:
   - connection: "automatic"
     opts:
       title: Bitrise Apple Developer Connection
-      summary: By default Apple Developer Connection set up in Bitrise Profile is used first and Apple authentication Step inputs are a fallback.
+      summary: By default any enabled Bitrise Apple Developer Connection is used, inputs for Apple Service authentication are used as a fallback only.
       description: |-
-        By default Apple Developer Connection set up in Bitrise Profile is used and Step inputs for configuring authentication with Apple are ignored.
-        You can choose which type of Apple Developer Connection to use, or use Step inputs for configuring authentication:
-        - `automatic`: Use Apple Developer Connection if found, Step inputs are used as a fallback. Both cases API key (JWT) authentication has priority over Apple ID (legacy), if set.
-        - `api_key`: Use Apple Developer Connection. Only API key (JWT) authentication is used. Authentication related Step inputs are ignored.
+        By default any enabled Bitrise Apple Developer Connection is used, inputs for Apple Service authentication are used as a fallback only.
+
+        You can choose which type of Bitrise Apple Developer Connection to use, or use Step inputs for configuring authentication:
+        - `automatic`: Use Apple Developer Connection if found, Step inputs are used as a fallback. Both cases API key (App Store Connect API) authentication has priority over Apple ID (legacy), if set.
+        - `api_key`: Use Apple Developer Connection. Only API key (App Store Connect API) authentication is used. Authentication related Step inputs are ignored.
         - `apple_id`: Use Apple Developer Connection and Application-specific password Step input. Only Apple ID (legacy) authentication is used. Other authentication related Step inputs are ignored.
-        - `disabled`: Do not use Apple Developer Connection. Only authentication related Step inputs are considered.
+        - `off`: Do not use Apple Developer Connection. Only authentication related Step inputs are considered.
       is_required: true
       value_options:
       - "automatic"
       - "api_key"
       - "apple_id"
-      - "disabled"
+      - "off"
   - api_key_path: ""
     opts:
-      title: "API key (JWT): API Key URL"
+      title: "API Key: URL"
+      summary: Path to local or remote file
       description: |-
         Specify the path in an URL format where your API key is stored.
         For example: `https://URL/TO/AuthKey_something.p8` or `file:///PATH/TO/AuthKey_something.p8`
@@ -119,9 +121,9 @@ inputs:
       is_sensitive: true
   - api_issuer: ""
     opts:
-      title: "API key (JWT): Issuer ID"
+      title: "API Key: Issuer ID"
       description: |-
-        Issuer ID. Required if api_key_path is specified.
+        Issuer ID. Required if API Key URL (api_key_path) is specified.
         **NOTE:** Only available from XCode 11.0 and above.
   - itunescon_user: ""
     opts:

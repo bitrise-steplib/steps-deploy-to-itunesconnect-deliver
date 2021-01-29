@@ -24,12 +24,12 @@ type Config struct {
 	IpaPath string `env:"ipa_path"`
 	PkgPath string `env:"pkg_path"`
 
-	BitriseAppleConnection string          `env:"connection,opt[automatic,api_key,apple_id,disabled]"`
-	ItunesConnectUser      string          `env:"itunescon_user"`
-	Password               stepconf.Secret `env:"password"`
-	AppPassword            stepconf.Secret `env:"app_password"`
-	APIKeyPath             string          `env:"api_key_path"`
-	APIIssuer              string          `env:"api_issuer"`
+	BitriseConnection string          `env:"connection,opt[automatic,api_key,apple_id,off]"`
+	ItunesConnectUser string          `env:"itunescon_user"`
+	Password          stepconf.Secret `env:"password"`
+	AppPassword       stepconf.Secret `env:"app_password"`
+	APIKeyPath        string          `env:"api_key_path"`
+	APIIssuer         string          `env:"api_issuer"`
 
 	AppID                string `env:"app_id"`
 	BundleID             string `env:"bundle_id"`
@@ -52,8 +52,8 @@ type Config struct {
 const latestStable = "latest-stable"
 const latestPrerelease = "latest"
 
-func parseAuthSources(connectionParam string) ([]appleauth.Source, error) {
-	switch connectionParam {
+func parseAuthSources(bitriseConnection string) ([]appleauth.Source, error) {
+	switch bitriseConnection {
 	case "automatic":
 		return []appleauth.Source{
 			&appleauth.ConnectionAPIKeySource{},
@@ -65,13 +65,13 @@ func parseAuthSources(connectionParam string) ([]appleauth.Source, error) {
 		return []appleauth.Source{&appleauth.ConnectionAPIKeySource{}}, nil
 	case "apple_id":
 		return []appleauth.Source{&appleauth.ConnectionAppleIDSource{}}, nil
-	case "disabled":
+	case "off":
 		return []appleauth.Source{
 			&appleauth.InputAPIKeySource{},
 			&appleauth.InputAppleIDSource{},
 		}, nil
 	default:
-		return nil, fmt.Errorf("invalid connection input: %s", connectionParam)
+		return nil, fmt.Errorf("invalid connection input: %s", bitriseConnection)
 	}
 }
 
@@ -263,14 +263,13 @@ func main() {
 	if err := cfg.validate(); err != nil {
 		fail("Input error: %s", err)
 	}
-	// Select authentication source
-	authSources, err := parseAuthSources(cfg.BitriseAppleConnection)
-	if err != nil {
-		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseAppleConnection)
-	}
 
 	//
-	// Fetch Apple authenication source
+	// Select and fetch Apple authenication source
+	authSources, err := parseAuthSources(cfg.BitriseConnection)
+	if err != nil {
+		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseConnection)
+	}
 	authConfig, err := appleauth.Fetch(authSources, appleauth.Inputs{
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
@@ -353,39 +352,8 @@ This means that when the API changes
 		"deliver",
 	}
 
-	if authConfig.AppleID != nil {
-		// Set as environment variables
-		if authConfig.AppleID.Password != "" {
-			envs = append(envs, "DELIVER_PASSWORD="+authConfig.AppleID.Password)
-		}
-
-		if authConfig.AppleID.Session != "" {
-			envs = append(envs, "FASTLANE_SESSION="+authConfig.AppleID.Session)
-		}
-
-		if authConfig.AppleID.AppSpecificPassword != "" {
-			envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+authConfig.AppleID.AppSpecificPassword)
-		}
-
-		// Add as an argument
-		if authConfig.AppleID.Username != "" {
-			args = append(args, "--username", authConfig.AppleID.Username)
-		}
-	}
-
-	if authConfig.APIKey != nil {
-		fastlaneAuthFile, err := appleauth.WriteFastlaneAPIKeyToFile(appleauth.FastlaneAPIKey{
-			IssuerID:   authConfig.APIKey.IssuerID,
-			KeyID:      authConfig.APIKey.KeyID,
-			PrivateKey: authConfig.APIKey.PrivateKey,
-		})
-		if err != nil {
-			fail("Failed to write Fastane API Key configuration to file: %v", err)
-		}
-
-		args = append(args, "--api_key_path", fastlaneAuthFile)
-		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
-		args = append(args, "--precheck_include_in_app_purchases", "false")
+	if err := appleauth.AppendFastlaneCredentials(appleauth.FastlaneParams{Envs: envs, Args: args}, authConfig); err != nil {
+		fail("Failed to set up Apple Service authentication for Fastlane: %s", err)
 	}
 
 	if cfg.AppID != "" {
