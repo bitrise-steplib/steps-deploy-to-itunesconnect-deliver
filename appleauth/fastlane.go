@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/sliceutil"
 )
@@ -53,11 +52,12 @@ func AppendFastlaneCredentials(p FastlaneParams, authConfig Credentials) error {
 			if !sliceutil.IsStringInSlice(teamNameKey, p.Args) {
 				p.Args = append(p.Args, teamNameKey, authConfig.AppleID.TeamName)
 			}
+		}
 		if authConfig.AppleID.TeamID != "" {
 			teamIDKey := "--team_id"
-			if !sliceutil.IsStringInSlice(teamNameKey, p.Args) {
-				p.Aargs = append(args, teamIDKey, authConfig.AppleID.TeamID)
-			}	
+			if !sliceutil.IsStringInSlice(teamIDKey, p.Args) {
+				p.Args = append(p.Args, teamIDKey, authConfig.AppleID.TeamID)
+			}
 		}
 	}
 
