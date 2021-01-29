@@ -325,17 +325,6 @@ alphanumeric characters.`)
 		fmt.Println()
 	}
 
-	if cfg.APIKeyPath == "" {
-		log.Printf(`**Be advised**
-that this step uses a well maintained, open source tool which
-uses *undocumented and unsupported APIs* (because the current
-iTunes Connect platform does not have a documented and supported API)
-to perform the deployment.
-This means that when the API changes
-**this step might fail until the tool is updated**.`)
-		fmt.Println()
-	}
-
 	var options []string
 	if cfg.Options != "" {
 		opts, err := shellquote.Split(cfg.Options)
