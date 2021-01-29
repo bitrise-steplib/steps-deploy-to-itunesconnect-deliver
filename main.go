@@ -274,6 +274,8 @@ func main() {
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
 		AppSpecificPassword: string(cfg.AppPassword),
+		TeamID:              cfg.TeamID,
+		TeamName:            cfg.TeamName,
 		APIIssuer:           cfg.APIIssuer,
 		APIKeyPath:          cfg.APIKeyPath,
 	})
@@ -365,17 +367,6 @@ This means that when the API changes
 		}
 	} else if cfg.BundleID != "" {
 		args = append(args, "--app_identifier", cfg.BundleID)
-	}
-
-	if cfg.TeamName != "" {
-		args = append(args, "--team_name", cfg.TeamName)
-
-		//warn user if TeamID is also set
-		if cfg.TeamID != "" {
-			log.Warnf("TeamName parameter specified, TeamID will be ignored")
-		}
-	} else if cfg.TeamID != "" {
-		args = append(args, "--team_id", cfg.TeamID)
 	}
 
 	if cfg.IpaPath != "" {

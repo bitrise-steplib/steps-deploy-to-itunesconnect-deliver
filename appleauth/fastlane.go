@@ -7,7 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
+	"github.com/bitrise-io/go-utils/sliceutil"
 )
 
 // fastlaneAPIKey is used to serialize App Store Connect API Key into JSON for fastlane
@@ -18,10 +20,12 @@ type fastlaneAPIKey struct {
 	PrivateKey string `json:"key"`
 }
 
+// FastlaneParams are Fastlane command arguments and environment variables
 type FastlaneParams struct {
 	Envs, Args []string
 }
 
+// AppendFastlaneCredentials adds auth credentials to Fastlane envs and args
 func AppendFastlaneCredentials(p FastlaneParams, authConfig Credentials) error {
 	if authConfig.AppleID != nil {
 		// Set as environment variables
@@ -39,7 +43,21 @@ func AppendFastlaneCredentials(p FastlaneParams, authConfig Credentials) error {
 
 		// Add as an argument
 		if authConfig.AppleID.Username != "" {
-			p.Args = append(p.Args, "--username", authConfig.AppleID.Username)
+			usernameKey := "--username"
+			if !sliceutil.IsStringInSlice(usernameKey, p.Args) {
+				p.Args = append(p.Args, usernameKey, authConfig.AppleID.Username)
+			}
+		}
+		if authConfig.AppleID.TeamName != "" {
+			teamNameKey := "--team_name"
+			if !sliceutil.IsStringInSlice(teamNameKey, p.Args) {
+				p.Args = append(p.Args, teamNameKey, authConfig.AppleID.TeamName)
+			}
+		if authConfig.AppleID.TeamID != "" {
+			teamIDKey := "--team_id"
+			if !sliceutil.IsStringInSlice(teamNameKey, p.Args) {
+				p.Aargs = append(args, teamIDKey, authConfig.AppleID.TeamID)
+			}	
 		}
 	}
 
@@ -53,9 +71,13 @@ func AppendFastlaneCredentials(p FastlaneParams, authConfig Credentials) error {
 			return fmt.Errorf("failed to write Fastane API Key configuration to file: %v", err)
 		}
 
-		p.Args = append(p.Args, "--api_key_path", fastlaneAuthFile)
-		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
-		p.Args = append(p.Args, "--precheck_include_in_app_purchases", "false")
+		apiKeyPathKey := "--api_key_path"
+		precheckIAPKey := "--precheck_include_in_app_purchases"
+		if !sliceutil.IsStringInSlice(apiKeyPathKey, p.Args) && !sliceutil.IsStringInSlice(precheckIAPKey, p.Args) {
+			p.Args = append(p.Args, apiKeyPathKey, fastlaneAuthFile)
+			// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
+			p.Args = append(p.Args, precheckIAPKey, "false")
+		}
 	}
 
 	return nil

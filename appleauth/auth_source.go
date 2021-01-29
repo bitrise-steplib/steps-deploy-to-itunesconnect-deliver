@@ -117,6 +117,8 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 			Password:            conn.SessionConnection.Password,
 			Session:             session,
 			AppSpecificPassword: inputs.AppSpecificPassword,
+			TeamID:              inputs.TeamID,
+			TeamName:            inputs.TeamName,
 		},
 	}, nil
 }
@@ -144,6 +146,8 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 			Username:            inputs.Username,
 			Password:            inputs.Password,
 			AppSpecificPassword: inputs.AppSpecificPassword,
+			TeamID:              inputs.TeamID,
+			TeamName:            inputs.TeamName,
 		},
 	}, nil
 }

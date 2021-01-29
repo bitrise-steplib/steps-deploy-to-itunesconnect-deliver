@@ -149,14 +149,14 @@ inputs:
       is_sensitive: true
   - team_id: ""
     opts:
-      title: "Team ID"
+      title: "Apple ID (legacy): Team ID"
       description: |-
         The app's *Team ID* on iTunes Connect.
         **NOTE:** This field or the `Team name` is required when using an iTunes Connect account
         that is linked to multiple publishing teams.
   - team_name: ""
     opts:
-      title: "Team name"
+      title: "Apple ID (legacy): Team name"
       description: |-
         The app's *Team Name* on iTunes Connect.
         **NOTE:** This field or the `Team ID` is required when using an iTunes Connect account

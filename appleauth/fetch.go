@@ -28,6 +28,7 @@ type Credentials struct {
 type AppleID struct {
 	Username, Password           string
 	Session, AppSpecificPassword string
+	TeamID, TeamName             string
 }
 
 // MissingAuthConfigError is returned in case no usable Apple App Store Connect / Developer Portal authenticaion is found
