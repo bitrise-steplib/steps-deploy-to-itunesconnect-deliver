@@ -343,9 +343,12 @@ alphanumeric characters.`)
 		"deliver",
 	}
 
-	if err := appleauth.AppendFastlaneCredentials(appleauth.FastlaneParams{Envs: envs, Args: args}, authConfig); err != nil {
+	params, err := appleauth.AppendFastlaneCredentials(appleauth.FastlaneParams{Envs: envs, Args: args}, authConfig)
+	if err != nil {
 		fail("Failed to set up Apple Service authentication for Fastlane: %s", err)
 	}
+	envs = params.Envs
+	args = params.Args
 
 	if cfg.AppID != "" {
 		args = append(args, "--app", cfg.AppID)
