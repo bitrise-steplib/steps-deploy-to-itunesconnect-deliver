@@ -367,7 +367,7 @@ alphanumeric characters.`)
 		envs = append(envs, env)
 	}
 	for _, arg := range authParams.Args {
-		args = append(args, arg)
+		args = append(args, []string{arg.Key, arg.Value}...)
 	}
 
 	if cfg.AppID != "" {

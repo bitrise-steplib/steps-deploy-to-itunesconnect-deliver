@@ -19,15 +19,20 @@ type fastlaneAPIKey struct {
 	PrivateKey string `json:"key"`
 }
 
+type Arg struct {
+	Key, Value string
+}
+
 // FastlaneParams are Fastlane command arguments and environment variables
 type FastlaneParams struct {
-	Envs, Args map[string]string
+	Envs map[string]string
+	Args []Arg
 }
 
 // FastlaneAuthParams converts Apple credentials to Fastlane env vars and arguments
 func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error) {
 	envs := make(map[string]string)
-	args := make(map[string]string)
+	var args []Arg
 	if authConfig.AppleID != nil {
 		// Set as environment variables
 		if authConfig.AppleID.Password != "" {
@@ -44,7 +49,10 @@ func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error
 
 		// Add as an argument
 		if authConfig.AppleID.Username != "" {
-			args["--username"] = authConfig.AppleID.Username
+			args = append(args, Arg{
+				Key:   "--username",
+				Value: authConfig.AppleID.Username,
+			})
 		}
 	}
 
@@ -67,9 +75,15 @@ func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error
 			return FastlaneParams{}, err
 		}
 
-		args["--api_key_path"] = fastlaneAuthFile
+		args = append(args, Arg{
+			Key:   "--api_key_path",
+			Value: fastlaneAuthFile,
+		})
 		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
-		args["--precheck_include_in_app_purchases"] = "false"
+		args = append(args, Arg{
+			Key:   "--precheck_include_in_app_purchases",
+			Value: "false",
+		})
 	}
 
 	return FastlaneParams{Envs: envs, Args: args}, nil

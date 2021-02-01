@@ -43,7 +43,7 @@ const notConnected = `Connected Apple Developer Portal Account not found.
 Most likely because there is no Apple Developer Portal Account connected to the build, or the build is running locally.
 Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/`
 
-// Select return valid Apple ID or API Key based authentication data, from the provided Bitrise Service or manual inputs
+// Select return valid Apple ID or API Key based authentication data, from the provided Bitrise Apple Developer Connection or Inputs
 // authSources: required, array of checked sources (in order, the first set one will be used)
 //	 for example: []AppleAuthSource{&SourceConnectionAPIKey{}, &SourceConnectionAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}
 // inputs: optional, user provided inputs that are not centrally managed (by setting up connections)
