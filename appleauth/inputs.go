@@ -9,7 +9,7 @@ import (
 
 // Inputs is Apple Service authentication configuration provided by end user
 type Inputs struct {
-	// Apple ID (legacy)
+	// Apple ID
 	Username, Password, AppSpecificPassword string
 	// API key (JWT)
 	APIIssuer, APIKeyPath string
@@ -29,7 +29,7 @@ func (cfg *Inputs) Validate() error {
 	switch {
 	case isAppleIDAuthType && isAPIKeyAuthType:
 		log.Warnf("Either provide Apple ID, Password (and  App-specific password if available) OR API Key Path and API Issuer")
-		return fmt.Errorf("both Apple ID (legacy) and API key related configuration provided, but only one of them expected")
+		return fmt.Errorf("both Apple ID and API key related configuration provided, but only one of them expected")
 
 	case isAppleIDAuthType:
 		if cfg.AppSpecificPassword != "" {

@@ -125,7 +125,7 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 
 // Description ...
 func (*InputAppleIDSource) Description() string {
-	return "Apple ID authentication-related inputs found. This method does not support 2FA."
+	return "Apple ID authentication-related inputs found. This method does not support TFA enabled Apple IDs."
 }
 
 // RequiresConnection ...
