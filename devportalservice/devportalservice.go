@@ -79,6 +79,18 @@ func (c *BitriseClient) GetAppleDeveloperConnection() (*AppleDeveloperConnection
 		return nil, fmt.Errorf("failed to unmarshal response (%s), error: %s", body, err)
 	}
 
+	if d.JWTConnection != nil {
+		if d.JWTConnection.IssuerID == "" {
+			return nil, fmt.Errorf("invalid response (%s), API key authentication data: missing issuer_id", body)
+		}
+		if d.JWTConnection.KeyID == "" {
+			return nil, fmt.Errorf("invalid response (%s), API key authentication data: missing key_id", body)
+		}
+		if d.JWTConnection.PrivateKey == "" {
+			return nil, fmt.Errorf("invalid response (%s), API key authentication data: missing private_key", body)
+		}
+	}
+
 	return &AppleDeveloperConnection{
 		SessionConnection: d.SessionConnection,
 		JWTConnection:     d.JWTConnection,

@@ -48,7 +48,8 @@ func (*ConnectionAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnec
 	}
 
 	return &Credentials{
-		APIKey: conn.JWTConnection,
+		APIKey:      conn.JWTConnection,
+		TestDevices: conn.TestDevices,
 	}, nil
 }
 
@@ -61,13 +62,18 @@ func (*InputAPIKeySource) Description() string {
 
 // RequiresConnection ...
 func (*InputAPIKeySource) RequiresConnection() bool {
-	return false
+	return true // For test devices
 }
 
 // Fetch ...
 func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
 	if inputs.APIKeyPath == "" { // Not configured
 		return nil, nil
+	}
+
+	var testDevices []devportalservice.TestDevice
+	if conn != nil { // Not configured
+		testDevices = conn.TestDevices
 	}
 
 	privateKey, keyID, err := fetchPrivateKey(inputs.APIKeyPath)
@@ -84,6 +90,7 @@ func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection,
 			KeyID:      keyID,
 			PrivateKey: string(privateKey),
 		},
+		TestDevices: testDevices,
 	}, nil
 }
 
