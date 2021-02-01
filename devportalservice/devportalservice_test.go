@@ -3,7 +3,6 @@ package devportalservice
 import (
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 
@@ -139,14 +138,4 @@ func newMockHTTPClient(response *http.Response, err error) mockHTTPClient {
 
 func (c mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return c.response, c.err
-}
-
-func restorableSetEnv(t *testing.T, key, value string) func() {
-	origValue, set := os.LookupEnv(key)
-	require.NoError(t, os.Setenv(key, value))
-	if set {
-		return func() { require.NoError(t, os.Setenv(key, origValue)) }
-	}
-	return func() { require.NoError(t, os.Unsetenv(key)) }
-
 }

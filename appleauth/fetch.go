@@ -45,21 +45,21 @@ Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-step
 // authSources: required, array of checked sources (in order, the first set one will be used)
 //	 for example: []AppleAuthSource{&SourceConnectionAPIKey{}, &SourceConnectionAppleID{}, &SourceInputAPIKey{}, &SourceInputAppleID{}}
 // inputs: optional, user provided inputs that are not centrally managed (by setting up connections)
-func Select(devportalServiceProvider *devportalservice.BitriseClient, authSources []Source, inputs Inputs) (Credentials, error) {
+func Select(devportalConnectionProvider devportalservice.AppleDeveloperConnectionProvider, authSources []Source, inputs Inputs) (Credentials, error) {
 	initializeConnection := false
 	for _, source := range authSources {
 		initializeConnection = initializeConnection || source.RequiresConnection()
 	}
 
 	var conn *devportalservice.AppleDeveloperConnection
-	if initializeConnection && devportalServiceProvider != nil {
+	if initializeConnection && devportalConnectionProvider != nil {
 		var err error
-		conn, err = devportalServiceProvider.GetAppleDeveloperConnection()
+		conn, err = devportalConnectionProvider.GetAppleDeveloperConnection()
 		if err != nil {
 			handleSessionDataError(err)
 		}
 
-		if conn.JWTConnection == nil && conn.SessionConnection == nil {
+		if conn == nil || (conn.JWTConnection == nil && conn.SessionConnection == nil) {
 			fmt.Println()
 			log.Debugf("%s", notConnected)
 		}

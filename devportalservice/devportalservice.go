@@ -19,7 +19,7 @@ type httpClient interface {
 
 // AppleDeveloperConnectionProvider ...
 type AppleDeveloperConnectionProvider interface {
-	GetAppleDeveloperConnection(buildURL, buildAPIToken string) (*AppleDeveloperConnection, error)
+	GetAppleDeveloperConnection() (*AppleDeveloperConnection, error)
 }
 
 // BitriseClient implements AppleDeveloperConnectionProvider through the Bitrise.io API.
