@@ -63,18 +63,18 @@ func parseAuthSources(bitriseConnection string) ([]appleauth.Source, error) {
 	case "automatic":
 		return []appleauth.Source{
 			&appleauth.ConnectionAPIKeySource{},
-			&appleauth.ConnectionAppleIDSource{},
+			&appleauth.ConnectionAppleIDFastlaneSource{},
 			&appleauth.InputAPIKeySource{},
-			&appleauth.InputAppleIDSource{},
+			&appleauth.InputAppleIDFastlaneSource{},
 		}, nil
 	case "api_key":
 		return []appleauth.Source{&appleauth.ConnectionAPIKeySource{}}, nil
 	case "apple_id":
-		return []appleauth.Source{&appleauth.ConnectionAppleIDSource{}}, nil
+		return []appleauth.Source{&appleauth.ConnectionAppleIDFastlaneSource{}}, nil
 	case "off":
 		return []appleauth.Source{
 			&appleauth.InputAPIKeySource{},
-			&appleauth.InputAppleIDSource{},
+			&appleauth.InputAppleIDFastlaneSource{},
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid connection input: %s", bitriseConnection)
