@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/bitrise-io/go-utils/pathutil"
-	"github.com/bitrise-io/go-utils/sliceutil"
 	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/appleauth"
 )
 
@@ -22,73 +21,55 @@ type fastlaneAPIKey struct {
 
 // FastlaneParams are Fastlane command arguments and environment variables
 type FastlaneParams struct {
-	Envs, Args []string
+	Envs, Args map[string]string
 }
 
-// AppendFastlaneCredentials adds auth credentials to Fastlane envs and args
-func AppendFastlaneCredentials(inParams FastlaneParams, authConfig appleauth.Credentials) (FastlaneParams, error) {
-	p := inParams
+// FastlaneAuthParams converts Apple credentials to Fastlane env vars and arguments
+func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error) {
+	var p FastlaneParams
 	if authConfig.AppleID != nil {
 		// Set as environment variables
 		if authConfig.AppleID.Password != "" {
-			p.Envs = append(p.Envs, "DELIVER_PASSWORD="+authConfig.AppleID.Password)
+			p.Envs["DELIVER_PASSWORD"] = authConfig.AppleID.Password
 		}
 
 		if authConfig.AppleID.Session != "" {
-			p.Envs = append(p.Envs, "FASTLANE_SESSION="+authConfig.AppleID.Session)
+			p.Envs["FASTLANE_SESSION"] = authConfig.AppleID.Session
 		}
 
 		if authConfig.AppleID.AppSpecificPassword != "" {
-			p.Envs = append(p.Envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+authConfig.AppleID.AppSpecificPassword)
+			p.Envs["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = authConfig.AppleID.AppSpecificPassword
 		}
 
 		// Add as an argument
 		if authConfig.AppleID.Username != "" {
-			usernameKey := "--username"
-			if !sliceutil.IsStringInSlice(usernameKey, p.Args) {
-				p.Args = append(p.Args, usernameKey, authConfig.AppleID.Username)
-			}
+			p.Args["--username"] = authConfig.AppleID.Username
 		}
 	}
 
 	if authConfig.APIKey != nil {
-		fastlaneAuthFile, err := writeFastlaneAPIKeyToFile(fastlaneAPIKey{
+		privateKey, err := json.Marshal(fastlaneAPIKey{
 			IssuerID:   authConfig.APIKey.IssuerID,
 			KeyID:      authConfig.APIKey.KeyID,
 			PrivateKey: authConfig.APIKey.PrivateKey,
 		})
 		if err != nil {
-			return FastlaneParams{}, fmt.Errorf("failed to write Fastane API Key configuration to file: %v", err)
+			return FastlaneParams{}, fmt.Errorf("failed to marshal Fastane API Key configuration: %v", err)
 		}
 
-		apiKeyPathKey := "--api_key_path"
-		precheckIAPKey := "--precheck_include_in_app_purchases"
-		if !sliceutil.IsStringInSlice(apiKeyPathKey, p.Args) && !sliceutil.IsStringInSlice(precheckIAPKey, p.Args) {
-			p.Args = append(p.Args, apiKeyPathKey, fastlaneAuthFile)
-			// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
-			p.Args = append(p.Args, precheckIAPKey, "false")
+		tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
+		if err != nil {
+			return FastlaneParams{}, err
 		}
+		fastlaneAuthFile := filepath.Join(tmpDir, "api_key.json")
+		if err := ioutil.WriteFile(fastlaneAuthFile, privateKey, os.ModePerm); err != nil {
+			return FastlaneParams{}, err
+		}
+
+		p.Args["--api_key_path"] = fastlaneAuthFile
+		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
+		p.Args["--precheck_include_in_app_purchases"] = "false"
 	}
 
 	return p, nil
-}
-
-// writeFastlaneAPIKeyToFile writes a Fastlane-specific JSON file to disk, containing Apple Service authentication details
-func writeFastlaneAPIKeyToFile(authData fastlaneAPIKey) (string, error) {
-	json, err := json.Marshal(authData)
-	if err != nil {
-		return "", err
-	}
-
-	tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
-	if err != nil {
-		return "", err
-	}
-	tmpPath := filepath.Join(tmpDir, "api_key.json")
-
-	if err := ioutil.WriteFile(tmpPath, json, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return tmpPath, nil
 }
