@@ -395,8 +395,8 @@ alphanumeric characters.`)
 	if err != nil {
 		fail("Failed to set up Fastlane authentication paramteres: %v", err)
 	}
-	for _, env := range authParams.Envs {
-		envs = append(envs, env)
+	for envKey, envValue := range authParams.Envs {
+		envs = append(envs, fmt.Sprintf("%s=%s", envKey, envValue))
 	}
 	for _, arg := range authParams.Args {
 		args = append(args, []string{arg.Key, arg.Value}...)
