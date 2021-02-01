@@ -26,24 +26,25 @@ type FastlaneParams struct {
 
 // FastlaneAuthParams converts Apple credentials to Fastlane env vars and arguments
 func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error) {
-	var p FastlaneParams
+	envs := make(map[string]string)
+	args := make(map[string]string)
 	if authConfig.AppleID != nil {
 		// Set as environment variables
 		if authConfig.AppleID.Password != "" {
-			p.Envs["DELIVER_PASSWORD"] = authConfig.AppleID.Password
+			envs["DELIVER_PASSWORD"] = authConfig.AppleID.Password
 		}
 
 		if authConfig.AppleID.Session != "" {
-			p.Envs["FASTLANE_SESSION"] = authConfig.AppleID.Session
+			envs["FASTLANE_SESSION"] = authConfig.AppleID.Session
 		}
 
 		if authConfig.AppleID.AppSpecificPassword != "" {
-			p.Envs["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = authConfig.AppleID.AppSpecificPassword
+			envs["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"] = authConfig.AppleID.AppSpecificPassword
 		}
 
 		// Add as an argument
 		if authConfig.AppleID.Username != "" {
-			p.Args["--username"] = authConfig.AppleID.Username
+			args["--username"] = authConfig.AppleID.Username
 		}
 	}
 
@@ -66,10 +67,10 @@ func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error
 			return FastlaneParams{}, err
 		}
 
-		p.Args["--api_key_path"] = fastlaneAuthFile
+		args["--api_key_path"] = fastlaneAuthFile
 		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
-		p.Args["--precheck_include_in_app_purchases"] = "false"
+		args["--precheck_include_in_app_purchases"] = "false"
 	}
 
-	return p, nil
+	return FastlaneParams{Envs: envs, Args: args}, nil
 }
