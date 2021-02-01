@@ -33,7 +33,7 @@ type InputAppleIDFastlaneSource struct{}
 
 // Description ...
 func (*ConnectionAPIKeySource) Description() string {
-	return "API key-based Bitrise Apple Developer Connection found"
+	return "Bitrise Apple Developer Connection with API key found"
 }
 
 // RequiresConnection ...
@@ -56,7 +56,7 @@ func (*ConnectionAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnec
 
 // Description ...
 func (*InputAPIKeySource) Description() string {
-	return "API key authentication-related inputs found"
+	return "Inputs with API key authentication found"
 }
 
 // RequiresConnection ...
@@ -91,7 +91,7 @@ func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection,
 
 // Description ...
 func (*ConnectionAppleIDSource) Description() string {
-	return "Apple ID-based Bitrise Apple Developer Connection found."
+	return "Bitrise Apple Developer Connection with Apple ID found."
 }
 
 // RequiresConnection ...
@@ -119,7 +119,7 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 
 // Description ...
 func (*InputAppleIDSource) Description() string {
-	return "Apple ID authentication-related inputs found."
+	return "Inputs with Apple ID authentication found."
 }
 
 // RequiresConnection ...
@@ -146,7 +146,7 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 
 // Description ...
 func (*ConnectionAppleIDFastlaneSource) Description() string {
-	return "Apple ID-based Bitrise Apple Developer Connection found."
+	return "Bitrise Apple Developer Connection with Apple ID found."
 }
 
 // RequiresConnection ...
@@ -183,7 +183,7 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 
 // Description ...
 func (*InputAppleIDFastlaneSource) Description() string {
-	return "Apple ID authentication-related inputs found. This method does not support TFA enabled Apple IDs."
+	return "Inputs with Apple ID authentication found. This method does not support TFA enabled Apple IDs."
 }
 
 // RequiresConnection ...
