@@ -75,7 +75,7 @@ func TestSelect(t *testing.T) {
 			name: "Connection active (API Key), inputs (Apple ID)",
 			args: args{
 				devportalConnectionProvider: newMockDevportalConnectionProvider(&devportalservice.AppleDeveloperConnection{
-					JWTConnection: &devportalservice.JWTConnection{
+					APIKeyConnection: &devportalservice.APIKeyConnection{
 						KeyID: "x", IssuerID: "y", PrivateKey: "z",
 					},
 				}, nil),
@@ -87,7 +87,7 @@ func TestSelect(t *testing.T) {
 			},
 			want: Credentials{
 				AppleID: nil,
-				APIKey: &devportalservice.JWTConnection{
+				APIKey: &devportalservice.APIKeyConnection{
 					KeyID: "x", IssuerID: "y", PrivateKey: "z",
 				},
 			},
@@ -96,7 +96,7 @@ func TestSelect(t *testing.T) {
 			name: "Connection active (API Key), inputs (Apple ID), connection not enabled",
 			args: args{
 				devportalConnectionProvider: newMockDevportalConnectionProvider(&devportalservice.AppleDeveloperConnection{
-					JWTConnection: &devportalservice.JWTConnection{
+					APIKeyConnection: &devportalservice.APIKeyConnection{
 						KeyID: "x", IssuerID: "y", PrivateKey: "z",
 					},
 				}, nil),
