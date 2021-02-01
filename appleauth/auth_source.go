@@ -101,7 +101,7 @@ func (*ConnectionAppleIDSource) RequiresConnection() bool {
 
 // Fetch ...
 func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
-	if conn == nil { // No Apple ID configured
+	if conn == nil || conn.SessionConnection == nil { // No Apple ID configured
 		return nil, nil
 	}
 
@@ -162,7 +162,7 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 
 	sessionConn := conn.SessionConnection
 	if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
-		return nil, fmt.Errorf("TFA session expired on %s.", expiry.String())
+		return nil, fmt.Errorf("2FA session saved in Bitrise Developer Connection is expired, was valid until %s", expiry.String())
 	}
 	session, err := sessionConn.FastlaneLoginSession()
 	if err != nil {

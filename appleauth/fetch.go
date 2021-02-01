@@ -19,7 +19,8 @@ type Credentials struct {
 // Without 2FA:
 //   Required: username, password
 // With 2FA:
-//   Required: username, password, session, appSpecificPassword
+//   Required: username, password, appSpecificPassword
+//			   session (Only for Fastlane, set as FASTLANE_SESSION)
 //
 // As Fastlane spaceship uses:
 //  - iTMSTransporter: it requires Username + Password (or App-specific password with 2FA)

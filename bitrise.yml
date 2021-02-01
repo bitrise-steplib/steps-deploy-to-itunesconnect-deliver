@@ -38,12 +38,11 @@ workflows:
   test:
     before_run:
     - test-apple-id-service-auth
-    - test-apple-id-input-auth
     - test-api-key-service-auth
     - test-api-key-input-auth
 
   test-apple-id-service-auth:
-    title: Test Apple ID service connection authentication
+    title: Test Apple ID connection authentication
     before_run:
     - prepare-test
     steps:
@@ -61,27 +60,8 @@ workflows:
         - fastlane_version: "latest"
         - verbose_log: "yes"
 
-  test-apple-id-input-auth:
-    title: Test Apple ID Step input authentication
-    before_run:
-    - prepare-test
-    steps:
-    - path::./:
-        inputs:
-        - connection: "off"
-        - itunescon_user: $ITUNES_CONNECT_USER
-        - password: $ITUNES_CONNECT_PASSWORD
-        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
-        - team_id: $ITUNES_CONNECT_TEAM_ID
-        - app_id: $ITUNES_CONNECT_APP_ID
-        - skip_screenshots: "no"
-        - skip_metadata: "yes"
-        - submit_for_review: "no"
-        - fastlane_version: "latest"
-        - verbose_log: "yes"
-
   test-api-key-service-auth:
-    title: Test API Key service connection authentication
+    title: Test API key connection authentication
     before_run:
       - prepare-test
     steps:
@@ -99,7 +79,7 @@ workflows:
           - verbose_log: "yes"
 
   test-api-key-input-auth:
-    title: Test API Key service Step input authentication
+    title: Test API key Step Input authentication
     before_run:
       - prepare-test
     steps:
@@ -121,6 +101,10 @@ workflows:
     description: |
       This downloads and archives an example app as an input for deliver
     steps:
+    - script:
+        title: Clean saved Fastlane session cookie
+        inputs:
+        - content: rm -rf ~/.fastlane
     - script:
         inputs:
         - content: rm -rf ./_tmp
