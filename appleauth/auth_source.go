@@ -38,12 +38,12 @@ func (*ConnectionAPIKeySource) RequiresConnection() bool {
 
 // Fetch ...
 func (*ConnectionAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
-	if conn == nil || conn.JWTConnection == nil { // Not configured
+	if conn == nil || conn.APIKeyConnection == nil { // Not configured
 		return nil, nil
 	}
 
 	return &Credentials{
-		APIKey: conn.JWTConnection,
+		APIKey: conn.APIKeyConnection,
 	}, nil
 }
 
@@ -74,7 +74,7 @@ func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection,
 	}
 
 	return &Credentials{
-		APIKey: &devportalservice.JWTConnection{
+		APIKey: &devportalservice.APIKeyConnection{
 			IssuerID:   inputs.APIIssuer,
 			KeyID:      keyID,
 			PrivateKey: string(privateKey),
@@ -96,11 +96,11 @@ func (*ConnectionAppleIDSource) RequiresConnection() bool {
 
 // Fetch ...
 func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
-	if conn == nil || conn.SessionConnection == nil { // No Apple ID configured
+	if conn == nil || conn.AppleIDConnection == nil { // No Apple ID configured
 		return nil, nil
 	}
 
-	sessionConn := conn.SessionConnection
+	sessionConn := conn.AppleIDConnection
 	if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
 		log.Warnf("TFA session expired on %s.", expiry.String())
 		return nil, nil
@@ -113,8 +113,8 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 
 	return &Credentials{
 		AppleID: &AppleID{
-			Username:            conn.SessionConnection.AppleID,
-			Password:            conn.SessionConnection.Password,
+			Username:            conn.AppleIDConnection.AppleID,
+			Password:            conn.AppleIDConnection.Password,
 			Session:             session,
 			AppSpecificPassword: inputs.AppSpecificPassword,
 		},
