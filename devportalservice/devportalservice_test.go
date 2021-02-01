@@ -68,8 +68,8 @@ func TestGetAppleDeveloperConnection(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewBitriseClient(newMockHTTPClient(tt.response, nil))
-			got, err := c.GetAppleDeveloperConnection("dummy url", "dummy token")
+			c := NewBitriseClient(newMockHTTPClient(tt.response, nil), "dummy url", "dummy token")
+			got, err := c.GetAppleDeveloperConnection()
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)
 		})
@@ -107,8 +107,8 @@ func TestSessionEnvValue(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewBitriseClient(newMockHTTPClient(tt.response, nil))
-			conn, err := c.GetAppleDeveloperConnection("dummy url", "dummy token")
+			c := NewBitriseClient(newMockHTTPClient(tt.response, nil), "dummy url", "dummy token")
+			conn, err := c.GetAppleDeveloperConnection()
 			require.NoError(t, err)
 
 			if tt.want == "" {

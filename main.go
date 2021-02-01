@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/appleauth"
+	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -47,6 +49,10 @@ type Config struct {
 	ITMSParameters  string `env:"itms_upload_parameters"`
 
 	VerboseLog bool `env:"verbose_log,opt[yes,no]"`
+
+	// Used to get Bitrise Apple Developer Portal Connection
+	BuildURL      string          `env:"BITRISE_BUILD_URL"`
+	BuildAPIToken stepconf.Secret `env:"BITRISE_BUILD_API_TOKEN"`
 }
 
 const latestStable = "latest-stable"
@@ -261,7 +267,17 @@ func main() {
 	//
 	// Validate inputs
 	if err := cfg.validate(); err != nil {
-		fail("Input error: %s", err)
+		fail("Issue with input: %s", err)
+	}
+	authInputs := appleauth.Inputs{
+		Username:            cfg.ItunesConnectUser,
+		Password:            string(cfg.Password),
+		AppSpecificPassword: string(cfg.AppPassword),
+		APIIssuer:           cfg.APIIssuer,
+		APIKeyPath:          cfg.APIKeyPath,
+	}
+	if err := authInputs.Validate(); err != nil {
+		fail("Issue with authentication related inputs: %v", err)
 	}
 
 	//
@@ -270,13 +286,15 @@ func main() {
 	if err != nil {
 		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseConnection)
 	}
-	authConfig, err := appleauth.Fetch(authSources, appleauth.Inputs{
-		Username:            cfg.ItunesConnectUser,
-		Password:            string(cfg.Password),
-		AppSpecificPassword: string(cfg.AppPassword),
-		APIIssuer:           cfg.APIIssuer,
-		APIKeyPath:          cfg.APIKeyPath,
-	})
+
+	var devportalServiceProvider *devportalservice.BitriseClient
+	if cfg.BuildURL != "" && cfg.BuildAPIToken != "" {
+		devportalServiceProvider = devportalservice.NewBitriseClient(http.DefaultClient, cfg.BuildURL, string(cfg.BuildAPIToken))
+	} else {
+		log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
+	}
+
+	authConfig, err := appleauth.Select(devportalServiceProvider, authSources, authInputs)
 	if err != nil {
 		fail("Could not configure Apple Service authentication: %v", err)
 	}
@@ -341,7 +359,7 @@ alphanumeric characters.`)
 		"deliver",
 	}
 
-	params, err := appleauth.AppendFastlaneCredentials(appleauth.FastlaneParams{Envs: envs, Args: args}, authConfig)
+	params, err := AppendFastlaneCredentials(FastlaneParams{Envs: envs, Args: args}, authConfig)
 	if err != nil {
 		fail("Failed to set up Apple Service authentication for Fastlane: %s", err)
 	}

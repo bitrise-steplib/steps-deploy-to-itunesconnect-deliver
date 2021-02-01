@@ -24,25 +24,28 @@ type AppleDeveloperConnectionProvider interface {
 
 // BitriseClient implements AppleDeveloperConnectionProvider through the Bitrise.io API.
 type BitriseClient struct {
-	httpClient httpClient
+	httpClient              httpClient
+	buildURL, buildAPIToken string
 }
 
 // NewBitriseClient creates a new instance of BitriseClient.
-func NewBitriseClient(client httpClient) *BitriseClient {
+func NewBitriseClient(client httpClient, buildURL, buildAPIToken string) *BitriseClient {
 	return &BitriseClient{
-		httpClient: client,
+		httpClient:    client,
+		buildURL:      buildURL,
+		buildAPIToken: buildAPIToken,
 	}
 }
 
 const appleDeveloperConnectionPath = "apple_developer_portal_data.json"
 
 // GetAppleDeveloperConnection fetches the Bitrise.io session-based Apple Developer connection.
-func (c *BitriseClient) GetAppleDeveloperConnection(buildURL, buildAPIToken string) (*AppleDeveloperConnection, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", buildURL, appleDeveloperConnectionPath), nil)
+func (c *BitriseClient) GetAppleDeveloperConnection() (*AppleDeveloperConnection, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/%s", c.buildURL, appleDeveloperConnectionPath), nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("BUILD_API_TOKEN", buildAPIToken)
+	req.Header.Add("BUILD_API_TOKEN", c.buildAPIToken)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
