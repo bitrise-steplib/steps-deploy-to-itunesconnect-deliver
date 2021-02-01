@@ -19,6 +19,7 @@ type fastlaneAPIKey struct {
 	PrivateKey string `json:"key"`
 }
 
+// Arg is a Fastlane argument
 type Arg struct {
 	Key, Value string
 }

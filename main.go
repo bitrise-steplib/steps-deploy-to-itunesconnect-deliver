@@ -255,6 +255,25 @@ func (cfg Config) validate() error {
 	return nil
 }
 
+const notConnected = `Connected Apple Developer Portal Account not found.
+Most likely because there is no Apple Developer Portal Account connected to the build, or the build is running locally.
+Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/`
+
+func handleSessionDataError(err error) {
+	if err == nil {
+		return
+	}
+
+	if networkErr, ok := err.(devportalservice.NetworkError); ok && networkErr.Status == http.StatusNotFound {
+		log.Debugf("")
+		log.Debugf("%s", notConnected)
+	} else {
+		fmt.Println()
+		log.Errorf("Failed to activate Bitrise Apple Developer Portal connection: %s", err)
+		log.Warnf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
+	}
+}
+
 func main() {
 	var cfg Config
 	if err := stepconf.Parse(&cfg); err != nil {
@@ -287,14 +306,27 @@ func main() {
 		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseConnection)
 	}
 
-	var devportalServiceProvider *devportalservice.BitriseClient
+	var devportalConnectionProvider *devportalservice.BitriseClient
 	if cfg.BuildURL != "" && cfg.BuildAPIToken != "" {
-		devportalServiceProvider = devportalservice.NewBitriseClient(http.DefaultClient, cfg.BuildURL, string(cfg.BuildAPIToken))
+		devportalConnectionProvider = devportalservice.NewBitriseClient(http.DefaultClient, cfg.BuildURL, string(cfg.BuildAPIToken))
 	} else {
 		log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
 	}
+	var conn *devportalservice.AppleDeveloperConnection
+	if cfg.BitriseConnection != "off" && devportalConnectionProvider != nil {
+		var err error
+		conn, err = devportalConnectionProvider.GetAppleDeveloperConnection()
+		if err != nil {
+			handleSessionDataError(err)
+		}
 
-	authConfig, err := appleauth.Select(devportalServiceProvider, authSources, authInputs)
+		if conn == nil || (conn.JWTConnection == nil && conn.SessionConnection == nil) {
+			fmt.Println()
+			log.Debugf("%s", notConnected)
+		}
+	}
+
+	authConfig, err := appleauth.Select(conn, authSources, authInputs)
 	if err != nil {
 		fail("Could not configure Apple Service authentication: %v", err)
 	}

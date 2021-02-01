@@ -10,7 +10,6 @@ import (
 type Source interface {
 	Fetch(connection *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error)
 	Description() string
-	RequiresConnection() bool
 }
 
 // ConnectionAPIKeySource provides API Key from Bitrise Apple Developer Connection
@@ -36,11 +35,6 @@ func (*ConnectionAPIKeySource) Description() string {
 	return "Bitrise Apple Developer Connection with API key found"
 }
 
-// RequiresConnection ...
-func (*ConnectionAPIKeySource) RequiresConnection() bool {
-	return true
-}
-
 // Fetch ...
 func (*ConnectionAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
 	if conn == nil || conn.JWTConnection == nil { // Not configured
@@ -48,8 +42,7 @@ func (*ConnectionAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnec
 	}
 
 	return &Credentials{
-		APIKey:      conn.JWTConnection,
-		TestDevices: conn.TestDevices,
+		APIKey: conn.JWTConnection,
 	}, nil
 }
 
@@ -60,20 +53,10 @@ func (*InputAPIKeySource) Description() string {
 	return "Inputs with API key authentication found"
 }
 
-// RequiresConnection ...
-func (*InputAPIKeySource) RequiresConnection() bool {
-	return true // For test devices
-}
-
 // Fetch ...
 func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
 	if inputs.APIKeyPath == "" { // Not configured
 		return nil, nil
-	}
-
-	var testDevices []devportalservice.TestDevice
-	if conn != nil { // Not configured
-		testDevices = conn.TestDevices
 	}
 
 	privateKey, keyID, err := fetchPrivateKey(inputs.APIKeyPath)
@@ -90,7 +73,6 @@ func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection,
 			KeyID:      keyID,
 			PrivateKey: string(privateKey),
 		},
-		TestDevices: testDevices,
 	}, nil
 }
 
@@ -99,11 +81,6 @@ func (*InputAPIKeySource) Fetch(conn *devportalservice.AppleDeveloperConnection,
 // Description ...
 func (*ConnectionAppleIDSource) Description() string {
 	return "Bitrise Apple Developer Connection with Apple ID found."
-}
-
-// RequiresConnection ...
-func (*ConnectionAppleIDSource) RequiresConnection() bool {
-	return true
 }
 
 // Fetch ...
@@ -129,11 +106,6 @@ func (*InputAppleIDSource) Description() string {
 	return "Inputs with Apple ID authentication found."
 }
 
-// RequiresConnection ...
-func (*InputAppleIDSource) RequiresConnection() bool {
-	return false
-}
-
 // Fetch ...
 func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection, inputs Inputs) (*Credentials, error) {
 	if inputs.Username == "" { // Not configured
@@ -154,11 +126,6 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 // Description ...
 func (*ConnectionAppleIDFastlaneSource) Description() string {
 	return "Bitrise Apple Developer Connection with Apple ID found."
-}
-
-// RequiresConnection ...
-func (*ConnectionAppleIDFastlaneSource) RequiresConnection() bool {
-	return true
 }
 
 // Fetch ...
@@ -191,11 +158,6 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 // Description ...
 func (*InputAppleIDFastlaneSource) Description() string {
 	return "Inputs with Apple ID authentication found. This method does not support TFA enabled Apple IDs."
-}
-
-// RequiresConnection ...
-func (*InputAppleIDFastlaneSource) RequiresConnection() bool {
-	return false
 }
 
 // Fetch ...
