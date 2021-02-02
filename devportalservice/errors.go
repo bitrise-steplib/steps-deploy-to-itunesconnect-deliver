@@ -9,5 +9,5 @@ type NetworkError struct {
 }
 
 func (e NetworkError) Error() string {
-	return fmt.Sprintf("response %d %s", e.Status, e.Body)
+	return fmt.Sprintf("network request failed with status %d, body (%s)", e.Status, e.Body)
 }
