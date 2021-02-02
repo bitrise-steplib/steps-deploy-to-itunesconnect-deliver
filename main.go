@@ -245,11 +245,11 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 
 func (cfg Config) validate() error {
 	if cfg.IpaPath == "" && cfg.PkgPath == "" {
-		return fmt.Errorf("Issue with input: no IpaPath nor PkgPath parameter specified")
+		return fmt.Errorf("no IpaPath nor PkgPath parameter specified")
 	}
 
 	if cfg.AppID == "" && cfg.BundleID == "" {
-		return fmt.Errorf("Issue with input: no AppID or BundleID parameter specified")
+		return fmt.Errorf("no AppID or BundleID parameter specified")
 	}
 
 	return nil
