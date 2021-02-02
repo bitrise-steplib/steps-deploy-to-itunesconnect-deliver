@@ -1,16 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"time"
 
 	"github.com/bitrise-io/go-steputils/stepconf"
@@ -21,6 +16,7 @@ import (
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
+	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/appleauth"
 	"github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/devportalservice"
 	"github.com/kballard/go-shellquote"
 )
@@ -30,6 +26,7 @@ type Config struct {
 	IpaPath string `env:"ipa_path"`
 	PkgPath string `env:"pkg_path"`
 
+	BitriseConnection string          `env:"connection,opt[automatic,api_key,apple_id,off]"`
 	ItunesConnectUser string          `env:"itunescon_user"`
 	Password          stepconf.Secret `env:"password"`
 	AppPassword       stepconf.Secret `env:"app_password"`
@@ -52,10 +49,37 @@ type Config struct {
 	ITMSParameters  string `env:"itms_upload_parameters"`
 
 	VerboseLog bool `env:"verbose_log,opt[yes,no]"`
+
+	// Used to get Bitrise Apple Developer Portal Connection
+	BuildURL      string          `env:"BITRISE_BUILD_URL"`
+	BuildAPIToken stepconf.Secret `env:"BITRISE_BUILD_API_TOKEN"`
 }
 
 const latestStable = "latest-stable"
 const latestPrerelease = "latest"
+
+func parseAuthSources(bitriseConnection string) ([]appleauth.Source, error) {
+	switch bitriseConnection {
+	case "automatic":
+		return []appleauth.Source{
+			&appleauth.ConnectionAPIKeySource{},
+			&appleauth.ConnectionAppleIDFastlaneSource{},
+			&appleauth.InputAPIKeySource{},
+			&appleauth.InputAppleIDFastlaneSource{},
+		}, nil
+	case "api_key":
+		return []appleauth.Source{&appleauth.ConnectionAPIKeySource{}}, nil
+	case "apple_id":
+		return []appleauth.Source{&appleauth.ConnectionAppleIDFastlaneSource{}}, nil
+	case "off":
+		return []appleauth.Source{
+			&appleauth.InputAPIKeySource{},
+			&appleauth.InputAppleIDFastlaneSource{},
+		}, nil
+	default:
+		return nil, fmt.Errorf("invalid connection input: %s", bitriseConnection)
+	}
+}
 
 func fail(format string, v ...interface{}) {
 	log.Errorf(format, v...)
@@ -219,23 +243,6 @@ func ensureFastlaneVersionAndCreateCmdSlice(forceVersion, gemfilePth string) ([]
 	return []string{"fastlane"}, "", nil
 }
 
-func handleSessionDataError(err error) {
-	if err == nil {
-		return
-	}
-
-	if networkErr, ok := err.(devportalservice.NetworkError); ok && networkErr.Status == http.StatusNotFound {
-		log.Debugf("")
-		log.Debugf("Connected Apple Developer Portal Account not found")
-		log.Debugf("Most likely because there is no Apple Developer Portal Account connected to the build, or the build is running locally.")
-		log.Debugf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
-	} else {
-		fmt.Println()
-		log.Errorf("Failed to activate Bitrise Apple Developer Portal connection: %s", err)
-		log.Warnf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
-	}
-}
-
 func (cfg Config) validate() error {
 	if cfg.IpaPath == "" && cfg.PkgPath == "" {
 		return fmt.Errorf("Issue with input: no IpaPath nor PkgPath parameter specified")
@@ -245,164 +252,26 @@ func (cfg Config) validate() error {
 		return fmt.Errorf("Issue with input: no AppID or BundleID parameter specified")
 	}
 
-	var (
-		isJWTAuthType     = (cfg.APIKeyPath != "" || cfg.APIIssuer != "")
-		isAppleIDAuthType = (cfg.AppPassword != "" || cfg.Password != "" || cfg.ItunesConnectUser != "")
-	)
-
-	switch {
-
-	case isAppleIDAuthType == isJWTAuthType:
-
-		return fmt.Errorf("one type of authentication required, either provide itunescon_user with password and optionally app_password or api_key_path with api_issuer")
-
-	case isAppleIDAuthType:
-
-		if cfg.ItunesConnectUser == "" {
-			return fmt.Errorf("no itunescon_user provided")
-		}
-		if cfg.Password == "" {
-			return fmt.Errorf("no password provided")
-		}
-
-	case isJWTAuthType:
-
-		if cfg.APIIssuer == "" {
-			return fmt.Errorf("no api_issuer provided")
-		}
-		if cfg.APIKeyPath == "" {
-			return fmt.Errorf("no api_key_path provided")
-		}
-
-	}
-
 	return nil
 }
 
-func copyOrDownloadFile(u *url.URL, pth string) error {
-	if err := os.MkdirAll(filepath.Dir(pth), 0777); err != nil {
-		return err
+const notConnected = `Connected Apple Developer Portal Account not found.
+Most likely because there is no Apple Developer Portal Account connected to the build, or the build is running locally.
+Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/`
+
+func handleSessionDataError(err error) {
+	if err == nil {
+		return
 	}
 
-	certFile, err := os.Create(pth)
-	if err != nil {
-		return err
+	if networkErr, ok := err.(devportalservice.NetworkError); ok && networkErr.Status == http.StatusNotFound {
+		log.Debugf("")
+		log.Debugf("%s", notConnected)
+	} else {
+		fmt.Println()
+		log.Errorf("Failed to activate Bitrise Apple Developer Portal connection: %s", err)
+		log.Warnf("Read more: https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/")
 	}
-	defer func() {
-		if err := certFile.Close(); err != nil {
-			log.Errorf("Failed to close file, error: %s", err)
-		}
-	}()
-
-	// if file -> copy
-	if u.Scheme == "file" {
-		b, err := ioutil.ReadFile(u.Path)
-		if err != nil {
-			return err
-		}
-		_, err = certFile.Write(b)
-		return err
-	}
-
-	// otherwise download
-	f, err := http.Get(u.String())
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err := f.Body.Close(); err != nil {
-			log.Errorf("Failed to close file, error: %s", err)
-		}
-	}()
-
-	_, err = io.Copy(certFile, f.Body)
-	return err
-}
-
-func getKeyID(u *url.URL) string {
-	var keyID = "Bitrise" // as default if no ID found in file name
-
-	// get the ID of the key from the file
-	if matches := regexp.MustCompile(`AuthKey_(.+)\.p8`).FindStringSubmatch(filepath.Base(u.Path)); len(matches) == 2 {
-		keyID = matches[1]
-	}
-
-	return keyID
-}
-
-func getKeyPath(keyID string, keyPaths []string) (string, bool, error) {
-	certName := fmt.Sprintf("AuthKey_%s.p8", keyID)
-
-	for _, path := range keyPaths {
-		certPath := filepath.Join(path, certName)
-
-		switch exists, err := pathutil.IsPathExists(certPath); {
-		case err != nil:
-			return "", false, err
-		case exists:
-			return certPath, true, err
-		}
-	}
-
-	return filepath.Join(keyPaths[0], certName), false, nil
-}
-
-// APIKey is used to serialize App Store Connect API Key into JSON for fastlane
-// see: https://docs.fastlane.tools/app-store-connect-api/#using-fastlane-api-key-json-file
-type APIKey struct {
-	KeyID    string `json:"key_id"`
-	IssuerID string `json:"issuer_id"`
-	Key      string `json:"key"`
-}
-
-func prepareAPIKey(apiKeyPath string, apiIssuer string) (string, error) {
-	// see these in the altool's man page
-	var keyPaths = []string{
-		filepath.Join(os.Getenv("HOME"), ".appstoreconnect/private_keys"),
-		filepath.Join(os.Getenv("HOME"), ".private_keys"),
-		filepath.Join(os.Getenv("HOME"), "private_keys"),
-		"./private_keys",
-	}
-
-	fileURL, err := url.Parse(apiKeyPath)
-	if err != nil {
-		return "", err
-	}
-
-	keyID := getKeyID(fileURL)
-
-	keyPath, keyExists, err := getKeyPath(keyID, keyPaths)
-	if err != nil {
-		return "", err
-	}
-
-	if !keyExists {
-		if err := copyOrDownloadFile(fileURL, keyPath); err != nil {
-			return "", err
-		}
-	}
-
-	key, err := ioutil.ReadFile(keyPath)
-	if err != nil {
-		return "", err
-	}
-
-	json, err := json.Marshal(APIKey{keyID, apiIssuer, string(key)})
-	if err != nil {
-		return "", err
-	}
-
-	tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
-	if err != nil {
-		return "", err
-	}
-	tmpPath := filepath.Join(tmpDir, "api_key.json")
-
-	if err := ioutil.WriteFile(tmpPath, json, os.ModePerm); err != nil {
-		return "", err
-	}
-
-	return tmpPath, nil
 }
 
 func main() {
@@ -417,40 +286,52 @@ func main() {
 	//
 	// Validate inputs
 	if err := cfg.validate(); err != nil {
-		fail("Input error: %s", err)
+		fail("Issue with input: %s", err)
+	}
+	authInputs := appleauth.Inputs{
+		Username:            cfg.ItunesConnectUser,
+		Password:            string(cfg.Password),
+		AppSpecificPassword: string(cfg.AppPassword),
+		APIIssuer:           cfg.APIIssuer,
+		APIKeyPath:          cfg.APIKeyPath,
+	}
+	if err := authInputs.Validate(); err != nil {
+		fail("Issue with authentication related inputs: %v", err)
 	}
 
 	//
-	// Fastlane session
-	fastlaneSession := ""
-	buildURL, buildAPIToken := os.Getenv("BITRISE_BUILD_URL"), os.Getenv("BITRISE_BUILD_API_TOKEN")
-	if buildURL != "" && buildAPIToken != "" {
-		var provider devportalservice.AppleDeveloperConnectionProvider
-		provider = devportalservice.NewBitriseClient(http.DefaultClient)
+	// Select and fetch Apple authenication source
+	authSources, err := parseAuthSources(cfg.BitriseConnection)
+	if err != nil {
+		fail("Input error: unexpected value for Bitrise Apple Developer Connection (%s)", cfg.BitriseConnection)
+	}
 
-		conn, err := provider.GetAppleDeveloperConnection(buildURL, buildAPIToken)
+	var devportalConnectionProvider *devportalservice.BitriseClient
+	if cfg.BuildURL != "" && cfg.BuildAPIToken != "" {
+		devportalConnectionProvider = devportalservice.NewBitriseClient(http.DefaultClient, cfg.BuildURL, string(cfg.BuildAPIToken))
+	} else {
+		log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
+	}
+	var conn *devportalservice.AppleDeveloperConnection
+	if cfg.BitriseConnection != "off" && devportalConnectionProvider != nil {
+		var err error
+		conn, err = devportalConnectionProvider.GetAppleDeveloperConnection()
 		if err != nil {
 			handleSessionDataError(err)
 		}
 
-		if conn != nil && conn.SessionConnection != nil {
+		if conn == nil || (conn.JWTConnection == nil && conn.SessionConnection == nil) {
 			fmt.Println()
-			log.Infof("Connected session-based Apple Developer Portal Account found")
-
-			sessionConn := conn.SessionConnection
-
-			if sessionConn.AppleID != cfg.ItunesConnectUser {
-				log.Warnf("Connected Apple Developer and App Store login account missmatch")
-			} else if expiry := sessionConn.Expiry(); expiry != nil && sessionConn.Expired() {
-				log.Warnf("TFA session expired on %s", expiry.String())
-			} else if session, err := sessionConn.FastlaneLoginSession(); err != nil {
-				handleSessionDataError(err)
-			} else {
-				fastlaneSession = session
-			}
+			log.Debugf("%s", notConnected)
 		}
-	} else {
-		log.Warnf("Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
+	}
+
+	authConfig, err := appleauth.Select(conn, authSources, authInputs)
+	if err != nil {
+		fail("Could not configure Apple Service authentication: %v", err)
+	}
+	if authConfig.AppleID != nil && authConfig.AppleID.AppSpecificPassword == "" {
+		log.Warnf("If 2FA enabled, Application-specific password is required when using Apple ID authentication.")
 	}
 
 	//
@@ -482,26 +363,15 @@ func main() {
 	fmt.Println()
 	log.Infof("Deploy")
 
-    if cfg.Password != "" {
-	    log.Printf(`**Note:** if your password
+	if cfg.Password != "" {
+		log.Printf(`**Note:** if your password
 contains special characters
 and you experience problems, please
 consider changing your password
 to something with only
 alphanumeric characters.`)
-	    fmt.Println()
-    }
-
-    if cfg.APIKeyPath == "" {
-	    log.Printf(`**Be advised**
-that this step uses a well maintained, open source tool which
-uses *undocumented and unsupported APIs* (because the current
-iTunes Connect platform does not have a documented and supported API)
-to perform the deployment.
-This means that when the API changes
-**this step might fail until the tool is updated**.`)
-	    fmt.Println()
-    }
+		fmt.Println()
+	}
 
 	var options []string
 	if cfg.Options != "" {
@@ -513,18 +383,6 @@ This means that when the API changes
 	}
 
 	envs := []string{}
-	if cfg.Password != "" {
-		envs = append(envs, "DELIVER_PASSWORD="+string(cfg.Password))
-	}
-
-	if fastlaneSession != "" {
-		envs = append(envs, "FASTLANE_SESSION="+fastlaneSession)
-	}
-
-	if string(cfg.AppPassword) != "" {
-		envs = append(envs, "FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD="+string(cfg.AppPassword))
-	}
-
 	if cfg.ITMSParameters != "" {
 		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
 	}
@@ -533,18 +391,15 @@ This means that when the API changes
 		"deliver",
 	}
 
-	if cfg.ItunesConnectUser != "" {
-		args = append(args, "--username", cfg.ItunesConnectUser)
+	authParams, err := FastlaneAuthParams(authConfig)
+	if err != nil {
+		fail("Failed to set up Fastlane authentication paramteres: %v", err)
 	}
-
-	if string(cfg.APIKeyPath) != "" {
-		apiKey, err := prepareAPIKey(cfg.APIKeyPath, cfg.APIIssuer)
-		if err != nil {
-			fail("Failed to prepare api key json for authentication, error: %s", err)
-		}
-		args = append(args, "--api_key_path", apiKey)
-		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
-		args = append(args, "--precheck_include_in_app_purchases", "false")
+	for envKey, envValue := range authParams.Envs {
+		envs = append(envs, fmt.Sprintf("%s=%s", envKey, envValue))
+	}
+	for _, arg := range authParams.Args {
+		args = append(args, []string{arg.Key, arg.Value}...)
 	}
 
 	if cfg.AppID != "" {
