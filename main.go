@@ -320,7 +320,7 @@ func main() {
 			handleSessionDataError(err)
 		}
 
-		if conn == nil || (conn.JWTConnection == nil && conn.SessionConnection == nil) {
+		if conn == nil || (conn.APIKeyConnection == nil && conn.AppleIDConnection == nil) {
 			fmt.Println()
 			log.Debugf("%s", notConnected)
 		}
