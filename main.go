@@ -30,7 +30,7 @@ type Config struct {
 	ItunesConnectUser string          `env:"itunescon_user"`
 	Password          stepconf.Secret `env:"password"`
 	AppPassword       stepconf.Secret `env:"app_password"`
-	APIKeyPath        string          `env:"api_key_path"`
+	APIKeyPath        stepconf.Secret `env:"api_key_path"`
 	APIIssuer         string          `env:"api_issuer"`
 
 	AppID                string `env:"app_id"`
@@ -266,7 +266,7 @@ func handleSessionDataError(err error) {
 
 	if networkErr, ok := err.(devportalservice.NetworkError); ok && networkErr.Status == http.StatusUnauthorized {
 		log.Debugf("")
-		log.Debugf("%s", "Unauthorized to query Connected Apple Developer Portal Account. The most likely reason it is not allowed in case of public app and PR build.")
+		log.Debugf("%s", "Unauthorized to query Connected Apple Developer Portal Account. This likely happens with a public app's PR build by design, to protect secrets.")
 
 		return
 	}
@@ -295,7 +295,7 @@ func main() {
 		Password:            string(cfg.Password),
 		AppSpecificPassword: string(cfg.AppPassword),
 		APIIssuer:           cfg.APIIssuer,
-		APIKeyPath:          cfg.APIKeyPath,
+		APIKeyPath:          string(cfg.APIKeyPath),
 	}
 	if err := authInputs.Validate(); err != nil {
 		fail("Issue with authentication related inputs: %v", err)
@@ -323,7 +323,7 @@ func main() {
 			handleSessionDataError(err)
 		}
 
-		if conn == nil || (conn.APIKeyConnection == nil && conn.AppleIDConnection == nil) {
+		if conn != nil && (conn.APIKeyConnection == nil && conn.AppleIDConnection == nil) {
 			fmt.Println()
 			log.Warnf("%s", notConnected)
 		}
