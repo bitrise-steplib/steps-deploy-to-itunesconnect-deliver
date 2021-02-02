@@ -12,39 +12,7 @@ import (
 
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
-	"github.com/hashicorp/go-retryablehttp"
 )
-
-// RetryLogAdaptor adapts the retryablehttp.Logger interface to the go-utils logger.
-type RetryLogAdaptor struct{}
-
-// Printf implements the retryablehttp.Logger interface
-func (*RetryLogAdaptor) Printf(fmtStr string, vars ...interface{}) {
-	switch {
-	case strings.Contains(fmtStr, "[DEBUG]"):
-		log.Debugf(fmtStr, vars...)
-	case strings.Contains(fmtStr, "[ERR]"), strings.Contains(fmtStr, "[ERROR]"):
-		log.Errorf(fmtStr, vars...)
-	case strings.Contains(fmtStr, "[WARN]"):
-		log.Warnf(fmtStr, vars...)
-	case strings.Contains(fmtStr, "[INFO]"):
-		log.Infof(fmtStr, vars...)
-	default:
-		log.Printf(fmtStr, vars...)
-	}
-}
-
-// NewRetryableClient returns a retryable HTTP client
-func NewRetryableClient() http.Client {
-	client := retryablehttp.NewClient()
-	client.Logger = &RetryLogAdaptor{}
-	client.ErrorHandler = retryablehttp.PassthroughErrorHandler
-	client.RetryWaitMin = 2 * time.Second
-	client.RetryWaitMax = 60 * time.Second
-	client.RetryMax = 5
-
-	return *client.StandardClient()
-}
 
 type httpClient interface {
 	Do(req *http.Request) (*http.Response, error)
