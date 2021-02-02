@@ -71,27 +71,6 @@ toolkit:
   go:
     package_name: github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver
 inputs:
-  - ipa_path: "$BITRISE_IPA_PATH"
-    opts:
-      title: "IPA path"
-      description: |-
-        Path to your IPA file to be deployed.
-        **NOTE:** This input or the `PKG path` is required.
-  - pkg_path: "$BITRISE_PKG_PATH"
-    opts:
-      title: "PKG path"
-      description: |-
-        Path to your PKG file to be deployed.
-        **NOTE:** This input or the `IPA path` is required.
-  - platform: "ios"
-    opts:
-      title: "Platform"
-      description: The platform of the app.
-      is_required: true
-      value_options:
-      - "ios"
-      - "osx"
-      - "appletvos"
   - connection: "automatic"
     opts:
       title: Bitrise Apple Developer Connection
@@ -163,6 +142,27 @@ inputs:
         The app's *Team Name* on App Store Connect.
         **NOTE:** This field or the `Team ID` is required when authenticating using Apple ID and the account
         is linked to multiple publishing teams.
+  - ipa_path: "$BITRISE_IPA_PATH"
+    opts:
+      title: "IPA path"
+      description: |-
+        Path to your IPA file to be deployed.
+        **NOTE:** This input or the `PKG path` is required.
+  - pkg_path: "$BITRISE_PKG_PATH"
+    opts:
+      title: "PKG path"
+      description: |-
+        Path to your PKG file to be deployed.
+        **NOTE:** This input or the `IPA path` is required.
+  - platform: "ios"
+    opts:
+      title: "Platform"
+      description: The platform of the app.
+      is_required: true
+      value_options:
+      - "ios"
+      - "osx"
+      - "appletvos"
   - app_id: ""
     opts:
       title: "App Store Connect App ID"
