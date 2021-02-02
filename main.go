@@ -265,8 +265,8 @@ func handleSessionDataError(err error) {
 	}
 
 	if networkErr, ok := err.(devportalservice.NetworkError); ok && networkErr.Status == http.StatusUnauthorized {
-		log.Debugf("")
-		log.Debugf("%s", "Unauthorized to query Connected Apple Developer Portal Account. This likely happens with a public app's PR build by design, to protect secrets.")
+		fmt.Println()
+		log.Warnf("%s", "Unauthorized to query Connected Apple Developer Portal Account. This happens by design, with a public app's PR build, to protect secrets.")
 
 		return
 	}
@@ -334,7 +334,7 @@ func main() {
 		fail("Could not configure Apple Service authentication: %v", err)
 	}
 	if authConfig.AppleID != nil && authConfig.AppleID.AppSpecificPassword == "" {
-		log.Warnf("If 2FA enabled Apple ID is used, Application-specific password may be required.")
+		log.Warnf("If 2FA enabled Apple ID is used, Application-specific password is required.")
 	}
 
 	//

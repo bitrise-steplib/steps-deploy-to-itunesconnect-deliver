@@ -95,16 +95,18 @@ inputs:
       summary: Path to local or remote file
       description: |-
         Specify the path in an URL format where your API key is stored.
-        For example: `https://URL/TO/AuthKey_something.p8` or `file:///PATH/TO/AuthKey_something.p8`
+        For example: `https://URL/TO/AuthKey_something.p8` or `file:///PATH/TO/AuthKey_something.p8`.
+
+
         You can upload your key on the **Generic File Storage** tab in the Workflow Editor and set the environment variable for the file here.
+
+
         For example: `$BITRISEIO_MYKEY_URL`
-        **NOTE:** Only available from XCode 11.0 and above.
   - api_issuer: ""
     opts:
       title: "API Key: Issuer ID"
       description: |-
-        Issuer ID. Required if API Key URL (api_key_path) is specified.
-        **NOTE:** Only available from XCode 11.0 and above.
+        Issuer ID. Required if **API Key: URL** (`api_key_path`) is specified.
   - itunescon_user: ""
     opts:
       title: "Apple ID: Email"
@@ -131,7 +133,7 @@ inputs:
       title: "Apple ID: Team ID"
       description: |-
         The app's *Team ID* on App Store Connect.
-        **NOTE:** This field or the `Team name` is required when authenticating using Apple ID and the account
+        **NOTE:** This field or the **Apple ID: Team name** is required when authenticating using Apple ID and the account
         is linked to multiple publishing teams.
 
         For example: `2040826`
@@ -140,20 +142,20 @@ inputs:
       title: "Apple ID: Team name"
       description: |-
         The app's *Team Name* on App Store Connect.
-        **NOTE:** This field or the `Team ID` is required when authenticating using Apple ID and the account
+        **NOTE:** This field or the **Apple ID: Team ID** is required when authenticating using Apple ID and the account
         is linked to multiple publishing teams.
   - ipa_path: "$BITRISE_IPA_PATH"
     opts:
       title: "IPA path"
       description: |-
         Path to your IPA file to be deployed.
-        **NOTE:** This input or the `PKG path` is required.
+        **NOTE:** This input or the **PKG path** is required.
   - pkg_path: "$BITRISE_PKG_PATH"
     opts:
       title: "PKG path"
       description: |-
         Path to your PKG file to be deployed.
-        **NOTE:** This input or the `IPA path` is required.
+        **NOTE:** This input or the **IPA path** is required.
   - platform: "ios"
     opts:
       title: "Platform"
@@ -169,7 +171,7 @@ inputs:
       summary: "App Store Connect App ID (Apple ID)"
       description: |-
         The app's *Apple ID* on App Store Connect.
-        **NOTE:** This input or the `App Bundle ID` is required.
+        **NOTE:** This input or the **App Bundle ID** is required.
         Open the **app's page on App Store Connect**, click on **App Information**,
         from the **General Information** section,
         copy the **Apple ID**'s value from here. It's a numeric value, for example, 846814360.
@@ -178,7 +180,7 @@ inputs:
       title: "App Bundle ID"
       description: |-
         The app's *Bundle ID* on App Store Connect.
-        **NOTE:** This input or the `App Apple ID` is required.
+        **NOTE:** This input or the **App Store Connect App ID** is required.
   - submit_for_review: "no"
     opts:
       title: "Submit for Review?"
