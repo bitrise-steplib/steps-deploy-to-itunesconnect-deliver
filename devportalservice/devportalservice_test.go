@@ -38,30 +38,30 @@ func TestGetAppleDeveloperConnection(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Session-based Apple Developer Connection set for the build",
+			name: "Apple ID-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testSessionConnectionResponseBody)),
+				Body:       ioutil.NopCloser(strings.NewReader(testAppleIDConnectionResponseBody)),
 			},
-			want:    &testConnectionWithSessionConnection,
+			want:    &testConnectionWithAppleIDConnection,
 			wantErr: false,
 		},
 		{
-			name: "JWT Apple Developer Connection set for the build",
+			name: "API key Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testJWTConnectionResponseBody)),
+				Body:       ioutil.NopCloser(strings.NewReader(testAPIKeyConnectionResponseBody)),
 			},
-			want:    &testConnectionWithJWTConnection,
+			want:    &testConnectionWithAPIKeyConnection,
 			wantErr: false,
 		},
 		{
-			name: "Session-based and JWT Apple Developer Connection set for the build, test device available",
+			name: "Apple ID-based and API key Apple Developer Connection set for the build, test device available",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testSessionAndJWTConnectionResponseBody)),
+				Body:       ioutil.NopCloser(strings.NewReader(testAppleIDAndAPIKeyConnectionResponseBody)),
 			},
-			want:    &testConnectionWithSessionAndJWTConnection,
+			want:    &testConnectionWithAppleIDAndAPIKeyConnection,
 			wantErr: false,
 		},
 	}
@@ -75,7 +75,7 @@ func TestGetAppleDeveloperConnection(t *testing.T) {
 	}
 }
 
-func TestSessionEnvValue(t *testing.T) {
+func TestFastlaneLoginSession(t *testing.T) {
 	tests := []struct {
 		name string
 
@@ -95,10 +95,10 @@ func TestSessionEnvValue(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Session-based Apple Developer Connection set for the build",
+			name: "Apple ID-based Apple Developer Connection set for the build",
 			response: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(strings.NewReader(testSessionConnectionResponseBody)),
+				Body:       ioutil.NopCloser(strings.NewReader(testAppleIDConnectionResponseBody)),
 			},
 			want:    testFastlaneSession,
 			wantErr: false,
@@ -111,17 +111,17 @@ func TestSessionEnvValue(t *testing.T) {
 			require.NoError(t, err)
 
 			if tt.want == "" {
-				require.Nil(t, conn.SessionConnection)
+				require.Nil(t, conn.AppleIDConnection)
 				return
 			}
 
-			got, err := conn.SessionConnection.FastlaneLoginSession()
+			got, err := conn.AppleIDConnection.FastlaneLoginSession()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("SessionData() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("FastlaneLoginSession() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if got != tt.want {
-				t.Errorf("SessionData() = %v, want %v", got, tt.want)
+				t.Errorf("FastlaneLoginSession() = %v, want %v", got, tt.want)
 			}
 		})
 	}
