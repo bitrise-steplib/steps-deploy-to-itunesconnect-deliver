@@ -43,6 +43,18 @@ func NewBitriseClient(client httpClient, buildURL, buildAPIToken string) *Bitris
 
 const appleDeveloperConnectionPath = "apple_developer_portal_data.json"
 
+func privateKeyWithHeader(privateKey string) string {
+	if strings.HasPrefix(privateKey, "-----BEGIN PRIVATE KEY----") {
+		return privateKey
+	}
+
+	return fmt.Sprint(
+		"-----BEGIN PRIVATE KEY-----\n",
+		privateKey,
+		"\n-----END PRIVATE KEY-----",
+	)
+}
+
 // GetAppleDeveloperConnection fetches the Bitrise.io Apple Developer connection.
 func (c *BitriseClient) GetAppleDeveloperConnection() (*AppleDeveloperConnection, error) {
 	var rawCreds []byte
@@ -77,6 +89,8 @@ func (c *BitriseClient) GetAppleDeveloperConnection() (*AppleDeveloperConnection
 		if d.APIKeyConnection.PrivateKey == "" {
 			return nil, fmt.Errorf("invalid authentication credentials, empty private_key in response (%s)", rawCreds)
 		}
+
+		d.APIKeyConnection.PrivateKey = privateKeyWithHeader(d.APIKeyConnection.PrivateKey)
 	}
 
 	return &AppleDeveloperConnection{
@@ -163,19 +177,6 @@ type AppleDeveloperConnection struct {
 	AppleIDConnection *AppleIDConnection
 	APIKeyConnection  *APIKeyConnection
 	TestDevices       []TestDevice `json:"test_devices"`
-}
-
-// PrivateKeyWithHeader adds header and footer if needed
-func (cred *APIKeyConnection) PrivateKeyWithHeader() string {
-	if strings.HasPrefix(cred.PrivateKey, "-----BEGIN PRIVATE KEY----") {
-		return cred.PrivateKey
-	}
-
-	return fmt.Sprint(
-		"-----BEGIN PRIVATE KEY-----\n",
-		cred.PrivateKey,
-		"\n-----END PRIVATE KEY-----",
-	)
 }
 
 // Expiry returns the expiration of the Bitrise Apple ID-based Apple Developer connection.
