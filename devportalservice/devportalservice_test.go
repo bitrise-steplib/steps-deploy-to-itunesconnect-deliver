@@ -133,7 +133,7 @@ type mockHTTPClient struct {
 }
 
 func newMockHTTPClient(response *http.Response, err error) mockHTTPClient {
-	return mockHTTPClient{response: response}
+	return mockHTTPClient{response: response, err: err}
 }
 
 func (c mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
