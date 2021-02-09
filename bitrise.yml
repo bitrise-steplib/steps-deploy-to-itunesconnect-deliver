@@ -67,16 +67,16 @@ workflows:
     steps:
     - path::./:
         inputs:
-          - connection: api_key
-          - api_key_path: ""
-          - api_issuer: ""
-          - team_id: ""
-          - app_id: $ITUNES_CONNECT_APP_ID
-          - skip_screenshots: "no"
-          - skip_metadata: "yes"
-          - submit_for_review: "no"
-          - fastlane_version: "latest"
-          - verbose_log: "yes"
+        - connection: api_key
+        - api_key_path: ""
+        - api_issuer: ""
+        - team_id: ""
+        - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
+        - fastlane_version: "latest"
+        - verbose_log: "yes"
 
   test-api-key-input-auth:
     title: Test API key Step Input authentication
@@ -85,16 +85,16 @@ workflows:
     steps:
     - path::./:
         inputs:
-          - connection: "off"
-          - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
-          - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
-          - team_id: ""
-          - app_id: $ITUNES_CONNECT_APP_ID
-          - skip_screenshots: "no"
-          - skip_metadata: "yes"
-          - submit_for_review: "no"
-          - fastlane_version: "latest"
-          - verbose_log: "yes"
+        - connection: "off"
+        - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
+        - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
+        - team_id: ""
+        - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
+        - fastlane_version: "latest"
+        - verbose_log: "yes"
 
   test-tfa-disabled-apple-id-service-auth:
     title: Test Apple ID connection authentication using TFA disabled account
