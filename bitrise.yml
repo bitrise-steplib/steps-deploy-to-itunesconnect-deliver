@@ -96,6 +96,26 @@ workflows:
         - fastlane_version: "latest"
         - verbose_log: "yes"
 
+  test-tfa-disabled-apple-id-service-auth:
+    title: Test Apple ID connection authentication using TFA disabled account
+    description: |-
+      Use this workflow for manual testing TFA disabled Apple ID.
+    before_run:
+    - prepare-test
+    steps:
+    - path::./:
+        inputs:
+        - connection: apple_id
+        - itunescon_user: ""
+        - password: ""
+        - team_id: $ITUNES_CONNECT_TEAM_ID
+        - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
+        - fastlane_version: "latest"
+        - verbose_log: "yes"
+
   prepare-test:
     title: Prepare test
     description: |
