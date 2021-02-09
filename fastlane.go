@@ -36,6 +36,8 @@ func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error
 	var args []Arg
 	if authConfig.AppleID != nil {
 		// Set as environment variables
+		envs["SPACESHIP_SKIP_2FA_UPGRADE"] = "1"
+
 		if authConfig.AppleID.Password != "" {
 			envs["DELIVER_PASSWORD"] = authConfig.AppleID.Password
 		}
