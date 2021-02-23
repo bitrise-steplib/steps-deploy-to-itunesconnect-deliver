@@ -91,7 +91,7 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 	}
 
 	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection.AppSpecificPassword != "" {
+	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
 		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
 	}
 
@@ -119,7 +119,7 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 	}
 
 	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection.AppSpecificPassword != "" {
+	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
 		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
 	}
 
@@ -155,7 +155,7 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 	}
 
 	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection.AppSpecificPassword != "" {
+	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
 		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
 	}
 
@@ -183,7 +183,7 @@ func (*InputAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDeveloperCo
 	}
 
 	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection.AppSpecificPassword != "" {
+	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
 		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
 	}
 
