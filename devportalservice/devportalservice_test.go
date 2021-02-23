@@ -140,7 +140,7 @@ func (c mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return c.response, c.err
 }
 
-func Test_normalizeTestDevices(t *testing.T) {
+func Test_validateTestDevice(t *testing.T) {
 	tests := []struct {
 		name                  string
 		deviceList            []TestDevice
@@ -197,7 +197,7 @@ func Test_normalizeTestDevices(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotValidDevices, gotDuplicatedDevices := normalizeTestDevices(tt.deviceList)
+			gotValidDevices, gotDuplicatedDevices := validateTestDevice(tt.deviceList)
 			require.Equal(t, tt.wantValidDevices, gotValidDevices, "normalizeTestDevices() validDevices")
 			require.Equal(t, tt.wantDuplicatedDevices, gotDuplicatedDevices, "normalizeTestDevices() duplicateDevices")
 		})
