@@ -204,7 +204,7 @@ func Test_validateTestDevice(t *testing.T) {
 	}
 }
 
-func TestTestDevice_CompareUDID(t *testing.T) {
+func TestTestDevice_IsEqualUDID(t *testing.T) {
 	tests := []struct {
 		name            string
 		UDID, otherUDID string
@@ -231,7 +231,7 @@ func TestTestDevice_CompareUDID(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CompareUDID(tt.UDID, tt.otherUDID); got != tt.want {
+			if got := IsEqualUDID(tt.UDID, tt.otherUDID); got != tt.want {
 				t.Errorf("TestDevice.EqualsTo() = %v, want %v", got, tt.want)
 			}
 		})

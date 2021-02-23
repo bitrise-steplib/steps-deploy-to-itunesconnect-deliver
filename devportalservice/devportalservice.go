@@ -176,8 +176,8 @@ type TestDevice struct {
 	DeviceType string    `json:"device_type"`
 }
 
-// CompareUDID compares two UDIDs (stored in the DeviceID field of TestDevice)
-func CompareUDID(UDID string, otherUDID string) bool {
+// IsEqualUDID compares two UDIDs (stored in the DeviceID field of TestDevice)
+func IsEqualUDID(UDID string, otherUDID string) bool {
 	return normalizeDeviceUDID(UDID) == normalizeDeviceUDID(otherUDID)
 }
 
