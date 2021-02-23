@@ -166,8 +166,9 @@ type APIKeyConnection struct {
 
 // TestDevice ...
 type TestDevice struct {
-	ID         int       `json:"id"`
-	UserID     int       `json:"user_id"`
+	ID     int `json:"id"`
+	UserID int `json:"user_id"`
+	// DeviceID is the Apple device UDID
 	DeviceID   string    `json:"device_identifier"`
 	Title      string    `json:"title"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -175,9 +176,9 @@ type TestDevice struct {
 	DeviceType string    `json:"device_type"`
 }
 
-// DeviceIDEqualsTo compares two TestDevice objects based on the UDID (DeviceID field)
-func (device TestDevice) DeviceIDEqualsTo(UDID string) bool {
-	return normalizeDeviceUDID(device.DeviceID) == normalizeDeviceUDID(UDID)
+// CompareUDID compares two UDIDs (stored in the DeviceID field of TestDevice)
+func CompareUDID(UDID string, otherUDID string) bool {
+	return normalizeDeviceUDID(UDID) == normalizeDeviceUDID(otherUDID)
 }
 
 // AppleDeveloperConnection represents a Bitrise.io Apple Developer connection.
@@ -224,27 +225,27 @@ func (c *AppleIDConnection) FastlaneLoginSession() (string, error) {
 	return strings.Join(rubyCookies, ""), nil
 }
 
-func filterDeviceUDID(udid string) string {
+func validDeviceUDID(udid string) string {
 	r := regexp.MustCompile("[^a-zA-Z0-9-]")
 	return r.ReplaceAllLiteralString(udid, "")
 }
 
 func normalizeDeviceUDID(udid string) string {
-	return strings.ToLower(strings.ReplaceAll(filterDeviceUDID(udid), "-", ""))
+	return strings.ToLower(strings.ReplaceAll(validDeviceUDID(udid), "-", ""))
 }
 
 func normalizeTestDevices(deviceList []TestDevice) (validDevices, duplicatedDevices []TestDevice) {
 	bitriseDevices := make(map[string]bool)
 	for _, device := range deviceList {
-		caseInsensitiveID := normalizeDeviceUDID(device.DeviceID)
-		if _, ok := bitriseDevices[caseInsensitiveID]; ok {
+		normalizedID := normalizeDeviceUDID(device.DeviceID)
+		if _, ok := bitriseDevices[normalizedID]; ok {
 			duplicatedDevices = append(duplicatedDevices, device)
 
 			continue
 		}
 
-		bitriseDevices[caseInsensitiveID] = true
-		device.DeviceID = filterDeviceUDID(device.DeviceID)
+		bitriseDevices[normalizedID] = true
+		device.DeviceID = validDeviceUDID(device.DeviceID)
 		validDevices = append(validDevices, device)
 	}
 
