@@ -3,183 +3,203 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-  - SAMPLE_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
-  - BRANCH: master
-  - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
-  - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
-  - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
+    - SAMPLE_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
+    - BRANCH: master
+    - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
+    - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
+    - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
 
-  # define these in your .bitrise.secrets.yml
-  - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
-  - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
-  - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
-  - ITUNES_CONNECT_API_KEY_PATH: $ITUNES_CONNECT_API_KEY_PATH
-  - ITUNES_CONNECT_API_KEY_ISSUER: $ITUNES_CONNECT_API_KEY_ISSUER
-  - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-  - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
+    # define these in your .bitrise.secrets.yml
+    - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
+    - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+    - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+    - ITUNES_CONNECT_API_KEY_PATH: $ITUNES_CONNECT_API_KEY_PATH
+    - ITUNES_CONNECT_API_KEY_ISSUER: $ITUNES_CONNECT_API_KEY_ISSUER
+    - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+    - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
 workflows:
   # ----------------------------------------------------------------
   # --- workflow to Step Test
   ci:
     before_run:
-    - audit-this-step
-    - go-tests
+      - audit-this-step
+      - go-tests
     after_run:
-    - test
+      - test
 
   go-tests:
     steps:
-    - go-list:
-    - golint:
-    - errcheck:
-    - go-test:
+      - go-list:
+      - golint:
+      - errcheck:
+      - go-test:
 
   test:
     before_run:
-    - test-apple-id-service-auth
-    - test-api-key-service-auth
-    - test-api-key-input-auth
+      - test-apple-id-service-auth
+      - test-apple-id-service-auth-no-pass
+      - test-api-key-service-auth
+      - test-api-key-input-auth
 
   test-apple-id-service-auth:
     title: Test Apple ID connection authentication
     before_run:
-    - prepare-test
+      - prepare-test
     steps:
-    - path::./:
-        inputs:
-        - connection: apple_id
-        - itunescon_user: ""
-        - password: ""
-        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
-        - team_id: $ITUNES_CONNECT_TEAM_ID
-        - app_id: $ITUNES_CONNECT_APP_ID
-        - skip_screenshots: "no"
-        - skip_metadata: "yes"
-        - submit_for_review: "no"
-        - fastlane_version: "latest"
-        - verbose_log: "yes"
+      - path::./:
+          inputs:
+            - connection: apple_id
+            - itunescon_user: ""
+            - password: ""
+            - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+            - team_id: $ITUNES_CONNECT_TEAM_ID
+            - app_id: $ITUNES_CONNECT_APP_ID
+            - skip_screenshots: "no"
+            - skip_metadata: "yes"
+            - submit_for_review: "no"
+            - fastlane_version: "latest"
+            - verbose_log: "yes"
+  
+  test-apple-id-service-auth-no-pass:
+    title: Test Apple ID connection authentication
+    before_run:
+      - prepare-test
+    steps:
+      - path::./:
+          inputs:
+            - connection: apple_id
+            - itunescon_user: ""
+            - password: ""
+            - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+            - team_id: $ITUNES_CONNECT_TEAM_ID
+            - app_id: $ITUNES_CONNECT_APP_ID
+            - skip_screenshots: "no"
+            - skip_metadata: "yes"
+            - submit_for_review: "no"
+            - fastlane_version: "latest"
+            - verbose_log: "yes
 
   test-api-key-service-auth:
     title: Test API key connection authentication
     before_run:
       - prepare-test
     steps:
-    - path::./:
-        inputs:
-        - connection: api_key
-        - api_key_path: ""
-        - api_issuer: ""
-        - team_id: ""
-        - app_id: $ITUNES_CONNECT_APP_ID
-        - skip_screenshots: "no"
-        - skip_metadata: "yes"
-        - submit_for_review: "no"
-        - fastlane_version: "latest"
-        - verbose_log: "yes"
+      - path::./:
+          inputs:
+            - connection: api_key
+            - api_key_path: ""
+            - api_issuer: ""
+            - team_id: ""
+            - app_id: $ITUNES_CONNECT_APP_ID
+            - skip_screenshots: "no"
+            - skip_metadata: "yes"
+            - submit_for_review: "no"
+            - fastlane_version: "latest"
+            - verbose_log: "yes"
 
   test-api-key-input-auth:
     title: Test API key Step Input authentication
     before_run:
       - prepare-test
     steps:
-    - path::./:
-        inputs:
-        - connection: "off"
-        - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
-        - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
-        - team_id: ""
-        - app_id: $ITUNES_CONNECT_APP_ID
-        - skip_screenshots: "no"
-        - skip_metadata: "yes"
-        - submit_for_review: "no"
-        - fastlane_version: "latest"
-        - verbose_log: "yes"
+      - path::./:
+          inputs:
+            - connection: "off"
+            - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
+            - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
+            - team_id: ""
+            - app_id: $ITUNES_CONNECT_APP_ID
+            - skip_screenshots: "no"
+            - skip_metadata: "yes"
+            - submit_for_review: "no"
+            - fastlane_version: "latest"
+            - verbose_log: "yes"
 
   test-tfa-disabled-apple-id-service-auth:
     title: Test Apple ID connection authentication using TFA disabled account
     description: |-
       Use this workflow for manual testing TFA disabled Apple ID.
     before_run:
-    - prepare-test
+      - prepare-test
     steps:
-    - path::./:
-        inputs:
-        - connection: apple_id
-        - itunescon_user: ""
-        - password: ""
-        - team_id: $ITUNES_CONNECT_TEAM_ID
-        - app_id: $ITUNES_CONNECT_APP_ID
-        - skip_screenshots: "no"
-        - skip_metadata: "yes"
-        - submit_for_review: "no"
-        - fastlane_version: "latest"
-        - verbose_log: "yes"
+      - path::./:
+          inputs:
+            - connection: apple_id
+            - itunescon_user: ""
+            - password: ""
+            - team_id: $ITUNES_CONNECT_TEAM_ID
+            - app_id: $ITUNES_CONNECT_APP_ID
+            - skip_screenshots: "no"
+            - skip_metadata: "yes"
+            - submit_for_review: "no"
+            - fastlane_version: "latest"
+            - verbose_log: "yes"
 
   prepare-test:
     title: Prepare test
     description: |
       This downloads and archives an example app as an input for deliver
     steps:
-    - script:
-        title: Clean saved Fastlane session cookie
-        inputs:
-        - content: rm -rf ~/.fastlane
-    - script:
-        inputs:
-        - content: rm -rf ./_tmp
-    - change-workdir:
-        run_if: true
-        inputs:
-        - path: ./_tmp
-        - is_create_path: true
-    - script:
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            if [[ -z "${SAMPLE_APP_URL}" ]]; then
-              echo "error: there is no SAMPLE_APP_URL env var specified"
-              exit 1
-            elif [[ -z "${COMMIT}" && -z "${BRANCH}" ]]; then
-              echo "error: can't checkout: there is no BRANCH or COMMIT env var specified"
-              exit 1
-            fi
-            git init
-            git remote add origin "${SAMPLE_APP_URL}"
-            git fetch || exit 1
-            [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
-    - ios-auto-provision-appstoreconnect:
-        inputs:
-        - generate_profiles: 'yes'
-        - distribution_type: app-store
-    - script:
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            CURRENT_BUILD_NUMBER=${BITRISE_BUILD_NUMBER}
-            BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*10000))
-            if [[ -z "${BITRISE_BUILD_NUMBER}" ]]; then
-              echo "error: failed to calculated build number"
-              exit 1
-            fi
-            if [[ -n "${CURRENT_BUILD_NUMBER}" ]]; then
-              BITRISE_BUILD_NUMBER=$((${BITRISE_BUILD_NUMBER}+${CURRENT_BUILD_NUMBER}))
-            fi
+      - script:
+          title: Clean saved Fastlane session cookie
+          inputs:
+            - content: rm -rf ~/.fastlane
+      - script:
+          inputs:
+            - content: rm -rf ./_tmp
+      - change-workdir:
+          run_if: true
+          inputs:
+            - path: ./_tmp
+            - is_create_path: true
+      - script:
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                if [[ -z "${SAMPLE_APP_URL}" ]]; then
+                  echo "error: there is no SAMPLE_APP_URL env var specified"
+                  exit 1
+                elif [[ -z "${COMMIT}" && -z "${BRANCH}" ]]; then
+                  echo "error: can't checkout: there is no BRANCH or COMMIT env var specified"
+                  exit 1
+                fi
+                git init
+                git remote add origin "${SAMPLE_APP_URL}"
+                git fetch || exit 1
+                [[ -n "${COMMIT}" ]] && git checkout "${COMMIT}" || git checkout "${BRANCH}"
+      - ios-auto-provision-appstoreconnect:
+          inputs:
+            - generate_profiles: "yes"
+            - distribution_type: app-store
+      - script:
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                CURRENT_BUILD_NUMBER=${BITRISE_BUILD_NUMBER}
+                BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*10000))
+                if [[ -z "${BITRISE_BUILD_NUMBER}" ]]; then
+                  echo "error: failed to calculated build number"
+                  exit 1
+                fi
+                if [[ -n "${CURRENT_BUILD_NUMBER}" ]]; then
+                  BITRISE_BUILD_NUMBER=$((${BITRISE_BUILD_NUMBER}+${CURRENT_BUILD_NUMBER}))
+                fi
 
-            envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
-    - set-xcode-build-number:
-        title: Set Build Number
-        run_if: true
-        inputs:
-        - build_version: $BITRISE_BUILD_NUMBER
-        - plist_path: $INFO_PLIST_PATH
-        - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
-    - xcode-archive:
-        title: Create Archive
-        inputs:
-        - output_dir: $BITRISE_DEPLOY_DIR
-        - project_path: $BITRISE_PROJECT_PATH
-        - export_method: app-store
+                envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
+      - set-xcode-build-number:
+          title: Set Build Number
+          run_if: true
+          inputs:
+            - build_version: $BITRISE_BUILD_NUMBER
+            - plist_path: $INFO_PLIST_PATH
+            - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
+      - xcode-archive:
+          title: Create Archive
+          inputs:
+            - output_dir: $BITRISE_DEPLOY_DIR
+            - project_path: $BITRISE_PROJECT_PATH
+            - export_method: app-store
 
   # ----------------------------------------------------------------
   # --- Utility workflows
@@ -188,23 +208,23 @@ workflows:
     description: |
       Used for updating bitrise dependencies with dep
     steps:
-    - script:
-        title: Dependency update
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            go get -u -v github.com/golang/dep/cmd/dep
-            dep ensure -v
-            dep ensure -v -update
+      - script:
+          title: Dependency update
+          inputs:
+            - content: |-
+                #!/bin/bash
+                set -ex
+                go get -u -v github.com/golang/dep/cmd/dep
+                dep ensure -v
+                dep ensure -v -update
 
   # ----------------------------------------------------------------
   # --- workflows to Share this step into a Step Library
   audit-this-step:
     steps:
-    - script:
-        inputs:
-        - content: |-
-            #!/bin/bash
-            set -ex
-            stepman audit --step-yml ./step.yml
+      - script:
+          inputs:
+            - content: |-
+                #!/bin/bash
+                set -ex
+                stepman audit --step-yml ./step.yml

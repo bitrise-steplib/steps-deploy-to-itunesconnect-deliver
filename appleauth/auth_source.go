@@ -90,12 +90,17 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 		return nil, nil
 	}
 
+	appSpecificPassword := inputs.AppSpecificPassword
+	if conn.AppleIDConnection.AppSpecificPassword != "" {
+		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
+	}
+
 	return &Credentials{
 		AppleID: &AppleID{
 			Username:            conn.AppleIDConnection.AppleID,
 			Password:            conn.AppleIDConnection.Password,
 			Session:             "",
-			AppSpecificPassword: inputs.AppSpecificPassword,
+			AppSpecificPassword: appSpecificPassword,
 		},
 	}, nil
 }
