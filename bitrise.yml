@@ -37,13 +37,13 @@ workflows:
 
   test:
     before_run:
-      - test-apple-id-service-auth
-      - test-apple-id-service-auth-no-pass
+      - test-apple-id-service-auth-app-spec-password-input
+      - test-apple-id-service-auth-app-spec-password-connection
       - test-api-key-service-auth
       - test-api-key-input-auth
 
-  test-apple-id-service-auth:
-    title: Test Apple ID connection authentication
+  test-apple-id-service-auth-app-spec-password-input:
+    title: Test Apple ID connection authentication with app specific password from input
     before_run:
       - prepare-test
     steps:
@@ -61,8 +61,8 @@ workflows:
             - fastlane_version: "latest"
             - verbose_log: "yes"
 
-  test-apple-id-service-auth-no-pass:
-    title: Test Apple ID connection authentication no app_password passed
+  test-apple-id-service-auth-app-spec-password-connection:
+    title: Test Apple ID connection authentication with app specific password from connection
     before_run:
       - prepare-test
     steps:
