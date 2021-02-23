@@ -204,47 +204,41 @@ func Test_normalizeTestDevices(t *testing.T) {
 	}
 }
 
-func TestTestDevice_EqualsTo(t *testing.T) {
+func TestTestDevice_DeviceIDEqualsTo(t *testing.T) {
 	tests := []struct {
-		name        string
-		device      TestDevice
-		otherDevice TestDevice
-		want        bool
+		name      string
+		device    TestDevice
+		otherUDID string
+		want      bool
 	}{
 		{
 			name: "Same device",
 			device: TestDevice{
 				DeviceID: "00008020-00213C3D2201002F",
 			},
-			otherDevice: TestDevice{
-				DeviceID: "00008020-00213C3D2201002F",
-			},
-			want: true,
+			otherUDID: "00008020-00213C3D2201002F",
+			want:      true,
 		},
 		{
 			name: "Same device with different casing and separators",
 			device: TestDevice{
 				DeviceID: "00008020-00213C3D2201002F",
 			},
-			otherDevice: TestDevice{
-				DeviceID: "00008020 00213c3d2201002f",
-			},
-			want: true,
+			otherUDID: "00008020 00213c3d2201002f",
+			want:      true,
 		},
 		{
 			name: "Different devices",
 			device: TestDevice{
 				DeviceID: "00008020-00213C3D2201002F",
 			},
-			otherDevice: TestDevice{
-				DeviceID: "00008020-00213C3D2201002G",
-			},
-			want: false,
+			otherUDID: "00008020-00213C3D2201002G",
+			want:      false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.device.EqualsTo(tt.otherDevice); got != tt.want {
+			if got := tt.device.DeviceIDEqualsTo(tt.otherUDID); got != tt.want {
 				t.Errorf("TestDevice.EqualsTo() = %v, want %v", got, tt.want)
 			}
 		})

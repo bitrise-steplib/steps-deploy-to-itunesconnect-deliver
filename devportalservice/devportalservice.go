@@ -175,9 +175,9 @@ type TestDevice struct {
 	DeviceType string    `json:"device_type"`
 }
 
-// EqualsTo compares two TestDevice objects based on the UDID (DeviceID field)
-func (device TestDevice) EqualsTo(otherDevice TestDevice) bool {
-	return normalizeDeviceUDID(device.DeviceID) == normalizeDeviceUDID(otherDevice.DeviceID)
+// DeviceIDEqualsTo compares two TestDevice objects based on the UDID (DeviceID field)
+func (device TestDevice) DeviceIDEqualsTo(UDID string) bool {
+	return normalizeDeviceUDID(device.DeviceID) == normalizeDeviceUDID(UDID)
 }
 
 // AppleDeveloperConnection represents a Bitrise.io Apple Developer connection.
@@ -234,7 +234,7 @@ func normalizeDeviceUDID(udid string) string {
 }
 
 func normalizeTestDevices(deviceList []TestDevice) (validDevices, duplicatedDevices []TestDevice) {
-	bitriseDevices := make(map[string]TestDevice)
+	bitriseDevices := make(map[string]bool)
 	for _, device := range deviceList {
 		caseInsensitiveID := normalizeDeviceUDID(device.DeviceID)
 		if _, ok := bitriseDevices[caseInsensitiveID]; ok {
@@ -243,11 +243,8 @@ func normalizeTestDevices(deviceList []TestDevice) (validDevices, duplicatedDevi
 			continue
 		}
 
+		bitriseDevices[caseInsensitiveID] = true
 		device.DeviceID = filterDeviceUDID(device.DeviceID)
-		bitriseDevices[caseInsensitiveID] = device
-	}
-
-	for _, device := range bitriseDevices {
 		validDevices = append(validDevices, device)
 	}
 
