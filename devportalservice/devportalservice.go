@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -93,10 +94,13 @@ func (c *BitriseClient) GetAppleDeveloperConnection() (*AppleDeveloperConnection
 		d.APIKeyConnection.PrivateKey = privateKeyWithHeader(d.APIKeyConnection.PrivateKey)
 	}
 
+	testDevices, duplicatedDevices := normalizeTestDevices(d.TestDevices)
+
 	return &AppleDeveloperConnection{
-		AppleIDConnection: d.AppleIDConnection,
-		APIKeyConnection:  d.APIKeyConnection,
-		TestDevices:       d.TestDevices,
+		AppleIDConnection:     d.AppleIDConnection,
+		APIKeyConnection:      d.APIKeyConnection,
+		TestDevices:           testDevices,
+		DuplicatedTestDevices: duplicatedDevices,
 	}, nil
 }
 
@@ -171,12 +175,17 @@ type TestDevice struct {
 	DeviceType string    `json:"device_type"`
 }
 
+// EqualsTo compares two TestDevice objects based on the UDID (DeviceID field)
+func (device TestDevice) EqualsTo(otherDevice TestDevice) bool {
+	return normalizeDeviceUDID(device.DeviceID) == normalizeDeviceUDID(otherDevice.DeviceID)
+}
+
 // AppleDeveloperConnection represents a Bitrise.io Apple Developer connection.
 // https://devcenter.bitrise.io/getting-started/configuring-bitrise-steps-that-require-apple-developer-account-data/
 type AppleDeveloperConnection struct {
-	AppleIDConnection *AppleIDConnection
-	APIKeyConnection  *APIKeyConnection
-	TestDevices       []TestDevice `json:"test_devices"`
+	AppleIDConnection                  *AppleIDConnection
+	APIKeyConnection                   *APIKeyConnection
+	TestDevices, DuplicatedTestDevices []TestDevice
 }
 
 // FastlaneLoginSession returns the Apple ID login session in a ruby/object:HTTP::Cookie format.
@@ -213,4 +222,34 @@ func (c *AppleIDConnection) FastlaneLoginSession() (string, error) {
 		rubyCookies = append(rubyCookies, b.String()+"\n")
 	}
 	return strings.Join(rubyCookies, ""), nil
+}
+
+func filterDeviceUDID(udid string) string {
+	r := regexp.MustCompile("[^a-zA-Z0-9-]")
+	return r.ReplaceAllLiteralString(udid, "")
+}
+
+func normalizeDeviceUDID(udid string) string {
+	return strings.ToLower(strings.ReplaceAll(filterDeviceUDID(udid), "-", ""))
+}
+
+func normalizeTestDevices(deviceList []TestDevice) (validDevices, duplicatedDevices []TestDevice) {
+	bitriseDevices := make(map[string]TestDevice)
+	for _, device := range deviceList {
+		caseInsensitiveID := normalizeDeviceUDID(device.DeviceID)
+		if _, ok := bitriseDevices[caseInsensitiveID]; ok {
+			duplicatedDevices = append(duplicatedDevices, device)
+
+			continue
+		}
+
+		device.DeviceID = filterDeviceUDID(device.DeviceID)
+		bitriseDevices[caseInsensitiveID] = device
+	}
+
+	for _, device := range bitriseDevices {
+		validDevices = append(validDevices, device)
+	}
+
+	return validDevices, duplicatedDevices
 }

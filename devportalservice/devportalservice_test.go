@@ -139,3 +139,114 @@ func newMockHTTPClient(response *http.Response, err error) mockHTTPClient {
 func (c mockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return c.response, c.err
 }
+
+func Test_normalizeTestDevices(t *testing.T) {
+	tests := []struct {
+		name                  string
+		deviceList            []TestDevice
+		wantValidDevices      []TestDevice
+		wantDuplicatedDevices []TestDevice
+	}{
+		{
+			name: "One device",
+			deviceList: []TestDevice{{
+				DeviceID: "612cb2257",
+			}},
+			wantValidDevices: []TestDevice{{
+				DeviceID: "612cb2257",
+			}},
+			wantDuplicatedDevices: nil,
+		},
+		{
+			name: "One device with whitespace",
+			deviceList: []TestDevice{{
+				DeviceID: "612c b2257 ",
+			}},
+			wantValidDevices: []TestDevice{{
+				DeviceID: "612cb2257",
+			}},
+			wantDuplicatedDevices: nil,
+		},
+		{
+			name: "One device with separator",
+			deviceList: []TestDevice{{
+				DeviceID: "00008020-00213C3D2201002F",
+			}},
+			wantValidDevices: []TestDevice{{
+				DeviceID: "00008020-00213C3D2201002F",
+			}},
+			wantDuplicatedDevices: nil,
+		},
+		{
+			name: "Duplicate devices",
+			deviceList: []TestDevice{
+				{
+					DeviceID: "00008020-00213C3D2201002F",
+				},
+				{
+					DeviceID: "0000802000213C3D2201002F",
+				},
+			},
+			wantValidDevices: []TestDevice{{
+				DeviceID: "00008020-00213C3D2201002F",
+			}},
+			wantDuplicatedDevices: []TestDevice{{
+				DeviceID: "0000802000213C3D2201002F",
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotValidDevices, gotDuplicatedDevices := normalizeTestDevices(tt.deviceList)
+			require.Equal(t, tt.wantValidDevices, gotValidDevices, "normalizeTestDevices() validDevices")
+			require.Equal(t, tt.wantDuplicatedDevices, gotDuplicatedDevices, "normalizeTestDevices() duplicateDevices")
+		})
+	}
+}
+
+func TestTestDevice_EqualsTo(t *testing.T) {
+	tests := []struct {
+		name        string
+		device      TestDevice
+		otherDevice TestDevice
+		want        bool
+	}{
+		{
+			name: "Same device",
+			device: TestDevice{
+				DeviceID: "00008020-00213C3D2201002F",
+			},
+			otherDevice: TestDevice{
+				DeviceID: "00008020-00213C3D2201002F",
+			},
+			want: true,
+		},
+		{
+			name: "Same device with different casing and separators",
+			device: TestDevice{
+				DeviceID: "00008020-00213C3D2201002F",
+			},
+			otherDevice: TestDevice{
+				DeviceID: "00008020 00213c3d2201002f",
+			},
+			want: true,
+		},
+		{
+			name: "Different devices",
+			device: TestDevice{
+				DeviceID: "00008020-00213C3D2201002F",
+			},
+			otherDevice: TestDevice{
+				DeviceID: "00008020-00213C3D2201002G",
+			},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.device.EqualsTo(tt.otherDevice); got != tt.want {
+				t.Errorf("TestDevice.EqualsTo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
