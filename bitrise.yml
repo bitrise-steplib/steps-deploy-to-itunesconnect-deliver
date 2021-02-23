@@ -60,9 +60,9 @@ workflows:
             - submit_for_review: "no"
             - fastlane_version: "latest"
             - verbose_log: "yes"
-  
+
   test-apple-id-service-auth-no-pass:
-    title: Test Apple ID connection authentication
+    title: Test Apple ID connection authentication no app_password passed
     before_run:
       - prepare-test
     steps:
@@ -71,14 +71,13 @@ workflows:
             - connection: apple_id
             - itunescon_user: ""
             - password: ""
-            - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
             - team_id: $ITUNES_CONNECT_TEAM_ID
             - app_id: $ITUNES_CONNECT_APP_ID
             - skip_screenshots: "no"
             - skip_metadata: "yes"
             - submit_for_review: "no"
             - fastlane_version: "latest"
-            - verbose_log: "yes
+            - verbose_log: "yes"
 
   test-api-key-service-auth:
     title: Test API key connection authentication
