@@ -177,11 +177,7 @@ func (*InputAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDeveloperCo
 }
 
 func appSpecificPasswordFavouringConnection(conn *devportalservice.AppleIDConnection, passwordFromInput string) string {
-	appSpecificPassword := ""
-
-	if passwordFromInput != "" {
-		appSpecificPassword = passwordFromInput
-	}
+	appSpecificPassword := passwordFromInput
 
 	// AppSpecifcPassword from the connection overwrites the one from the input
 	if conn != nil && conn.AppSpecificPassword != "" {
