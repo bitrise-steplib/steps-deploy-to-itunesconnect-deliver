@@ -61,6 +61,25 @@ func TestSelect(t *testing.T) {
 			},
 		},
 		{
+			name: "Connection active (Apple ID), inputs (Apple ID)",
+			args: args{
+				devportalConnection: &devportalservice.AppleDeveloperConnection{
+					AppleIDConnection: &devportalservice.AppleIDConnection{AppleID: "x", Password: "y", AppSpecificPassword: "password_from_connection"},
+				},
+				authSources: []Source{&ConnectionAPIKeySource{}, &ConnectionAppleIDSource{}, &InputAPIKeySource{}, &InputAppleIDSource{}},
+				inputs: Inputs{
+					Username: "a", Password: "b", AppSpecificPassword: "password_from_input",
+					APIIssuer: "", APIKeyPath: "",
+				},
+			},
+			want: Credentials{
+				AppleID: &AppleID{
+					Username: "x", Password: "y", AppSpecificPassword: "password_from_input", Session: "",
+				},
+				APIKey: nil,
+			},
+		},
+		{
 			name: "Connection active (API Key), inputs (Apple ID)",
 			args: args{
 				devportalConnection: &devportalservice.AppleDeveloperConnection{

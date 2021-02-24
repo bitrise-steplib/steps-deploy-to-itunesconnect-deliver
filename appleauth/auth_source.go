@@ -90,17 +90,12 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 		return nil, nil
 	}
 
-	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
-		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
-	}
-
 	return &Credentials{
 		AppleID: &AppleID{
 			Username:            conn.AppleIDConnection.AppleID,
 			Password:            conn.AppleIDConnection.Password,
 			Session:             "",
-			AppSpecificPassword: appSpecificPassword,
+			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
 		},
 	}, nil
 }
@@ -118,16 +113,11 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 		return nil, nil
 	}
 
-	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
-		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
-	}
-
 	return &Credentials{
 		AppleID: &AppleID{
 			Username:            inputs.Username,
 			Password:            inputs.Password,
-			AppSpecificPassword: appSpecificPassword,
+			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
 		},
 	}, nil
 }
@@ -154,17 +144,12 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 		return nil, fmt.Errorf("could not prepare Fastlane session cookie object: %v", err)
 	}
 
-	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
-		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
-	}
-
 	return &Credentials{
 		AppleID: &AppleID{
 			Username:            conn.AppleIDConnection.AppleID,
 			Password:            conn.AppleIDConnection.Password,
 			Session:             session,
-			AppSpecificPassword: appSpecificPassword,
+			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
 		},
 	}, nil
 }
@@ -182,16 +167,25 @@ func (*InputAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDeveloperCo
 		return nil, nil
 	}
 
-	appSpecificPassword := inputs.AppSpecificPassword
-	if conn.AppleIDConnection != nil && conn.AppleIDConnection.AppSpecificPassword != "" {
-		appSpecificPassword = conn.AppleIDConnection.AppSpecificPassword
-	}
-
 	return &Credentials{
 		AppleID: &AppleID{
 			Username:            inputs.Username,
 			Password:            inputs.Password,
-			AppSpecificPassword: appSpecificPassword,
+			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
 		},
 	}, nil
+}
+
+func appSpecificPassword(conn *devportalservice.AppleIDConnection, passwordFromInput string) string {
+	appSpecificPassword := ""
+
+	if conn != nil && conn.AppSpecificPassword != "" {
+		appSpecificPassword = conn.AppSpecificPassword
+	}
+	// AppSpecifcPassword from input overwrites the one from the connection
+	if passwordFromInput != "" {
+		appSpecificPassword = passwordFromInput
+	}
+
+	return appSpecificPassword
 }
