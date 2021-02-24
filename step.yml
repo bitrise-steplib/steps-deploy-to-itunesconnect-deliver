@@ -122,7 +122,7 @@ inputs:
       title: "Apple ID: Application-specific password"
       summary: Optional if using Apple ID
       description: |-
-        This input needs to be used if TFA enabled on the Apple ID, but no app-specific password added to the used Bitrise Apple ID connection.
+        Use this input if TFA is enabled on the Apple ID but no app-specific password has been added to the used Bitrise Apple ID connection.
 
         **NOTE:** Application-specific passwords can be created on the
         [AppleID Website](https://appleid.apple.com). It can be used to
