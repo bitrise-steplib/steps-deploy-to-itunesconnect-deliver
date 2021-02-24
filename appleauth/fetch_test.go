@@ -18,6 +18,10 @@ var (
 		AppleID: "connection_appleid", Password: "connection_password", AppSpecificPassword: "connection_appspecificpassword",
 	}
 
+	argAppleIDConnectionMissingPassword = devportalservice.AppleIDConnection{
+		AppleID: "connection_appleid", Password: "connection_password", AppSpecificPassword: "",
+	}
+
 	argAPIKeyConnection = devportalservice.APIKeyConnection{
 		KeyID: "keyconnection_keyID", IssuerID: "keyconnection_issuerID", PrivateKey: "keyconnection_PrivateKey",
 	}
@@ -125,6 +129,20 @@ func TestSelect(t *testing.T) {
 			args: args{
 				devportalConnection: &devportalservice.AppleDeveloperConnection{
 					AppleIDConnection: &argAppleIDConnection,
+				},
+				authSources: []Source{&ConnectionAppleIDFastlaneSource{}},
+				inputs:      argInput,
+			},
+			want: Credentials{
+				AppleID: &expectedAppleIDWithArgConnection,
+				APIKey:  nil,
+			},
+		},
+		{
+			name: "Connection active but missing password (Apple ID), inputs (Apple ID) with ConnectionAppleIDFastlaneSource",
+			args: args{
+				devportalConnection: &devportalservice.AppleDeveloperConnection{
+					AppleIDConnection: &argAppleIDConnectionMissingPassword,
 				},
 				authSources: []Source{&ConnectionAppleIDFastlaneSource{}},
 				inputs:      argInput,

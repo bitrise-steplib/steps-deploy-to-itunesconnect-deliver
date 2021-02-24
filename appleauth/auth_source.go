@@ -149,7 +149,7 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 			Username:            conn.AppleIDConnection.AppleID,
 			Password:            conn.AppleIDConnection.Password,
 			Session:             session,
-			AppSpecificPassword: inputs.AppSpecificPassword,
+			AppSpecificPassword: appSpecificPasswordFavouringConnection(conn.AppleIDConnection, inputs.AppSpecificPassword),
 		},
 	}, nil
 }
