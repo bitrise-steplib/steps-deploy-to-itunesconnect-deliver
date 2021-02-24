@@ -95,7 +95,7 @@ func (*ConnectionAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConne
 			Username:            conn.AppleIDConnection.AppleID,
 			Password:            conn.AppleIDConnection.Password,
 			Session:             "",
-			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
+			AppSpecificPassword: appSpecificPasswordFavouringConnection(conn.AppleIDConnection, inputs.AppSpecificPassword),
 		},
 	}, nil
 }
@@ -117,7 +117,7 @@ func (*InputAppleIDSource) Fetch(conn *devportalservice.AppleDeveloperConnection
 		AppleID: &AppleID{
 			Username:            inputs.Username,
 			Password:            inputs.Password,
-			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
+			AppSpecificPassword: inputs.AppSpecificPassword,
 		},
 	}, nil
 }
@@ -149,7 +149,7 @@ func (*ConnectionAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDevelo
 			Username:            conn.AppleIDConnection.AppleID,
 			Password:            conn.AppleIDConnection.Password,
 			Session:             session,
-			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
+			AppSpecificPassword: inputs.AppSpecificPassword,
 		},
 	}, nil
 }
@@ -171,20 +171,21 @@ func (*InputAppleIDFastlaneSource) Fetch(conn *devportalservice.AppleDeveloperCo
 		AppleID: &AppleID{
 			Username:            inputs.Username,
 			Password:            inputs.Password,
-			AppSpecificPassword: appSpecificPassword(conn.AppleIDConnection, inputs.AppSpecificPassword),
+			AppSpecificPassword: inputs.AppSpecificPassword,
 		},
 	}, nil
 }
 
-func appSpecificPassword(conn *devportalservice.AppleIDConnection, passwordFromInput string) string {
+func appSpecificPasswordFavouringConnection(conn *devportalservice.AppleIDConnection, passwordFromInput string) string {
 	appSpecificPassword := ""
 
-	if conn != nil && conn.AppSpecificPassword != "" {
-		appSpecificPassword = conn.AppSpecificPassword
-	}
-	// AppSpecifcPassword from input overwrites the one from the connection
 	if passwordFromInput != "" {
 		appSpecificPassword = passwordFromInput
+	}
+
+	// AppSpecifcPassword from the connection overwrites the one from the input
+	if conn != nil && conn.AppSpecificPassword != "" {
+		appSpecificPassword = conn.AppSpecificPassword
 	}
 
 	return appSpecificPassword
