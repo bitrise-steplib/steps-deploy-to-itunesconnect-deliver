@@ -81,7 +81,7 @@ inputs:
         There are two types of Apple Developer connection you can enable on Bitrise: one is based on an API key of the App Store Connect API, the other is the legacy method of session-based authentication with an Apple ID. You can choose which type of Bitrise Apple Developer connection to use or you can tell the Step to only use the Step inputs for authentication:
         - `automatic`: Use any enabled Apple Developer connection, either based on Apple ID authentication or API key authentication.  Step inputs are only used as a fallback. API key authentication has priority over Apple ID authentication in both cases.
         - `api_key`: Use the Apple Developer connection based on API key authentication. Authentication-related Step inputs are ignored.
-        - `apple_id`: Use the Apple Developer connection based on Apple ID authentication and **Application-specific password** Step input. Other authentication-related Step inputs are ignored.
+        - `apple_id`: Use the Apple Developer connection based on Apple ID authentication. If no app-specific password has been added to the used connection, the **Apple ID: App-specific password** Step input will be used. Other authentication-related Step inputs are ignored.
         - `off`: Do not use any already configured Apple Developer Connection. Only authentication-related Step inputs are considered.
       is_required: true
       value_options:
