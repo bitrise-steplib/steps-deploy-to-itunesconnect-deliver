@@ -151,10 +151,11 @@ type cookie struct {
 
 // AppleIDConnection represents a Bitrise.io Apple ID-based Apple Developer connection.
 type AppleIDConnection struct {
-	AppleID           string              `json:"apple_id"`
-	Password          string              `json:"password"`
-	SessionExpiryDate *time.Time          `json:"connection_expiry_date"`
-	SessionCookies    map[string][]cookie `json:"session_cookies"`
+	AppleID             string              `json:"apple_id"`
+	Password            string              `json:"password"`
+	AppSpecificPassword string              `json:"app_specific_password"`
+	SessionExpiryDate   *time.Time          `json:"connection_expiry_date"`
+	SessionCookies      map[string][]cookie `json:"session_cookies"`
 }
 
 // APIKeyConnection represents a Bitrise.io API key-based Apple Developer connection.
