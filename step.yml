@@ -237,7 +237,7 @@ inputs:
         Options added to the end of the `deliver` call.
         If you want to add more options, list those separated by space character.
         Example: `--skip_metadata --skip_screenshots`
-  - itms_upload_parameters: "-t DAV"
+  - itms_upload_parameters: ""
     opts:
       category: Debug
       title: "Transporter delivery method"
