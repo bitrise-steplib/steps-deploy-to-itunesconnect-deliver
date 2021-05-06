@@ -171,6 +171,8 @@ workflows:
           inputs:
             - generate_profiles: "yes"
             - distribution_type: app-store
+            - api_key_path: $BITRISEIO_IOS_AUTO_PROV_API_KEY_URL
+            - api_issuer: $IOS_AUTO_PROV_API_KEY_ISSUER
       - script:
           inputs:
             - content: |-
