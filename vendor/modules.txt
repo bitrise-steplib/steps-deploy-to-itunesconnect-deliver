@@ -1,32 +1,28 @@
-# github.com/bitrise-io/go-steputils v0.0.0-20210505101226-8536c460c5c1
+# github.com/bitrise-io/go-steputils v0.0.0-20210507072936-92fde382fb33
 ## explicit
 github.com/bitrise-io/go-steputils/command/gems
 github.com/bitrise-io/go-steputils/command/rubycommand
 github.com/bitrise-io/go-steputils/input
 github.com/bitrise-io/go-steputils/stepconf
-# github.com/bitrise-io/go-utils v0.0.0-20210505121718-07411d72e36e
+# github.com/bitrise-io/go-utils v0.0.0-20210507100250-37de47dfa6ce
 ## explicit
 github.com/bitrise-io/go-utils/colorstring
 github.com/bitrise-io/go-utils/command
+github.com/bitrise-io/go-utils/filedownloader
 github.com/bitrise-io/go-utils/fileutil
 github.com/bitrise-io/go-utils/log
 github.com/bitrise-io/go-utils/parseutil
 github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/pointers
 github.com/bitrise-io/go-utils/retry
-# github.com/bitrise-steplib/bitrise-step-export-universal-apk v0.0.0-20200729103519-a582681d23d6
+# github.com/bitrise-io/go-xcode v0.0.0-20210512084902-047d3c3d372a
 ## explicit
-github.com/bitrise-steplib/bitrise-step-export-universal-apk/filedownloader
-# github.com/davecgh/go-spew v1.1.1
-github.com/davecgh/go-spew/spew
+github.com/bitrise-io/go-xcode/appleauth
+github.com/bitrise-io/go-xcode/devportalservice
+# github.com/hashicorp/go-cleanhttp v0.5.1
+github.com/hashicorp/go-cleanhttp
+# github.com/hashicorp/go-retryablehttp v0.6.6
+github.com/hashicorp/go-retryablehttp
 # github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 ## explicit
 github.com/kballard/go-shellquote
-# github.com/pmezard/go-difflib v1.0.0
-github.com/pmezard/go-difflib/difflib
-# github.com/stretchr/testify v1.7.0
-## explicit
-github.com/stretchr/testify/assert
-github.com/stretchr/testify/require
-# gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-gopkg.in/yaml.v3
