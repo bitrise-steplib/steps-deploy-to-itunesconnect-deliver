@@ -1,0 +1,159 @@
+format_version: 11
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+
+app:
+  envs:
+    # Configs
+    - TEST_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
+    - TEST_APP_BRANCH: master
+    - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
+    - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
+    - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
+    - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
+    # Secrets
+    - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
+    - BITRISE_CERTIFICATE_URL_LIST: $BITRISE_CERTIFICATE_URL_LIST
+    - BITRISE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
+    - APPSTORECONNECT_API_KEY_URL: $APPSTORECONNECT_API_KEY_URL
+    - APPSTORECONNECT_API_KEY_ISSUER: $APPSTORECONNECT_API_KEY_ISSUER
+
+
+
+    # - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
+    # - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+    - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+    - ITUNES_CONNECT_API_KEY_PATH: $ITUNES_CONNECT_API_KEY_PATH
+    - ITUNES_CONNECT_API_KEY_ISSUER: $ITUNES_CONNECT_API_KEY_ISSUER
+    - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+    - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
+
+
+workflows:
+  test-apple-id-service-auth-app-spec-password-input:
+    title: Test Apple ID connection authentication with app specific password from input
+    envs:
+      - CONNECTION: apple_id
+      - API_KEY_URL: ""
+      - API_KEY_ISSUER: ""
+      - ITUNESCON_USER: ""
+      - ITUNESCON_PASSWORD: ""
+      - APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+      - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+      - APP_ID: $ITUNES_CONNECT_APP_ID
+    after_run:
+      - _run
+
+  # test-apple-id-service-auth-app-spec-password-connection:
+  #   title: Test Apple ID connection authentication with app specific password from connection
+  #   envs:
+  #     - CONNECTION: apple_id
+  #     - ITUNES_CONNECT_API_KEY_URL: ""
+  #     - ITUNES_CONNECT_API_KEY_ISSUER: ""
+  #     - itunescon_user: ""
+  #     - password: ""
+  #     - team_id: $ITUNES_CONNECT_TEAM_ID
+  #     - app_id: $ITUNES_CONNECT_APP_ID
+  #   after_run:
+  #     - _run
+
+
+  # test-api-key-service-auth:
+  #   title: Test API key connection authentication
+  #   envs:
+  #     - CONNECTION: api_key
+  #     - ITUNES_CONNECT_API_KEY_URL: ""
+  #     - ITUNES_CONNECT_API_KEY_ISSUER: ""
+  #     - team_id: ""
+  #     - app_id: $ITUNES_CONNECT_APP_ID
+  #   after_run:
+  #     - _run
+
+  # test-api-key-input-auth:
+  #   title: Test API key Step Input authentication
+  #   envs:
+  #     - CONNECTION: "off"
+  #     - ITUNES_CONNECT_API_KEY_URL: $APPSTORECONNECT_API_KEY_URL
+  #     - ITUNES_CONNECT_API_KEY_ISSUER: $APPSTORECONNECT_API_KEY_ISSUER
+  #     - team_id: ""
+  #     - app_id: $ITUNES_CONNECT_APP_ID
+  #   after_run:
+  #     - _run
+
+  _run:
+    title: Prepare test
+    description: |
+      This downloads and archives an example app as an input for deliver
+    steps:
+      - script:
+          title: Clean saved Fastlane session cookie and cleanup _tmp dir
+          inputs:
+            - content: |-
+                #!/bin/env bash
+                set -ex
+                rm -rf ~/.fastlane
+                rm -rf ./_tmp
+      - change-workdir:
+          run_if: true
+          inputs:
+            - path: ./_tmp
+      - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
+          inputs:
+            - repository_url: $TEST_APP_URL
+            - branch: $TEST_APP_BRANCH
+            - clone_into_dir: .
+      - ios-auto-provision-appstoreconnect:
+          run_if: true
+          inputs:
+            - connection: "off"
+            - distribution_type: app-store
+            - generate_profiles: "yes"
+            - scheme: $BITRISE_SCHEME
+            - api_key_path: $APPSTORECONNECT_API_KEY_URL
+            - api_issuer: $APPSTORECONNECT_API_KEY_ISSUER
+            - certificate_urls: $BITRISE_CERTIFICATE_URL_LIST
+            - passphrases: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
+            - keychain_path: $BITRISE_KEYCHAIN_PATH
+            - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
+      - script:
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                CURRENT_BUILD_NUMBER=${BITRISE_BUILD_NUMBER}
+                BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*10000))
+                if [[ -z "${BITRISE_BUILD_NUMBER}" ]]; then
+                  echo "error: failed to calculated build number"
+                  exit 1
+                fi
+                if [[ -n "${CURRENT_BUILD_NUMBER}" ]]; then
+                  BITRISE_BUILD_NUMBER=$((${BITRISE_BUILD_NUMBER}+${CURRENT_BUILD_NUMBER}))
+                fi
+
+                envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
+      - set-xcode-build-number:
+          title: Set Build Number
+          run_if: true
+          inputs:
+            - build_version: $BITRISE_BUILD_NUMBER
+            - plist_path: $INFO_PLIST_PATH
+            - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
+      - xcode-archive:
+          title: Create Archive
+          inputs:
+            - output_dir: $BITRISE_DEPLOY_DIR
+            - project_path: $BITRISE_PROJECT_PATH
+            - export_method: app-store
+      - path::./:
+          inputs:
+            - connection: $CONNECTION
+            - itunescon_user: $ITUNESCON_USER
+            - password: $ITUNESCON_PASSWORD
+            - api_key_path: $API_KEY_URL
+            - api_issuer: $API_KEY_ISSUER
+            - app_password: $APP_SPECIFIC_PASSWORD
+            - team_id: $TEAM_ID
+            - app_id: $APP_ID
+            - skip_screenshots: "no"
+            - skip_metadata: "yes"
+            - submit_for_review: "no"
+            - fastlane_version: "latest"
+            - verbose_log: "yes"
