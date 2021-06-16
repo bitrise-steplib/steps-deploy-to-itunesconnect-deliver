@@ -45,7 +45,7 @@ workflows:
   #   after_run:
   #     - _run
 
-  test-api-key-service-auth:
+  test_api_key_service_auth:
     title: Test API key connection authentication
     envs:
       - CONNECTION: api_key
