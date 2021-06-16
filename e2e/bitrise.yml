@@ -29,7 +29,7 @@ app:
 
 
 workflows:
-  test-apple-id-service-auth-app-spec-password-input:
+  test_apple_id_service_auth_app_spec_password_input:
     title: Test Apple ID connection authentication with app specific password from input
     envs:
       - CONNECTION: apple_id
