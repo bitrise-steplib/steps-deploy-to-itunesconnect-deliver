@@ -19,11 +19,6 @@ app:
     - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
     - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
     - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
-    # - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
-    # - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
-    # - ITUNES_CONNECT_API_KEY_PATH: $ITUNES_CONNECT_API_KEY_PATH
-    # - ITUNES_CONNECT_API_KEY_ISSUER: $ITUNES_CONNECT_API_KEY_ISSUER
-
 
 workflows:
   # test_apple_id_service_auth_app_spec_password_input:
@@ -32,38 +27,35 @@ workflows:
   #     - CONNECTION: apple_id
   #     - API_KEY_URL: ""
   #     - API_KEY_ISSUER: ""
-  #     - ITUNESCON_USER: ""
-  #     - ITUNESCON_PASSWORD: ""
   #     - APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
   #     - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
   #     - APP_ID: $ITUNES_CONNECT_APP_ID
   #   after_run:
   #     - _run
 
-  test_apple_id_service_auth_app_spec_password_connection:
-    title: Test Apple ID connection authentication with app specific password from connection
+  # test_apple_id_service_auth_app_spec_password_connection:
+  #   title: Test Apple ID connection authentication with app specific password from connection
+  #   envs:
+  #     - CONNECTION: apple_id
+  #     - API_KEY_URL: ""
+  #     - API_KEY_ISSUER: ""
+  #     - APP_SPECIFIC_PASSWORD: ""
+  #     - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+  #     - APP_ID: $ITUNES_CONNECT_APP_ID
+  #   after_run:
+  #     - _run
+
+  test-api-key-service-auth:
+    title: Test API key connection authentication
     envs:
-      - CONNECTION: apple_id
+      - CONNECTION: api_key
       - API_KEY_URL: ""
       - API_KEY_ISSUER: ""
-      - ITUNESCON_USER: ""
-      - ITUNESCON_PASSWORD: ""
       - APP_SPECIFIC_PASSWORD: ""
-      - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+      - TEAM_ID: ""
       - APP_ID: $ITUNES_CONNECT_APP_ID
     after_run:
       - _run
-
-  # test-api-key-service-auth:
-  #   title: Test API key connection authentication
-  #   envs:
-  #     - CONNECTION: api_key
-  #     - ITUNES_CONNECT_API_KEY_URL: ""
-  #     - ITUNES_CONNECT_API_KEY_ISSUER: ""
-  #     - team_id: ""
-  #     - app_id: $ITUNES_CONNECT_APP_ID
-  #   after_run:
-  #     - _run
 
   # test-api-key-input-auth:
   #   title: Test API key Step Input authentication
@@ -71,6 +63,7 @@ workflows:
   #     - CONNECTION: "off"
   #     - ITUNES_CONNECT_API_KEY_URL: $APPSTORECONNECT_API_KEY_URL
   #     - ITUNES_CONNECT_API_KEY_ISSUER: $APPSTORECONNECT_API_KEY_ISSUER
+  #     - APP_SPECIFIC_PASSWORD: ""
   #     - team_id: ""
   #     - app_id: $ITUNES_CONNECT_APP_ID
   #   after_run:
