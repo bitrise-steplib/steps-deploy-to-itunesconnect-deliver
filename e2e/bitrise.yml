@@ -3,14 +3,14 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 app:
   envs:
-    # Configs
+    # Shared configs
     - TEST_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
     - TEST_APP_BRANCH: master
     - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
     - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
     - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
     - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
-    # Secrets
+    # Shared secrets
     - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
     - BITRISE_CERTIFICATE_URL_LIST: $BITRISE_CERTIFICATE_URL_LIST
     - BITRISE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
@@ -21,43 +21,75 @@ app:
     - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
 workflows:
-  # test_apple_id_service_auth_app_spec_password_input:
-  #   title: Test Apple ID connection authentication with app specific password from input
-  #   envs:
-  #     - CONNECTION: apple_id
-  #     - API_KEY_URL: ""
-  #     - API_KEY_ISSUER: ""
-  #     - APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
-  #     - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-  #     - APP_ID: $ITUNES_CONNECT_APP_ID
-  #   after_run:
-  #     - _run
+  test_apple_id_service_auth_app_spec_password_input:
+    steps:
+    - bitrise-run:
+        run_if: '{{getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x"}}'
+        inputs:
+        - workflow_id: utility_test_apple_id_service_auth_app_spec_password_input
+        - bitrise_config_path: ./e2e/bitrise.yml
 
-  # test_apple_id_service_auth_app_spec_password_connection:
-  #   title: Test Apple ID connection authentication with app specific password from connection
-  #   envs:
-  #     - CONNECTION: apple_id
-  #     - API_KEY_URL: ""
-  #     - API_KEY_ISSUER: ""
-  #     - APP_SPECIFIC_PASSWORD: ""
-  #     - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-  #     - APP_ID: $ITUNES_CONNECT_APP_ID
-  #   after_run:
-  #     - _run
+  utility_test_apple_id_service_auth_app_spec_password_input:
+    title: Test Apple ID connection authentication with app specific password from input
+    envs:
+      - CONNECTION: apple_id
+      - API_KEY_URL: ""
+      - API_KEY_ISSUER: ""
+      - APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+      - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+      - APP_ID: $ITUNES_CONNECT_APP_ID
+    after_run:
+      - _run
 
-  # test_api_key_service_auth:
-  #   title: Test API key connection authentication
-  #   envs:
-  #     - CONNECTION: api_key
-  #     - API_KEY_URL: ""
-  #     - API_KEY_ISSUER: ""
-  #     - APP_SPECIFIC_PASSWORD: ""
-  #     - TEAM_ID: ""
-  #     - APP_ID: $ITUNES_CONNECT_APP_ID
-  #   after_run:
-  #     - _run
+  test_apple_id_service_auth_app_spec_password_connection:
+    steps:
+    - bitrise-run:
+        run_if: '{{getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x"}}'
+        inputs:
+        - workflow_id: utility_test_apple_id_service_auth_app_spec_password_connection
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_apple_id_service_auth_app_spec_password_connection:
+    title: Test Apple ID connection authentication with app specific password from connection
+    envs:
+      - CONNECTION: apple_id
+      - API_KEY_URL: ""
+      - API_KEY_ISSUER: ""
+      - APP_SPECIFIC_PASSWORD: ""
+      - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+      - APP_ID: $ITUNES_CONNECT_APP_ID
+    after_run:
+      - _run
+
+  test_api_key_service_auth:
+    steps:
+    - bitrise-run:
+        run_if: '{{getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x"}}'
+        inputs:
+        - workflow_id: utility_test_api_key_service_auth
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_api_key_service_auth:
+    title: Test API key connection authentication
+    envs:
+      - CONNECTION: api_key
+      - API_KEY_URL: ""
+      - API_KEY_ISSUER: ""
+      - APP_SPECIFIC_PASSWORD: ""
+      - TEAM_ID: ""
+      - APP_ID: $ITUNES_CONNECT_APP_ID
+    after_run:
+      - _run
 
   test_api_key_input_auth:
+    steps:
+    - bitrise-run:
+        run_if: '{{getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x"}}'
+        inputs:
+        - workflow_id: utility_test_api_key_input_auth
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_api_key_input_auth:
     title: Test API key Step Input authentication
     envs:
       - CONNECTION: "off"
