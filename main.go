@@ -310,7 +310,7 @@ func main() {
 
 	var devportalConnectionProvider *devportalservice.BitriseClient
 	if cfg.BuildURL != "" && cfg.BuildAPIToken != "" {
-		devportalConnectionProvider = devportalservice.NewBitriseClient(http.DefaultClient, cfg.BuildURL, string(cfg.BuildAPIToken))
+		devportalConnectionProvider = devportalservice.NewBitriseClient(retry.NewHTTPClient().StandardClient(), cfg.BuildURL, string(cfg.BuildAPIToken))
 	} else {
 		fmt.Println()
 		log.Warnf("Connected Apple Developer Portal Account not found. Step is not running on bitrise.io: BITRISE_BUILD_URL and BITRISE_BUILD_API_TOKEN envs are not set")
