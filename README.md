@@ -1,4 +1,4 @@
-# Deploy to iTunes Connect
+# Deploy to iTunes Connect with Deliver
 
 [![Step changelog](https://shields.io/github/v/release/bitrise-steplib/steps-deploy-to-itunesconnect-deliver?include_prereleases&label=changelog&color=blueviolet)](https://github.com/bitrise-steplib/steps-deploy-to-itunesconnect-deliver/releases)
 
