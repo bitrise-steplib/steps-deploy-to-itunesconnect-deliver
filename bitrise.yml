@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 workflows:
   check:
     steps:
-    - git::https://github.com/bitrise-steplib/steps-check.git: {}
+    - git::https://github.com/bitrise-steplib/steps-check.git:
 
   e2e:
     steps:
@@ -14,93 +14,99 @@ workflows:
 
   sample:
     envs:
-      # Configs
-      - TEST_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
-      - TEST_APP_BRANCH: master
-      - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
-      - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
-      - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
-      - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
-      # Secrets
-      - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
-      - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
-      - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
-      - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
-      - ITUNES_CONNECT_API_KEY_PATH: $ITUNES_CONNECT_API_KEY_PATH
-      - ITUNES_CONNECT_API_KEY_ISSUER: $ITUNES_CONNECT_API_KEY_ISSUER
-      - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-      - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
-      - BITRISE_CERTIFICATE_URL_LIST: $BITRISE_CERTIFICATE_URL_LIST
-      - BITRISE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
+    # Configs
+    - TEST_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
+    - TEST_APP_BRANCH: master
+    - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
+    - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
+    - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
+    - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
+    # Secrets
+    - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
+    - ITUNES_CONNECT_USER: $ITUNES_CONNECT_USER
+    - ITUNES_CONNECT_PASSWORD: $ITUNES_CONNECT_PASSWORD
+    - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+    - ITUNES_CONNECT_API_KEY_PATH: $ITUNES_CONNECT_API_KEY_PATH
+    - ITUNES_CONNECT_API_KEY_ISSUER: $ITUNES_CONNECT_API_KEY_ISSUER
+    - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
+    - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
+    - BITRISE_CERTIFICATE_URL_LIST: $BITRISE_CERTIFICATE_URL_LIST
+    - BITRISE_CERTIFICATE_PASSPHRASE_LIST: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
     steps:
-      - script:
-          title: Clean saved Fastlane session cookie and cleanup _tmp dir
-          inputs:
-            - content: |-
-                #!/bin/env bash
-                set -ex
-                rm -rf ~/.fastlane
-                rm -rf ./_tmp
-      - change-workdir:
-          run_if: true
-          inputs:
-            - path: ./_tmp
-      - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
-          inputs:
-            - repository_url: $TEST_APP_URL
-            - branch: $TEST_APP_BRANCH
-            - clone_into_dir: .
-      - ios-auto-provision-appstoreconnect:
-          run_if: true
-          inputs:
-            - connection: "off"
-            - distribution_type: app-store
-            - generate_profiles: "yes"
-            - scheme: $BITRISE_SCHEME
-            - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
-            - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
-            - certificate_urls: $BITRISE_CERTIFICATE_URL_LIST
-            - passphrases: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
-            - keychain_path: $BITRISE_KEYCHAIN_PATH
-            - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
-      - script:
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                CURRENT_BUILD_NUMBER=${BITRISE_BUILD_NUMBER}
-                BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*10000))
-                if [[ -z "${BITRISE_BUILD_NUMBER}" ]]; then
-                  echo "error: failed to calculated build number"
-                  exit 1
-                fi
-                if [[ -n "${CURRENT_BUILD_NUMBER}" ]]; then
-                  BITRISE_BUILD_NUMBER=$((${BITRISE_BUILD_NUMBER}+${CURRENT_BUILD_NUMBER}))
-                fi
+    - script:
+        title: Clean saved Fastlane session cookie and cleanup _tmp dir
+        inputs:
+        - content: |-
+            #!/bin/env bash
+            set -ex
+            rm -rf ~/.fastlane
+            rm -rf ./_tmp
+    - change-workdir:
+        run_if: true
+        inputs:
+        - path: ./_tmp
+    - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
+        inputs:
+        - repository_url: $TEST_APP_URL
+        - branch: $TEST_APP_BRANCH
+        - clone_into_dir: .
+    - ios-auto-provision-appstoreconnect:
+        run_if: true
+        inputs:
+        - connection: "off"
+        - distribution_type: app-store
+        - generate_profiles: "yes"
+        - scheme: $BITRISE_SCHEME
+        - api_key_path: $ITUNES_CONNECT_API_KEY_PATH
+        - api_issuer: $ITUNES_CONNECT_API_KEY_ISSUER
+        - certificate_urls: $BITRISE_CERTIFICATE_URL_LIST
+        - passphrases: $BITRISE_CERTIFICATE_PASSPHRASE_LIST
+        - keychain_path: $BITRISE_KEYCHAIN_PATH
+        - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
+    - script:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            CURRENT_BUILD_NUMBER=${BITRISE_BUILD_NUMBER}
+            BITRISE_BUILD_NUMBER=$((($(gdate +%Y%m%d%H%M%S)-20000000000000)*10000))
+            if [[ -z "${BITRISE_BUILD_NUMBER}" ]]; then
+              echo "error: failed to calculated build number"
+              exit 1
+            fi
+            if [[ -n "${CURRENT_BUILD_NUMBER}" ]]; then
+              BITRISE_BUILD_NUMBER=$((${BITRISE_BUILD_NUMBER}+${CURRENT_BUILD_NUMBER}))
+            fi
 
-                envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
-      - set-xcode-build-number:
-          title: Set Build Number
-          run_if: true
-          inputs:
-            - build_version: $BITRISE_BUILD_NUMBER
-            - plist_path: $INFO_PLIST_PATH
-            - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
-      - xcode-archive:
-          title: Create Archive
-          inputs:
-            - output_dir: $BITRISE_DEPLOY_DIR
-            - project_path: $BITRISE_PROJECT_PATH
-            - export_method: app-store
-      - path::./:
-          inputs:
-            - connection: apple_id
-            - itunescon_user: $ITUNES_CONNECT_USER
-            - password: $ITUNES_CONNECT_PASSWORD
-            - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
-            - team_id: $ITUNES_CONNECT_TEAM_ID
-            - app_id: $ITUNES_CONNECT_APP_ID
-            - skip_screenshots: "no"
-            - skip_metadata: "yes"
-            - submit_for_review: "no"
-            - fastlane_version: "latest"
-            - verbose_log: "yes"
+            envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
+    - set-xcode-build-number:
+        title: Set Build Number
+        run_if: true
+        inputs:
+        - build_version: $BITRISE_BUILD_NUMBER
+        - plist_path: $INFO_PLIST_PATH
+        - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
+    - xcode-archive:
+        title: Create Archive
+        inputs:
+        - output_dir: $BITRISE_DEPLOY_DIR
+        - project_path: $BITRISE_PROJECT_PATH
+        - export_method: app-store
+    - path::./:
+        inputs:
+        - connection: apple_id
+        - itunescon_user: $ITUNES_CONNECT_USER
+        - password: $ITUNES_CONNECT_PASSWORD
+        - app_password: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
+        - team_id: $ITUNES_CONNECT_TEAM_ID
+        - app_id: $ITUNES_CONNECT_APP_ID
+        - skip_screenshots: "no"
+        - skip_metadata: "yes"
+        - submit_for_review: "no"
+        - fastlane_version: "latest"
+        - verbose_log: "yes"
+
+  generate_readme:
+    steps:
+    - git::https://github.com/bitrise-steplib/steps-readme-generator.git@main:
+        inputs:
+        - contrib_section: docs/contribution.md
