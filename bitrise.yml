@@ -1,10 +1,10 @@
-format_version: 11
+format_version: "11"
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 
 workflows:
   check:
     steps:
-    - git::https://github.com/bitrise-steplib/steps-check.git:
+    - git::https://github.com/bitrise-steplib/steps-check.git: { }
 
   e2e:
     steps:
@@ -42,7 +42,6 @@ workflows:
             rm -rf ~/.fastlane
             rm -rf ./_tmp
     - change-workdir:
-        run_if: true
         inputs:
         - path: ./_tmp
     - git::https://github.com/bitrise-steplib/bitrise-step-simple-git-clone.git:
@@ -51,7 +50,6 @@ workflows:
         - branch: $TEST_APP_BRANCH
         - clone_into_dir: .
     - ios-auto-provision-appstoreconnect:
-        run_if: true
         inputs:
         - connection: "off"
         - distribution_type: app-store
@@ -80,7 +78,6 @@ workflows:
             envman add --key BITRISE_BUILD_NUMBER --value "${BITRISE_BUILD_NUMBER}"
     - set-xcode-build-number:
         title: Set Build Number
-        run_if: true
         inputs:
         - build_version: $BITRISE_BUILD_NUMBER
         - plist_path: $INFO_PLIST_PATH
@@ -90,7 +87,7 @@ workflows:
         inputs:
         - output_dir: $BITRISE_DEPLOY_DIR
         - project_path: $BITRISE_PROJECT_PATH
-        - export_method: app-store
+        - distribution_method: app-store
     - path::./:
         inputs:
         - connection: apple_id
@@ -102,7 +99,7 @@ workflows:
         - skip_screenshots: "no"
         - skip_metadata: "yes"
         - submit_for_review: "no"
-        - fastlane_version: "latest"
+        - fastlane_version: latest
         - verbose_log: "yes"
 
   generate_readme:
