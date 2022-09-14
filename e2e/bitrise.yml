@@ -4,11 +4,11 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # Shared configs
-  - TEST_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
-  - TEST_APP_BRANCH: debug
-  - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
-  - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
-  - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
+  - TEST_APP_URL: https://github.com/lpusok/Application-Loader-Test.git
+  - TEST_APP_BRANCH: patch-1
+  - INFO_PLIST_PATH: "./Application Loader Test/Info.plist"
+  - BITRISE_PROJECT_PATH: "./Application Loader Test.xcodeproj"
+  - BITRISE_SCHEME: Application Loader Test
   - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
   # Shared secrets
   - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
@@ -138,6 +138,7 @@ workflows:
         - keychain_path: $BITRISE_KEYCHAIN_PATH
         - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
     - script:
+        title: Prepare Build Number
         inputs:
         - content: |-
             #!/usr/bin/env bash
