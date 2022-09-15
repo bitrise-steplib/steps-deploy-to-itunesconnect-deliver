@@ -5,7 +5,7 @@ app:
   envs:
   # Shared configs
   - TEST_APP_URL: https://github.com/lpusok/Application-Loader-Test.git
-  - TEST_APP_BRANCH: patch-1
+  - TEST_APP_BRANCH: master
   - INFO_PLIST_PATH: ./Application Loader Test/Info.plist
   - BITRISE_PROJECT_PATH: ./Application Loader Test.xcodeproj
   - BITRISE_SCHEME: Application Loader Test
