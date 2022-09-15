@@ -4,7 +4,7 @@ default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 app:
   envs:
   # Shared configs
-  - TEST_APP_URL: https://github.com/lpusok/Application-Loader-Test.git
+  - TEST_APP_URL: https://github.com/bitrise-io/Application-Loader-Test.git
   - TEST_APP_BRANCH: master
   - INFO_PLIST_PATH: ./Application Loader Test/Info.plist
   - BITRISE_PROJECT_PATH: ./Application Loader Test.xcodeproj
@@ -179,5 +179,5 @@ workflows:
         - skip_screenshots: "no"
         - skip_metadata: "yes"
         - submit_for_review: "no"
-        - fastlane_version: ""
+        - fastlane_version: "latest"
         - verbose_log: "yes"
