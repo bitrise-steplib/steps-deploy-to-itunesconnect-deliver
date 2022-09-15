@@ -179,5 +179,5 @@ workflows:
         - skip_screenshots: "no"
         - skip_metadata: "yes"
         - submit_for_review: "no"
-        - fastlane_version: "latest"
+        - fastlane_version: latest-stable
         - verbose_log: "yes"
