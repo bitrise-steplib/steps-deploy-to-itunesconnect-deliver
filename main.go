@@ -385,7 +385,7 @@ alphanumeric characters.`)
 		options = opts
 	}
 
-	envs := []string{}
+	envs := []string{"ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD=true"}
 	if cfg.ITMSParameters != "" {
 		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
 	}
