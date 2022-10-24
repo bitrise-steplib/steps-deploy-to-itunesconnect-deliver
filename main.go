@@ -18,6 +18,7 @@ import (
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-io/go-xcode/appleauth"
 	"github.com/bitrise-io/go-xcode/devportalservice"
+	"github.com/bitrise-io/go-xcode/utility"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -385,14 +386,21 @@ alphanumeric characters.`)
 		options = opts
 	}
 
-	envs := []string{}
-	if cfg.ITMSParameters != "" {
-		envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
+	version, err := utility.GetXcodeVersion()
+	if err != nil {
+		fail("Failed to read Xcode version: %w", err)
 	}
 
-	args := []string{
-		"deliver",
+	envs := []string{}
+	// Xcode 14 and above fastlane uses altool to upload
+	if version.MajorVersion < 14 {
+		envs = append(envs, "ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD=true")
+		if cfg.ITMSParameters != "" {
+			envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
+		}
 	}
+
+	args := []string{"deliver"}
 
 	authParams, err := FastlaneAuthParams(authConfig)
 	if err != nil {

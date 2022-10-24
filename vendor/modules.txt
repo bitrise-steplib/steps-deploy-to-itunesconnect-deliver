@@ -19,6 +19,8 @@ github.com/bitrise-io/go-utils/retry
 ## explicit
 github.com/bitrise-io/go-xcode/appleauth
 github.com/bitrise-io/go-xcode/devportalservice
+github.com/bitrise-io/go-xcode/models
+github.com/bitrise-io/go-xcode/utility
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/hashicorp/go-cleanhttp v0.5.2
