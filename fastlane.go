@@ -3,11 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 
-	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-xcode/appleauth"
 )
 
@@ -69,19 +65,8 @@ func FastlaneAuthParams(authConfig appleauth.Credentials) (FastlaneParams, error
 			return FastlaneParams{}, fmt.Errorf("failed to marshal Fastane API Key configuration: %v", err)
 		}
 
-		tmpDir, err := pathutil.NormalizedOSTempDirPath("apiKey")
-		if err != nil {
-			return FastlaneParams{}, err
-		}
-		fastlaneAuthFile := filepath.Join(tmpDir, "api_key.json")
-		if err := ioutil.WriteFile(fastlaneAuthFile, privateKey, os.ModePerm); err != nil {
-			return FastlaneParams{}, err
-		}
+		envs["APP_STORE_CONNECT_API_KEY"] = string(privateKey)
 
-		args = append(args, Arg{
-			Key:   "--api_key_path",
-			Value: fastlaneAuthFile,
-		})
 		// deliver: "Precheck cannot check In-app purchases with the App Store Connect API Key (yet). Exclude In-app purchases from precheck"
 		args = append(args, Arg{
 			Key:   "--precheck_include_in_app_purchases",
