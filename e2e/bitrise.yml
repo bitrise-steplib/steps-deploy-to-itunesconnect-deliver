@@ -5,7 +5,7 @@ app:
   envs:
   # Shared configs
   - TEST_APP_URL: https://github.com/bitrise-io/sample-apps-itunes-connect-beta-test.git
-  - TEST_APP_BRANCH: master
+  - TEST_APP_BRANCH: update
   - BITRISE_PROJECT_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest.xcodeproj
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
