@@ -7,7 +7,6 @@ import (
 )
 
 func Test_ensureFastlaneVersionAndCreateCmdSlice(t *testing.T) {
-	//gemfileLockPath := path.Join("testdata", "Gemfile.lock")
 	gemfilePath := path.Join("testdata", "Gemfile")
 
 	tests := []struct {
