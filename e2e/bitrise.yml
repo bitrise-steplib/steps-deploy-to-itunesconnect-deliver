@@ -23,16 +23,10 @@ app:
   - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
 workflows:
-  test_apple_id_service_auth_app_spec_password_input:
-    steps:
-    - bitrise-run:
-        run_if: |-
-          {{ getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x" }}
-        inputs:
-        - workflow_id: utility_test_apple_id_service_auth_app_spec_password_input
-        - bitrise_config_path: ./e2e/bitrise.yml
+  # These E2E tests are not triggered automatically (not prefixed with `test_`) because of App Store rate limits and high flakiness
+  # When making changes to the step, please run these tests manually to verify the changes!
 
-  utility_test_apple_id_service_auth_app_spec_password_input:
+  manual_test_apple_id_service_auth_app_spec_password_input:
     title: Test Apple ID connection authentication with app specific password from input
     envs:
     - CONNECTION: apple_id
@@ -44,16 +38,7 @@ workflows:
     after_run:
     - _run
 
-  test_apple_id_service_auth_app_spec_password_connection:
-    steps:
-    - bitrise-run:
-        run_if: |-
-          {{ getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x" }}
-        inputs:
-        - workflow_id: utility_test_apple_id_service_auth_app_spec_password_connection
-        - bitrise_config_path: ./e2e/bitrise.yml
-
-  utility_test_apple_id_service_auth_app_spec_password_connection:
+  manual_test_apple_id_service_auth_app_spec_password_connection:
     title: Test Apple ID connection authentication with app specific password from connection
     envs:
     - CONNECTION: apple_id
@@ -65,16 +50,7 @@ workflows:
     after_run:
     - _run
 
-  test_api_key_service_auth:
-    steps:
-    - bitrise-run:
-        run_if: |-
-          {{ getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x" }}
-        inputs:
-        - workflow_id: utility_test_api_key_service_auth
-        - bitrise_config_path: ./e2e/bitrise.yml
-
-  utility_test_api_key_service_auth:
+  manual_test_api_key_service_auth:
     title: Test API key connection authentication
     envs:
     - CONNECTION: api_key
@@ -86,16 +62,7 @@ workflows:
     after_run:
     - _run
 
-  test_api_key_input_auth:
-    steps:
-    - bitrise-run:
-        run_if: |-
-          {{ getenv "BITRISEIO_STACK_ID" | ne "osx-xcode-10.3.x" }}
-        inputs:
-        - workflow_id: utility_test_api_key_input_auth
-        - bitrise_config_path: ./e2e/bitrise.yml
-
-  utility_test_api_key_input_auth:
+  manual_test_api_key_input_auth:
     title: Test API key Step Input authentication
     envs:
     - CONNECTION: "off"
