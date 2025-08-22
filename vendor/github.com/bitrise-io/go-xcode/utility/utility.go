@@ -9,29 +9,14 @@ import (
 	"github.com/bitrise-io/go-xcode/models"
 )
 
-// GetXcodeVersion ...
-func GetXcodeVersion() (models.XcodebuildVersionModel, error) {
-	cmd := command.New("xcodebuild", "-version")
-	outStr, err := cmd.RunAndReturnTrimmedCombinedOutput()
-	if err != nil {
-		return models.XcodebuildVersionModel{}, fmt.Errorf("xcodebuild -version failed, err: %s, details: %s", err, outStr)
-	}
-	return getXcodeVersionFromXcodebuildOutput(outStr)
-}
-
 func getXcodeVersionFromXcodebuildOutput(outStr string) (models.XcodebuildVersionModel, error) {
 	split := strings.Split(outStr, "\n")
 	if len(split) == 0 {
 		return models.XcodebuildVersionModel{}, fmt.Errorf("failed to parse xcodebuild version output (%s)", outStr)
 	}
 
-	filteredOutput, err := filterXcodeWarnings(split)
-	if err != nil {
-		return models.XcodebuildVersionModel{}, err
-	}
-
-	xcodebuildVersion := filteredOutput[0]
-	buildVersion := filteredOutput[1]
+	xcodebuildVersion := split[0]
+	buildVersion := split[1]
 
 	split = strings.Split(xcodebuildVersion, " ")
 	if len(split) != 2 {
@@ -55,18 +40,12 @@ func getXcodeVersionFromXcodebuildOutput(outStr string) (models.XcodebuildVersio
 	}, nil
 }
 
-func filterXcodeWarnings(cmdOutputLines []string) ([]string, error) {
-	firstLineIndex := -1
-	for i, line := range cmdOutputLines {
-		if strings.HasPrefix(line, "Xcode ") {
-			firstLineIndex = i
-			break
-		}
+// GetXcodeVersion ...
+func GetXcodeVersion() (models.XcodebuildVersionModel, error) {
+	cmd := command.New("xcodebuild", "-version")
+	outStr, err := cmd.RunAndReturnTrimmedCombinedOutput()
+	if err != nil {
+		return models.XcodebuildVersionModel{}, fmt.Errorf("xcodebuild -version failed, err: %s, details: %s", err, outStr)
 	}
-
-	if firstLineIndex < 0 {
-		return []string{}, fmt.Errorf("couldn't find Xcode version in output: %s", cmdOutputLines)
-	}
-
-	return cmdOutputLines[firstLineIndex:], nil
+	return getXcodeVersionFromXcodebuildOutput(outStr)
 }

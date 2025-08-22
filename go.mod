@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/bitrise-io/go-steputils v1.0.5
 	github.com/bitrise-io/go-utils v1.0.9
-	github.com/bitrise-io/go-xcode v1.0.16
+	github.com/bitrise-io/go-xcode v1.0.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 )
 
