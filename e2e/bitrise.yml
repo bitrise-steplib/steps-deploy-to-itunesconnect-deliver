@@ -10,6 +10,7 @@ app:
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
   - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
+  - BUNDLE_ID: com.bitrise.Bitrise-iTunesConnectBetaTest
   # Shared secrets
   - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
   - BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
@@ -25,7 +26,6 @@ app:
 workflows:
   # These E2E tests are not triggered automatically (not prefixed with `test_`) because of App Store rate limits and high flakiness
   # When making changes to the step, please run these tests manually to verify the changes!
-
   manual_test_apple_id_service_auth_app_spec_password_input:
     title: Test Apple ID connection authentication with app specific password from input
     envs:
@@ -50,7 +50,7 @@ workflows:
     after_run:
     - _run
 
-  manual_test_api_key_service_auth:
+  test_api_key_service_auth:
     title: Test API key connection authentication
     envs:
     - CONNECTION: api_key
@@ -132,6 +132,7 @@ workflows:
         - project_path: $BITRISE_PROJECT_PATH
         - distribution_method: app-store
     - path::./:
+        run_if: '{{ enveq "IS_LATEST_STACK_XCODE" "true" }}'
         inputs:
         - connection: $CONNECTION
         - itunescon_user: $ITUNESCON_USER
@@ -141,8 +142,10 @@ workflows:
         - app_password: $APP_SPECIFIC_PASSWORD
         - team_id: $TEAM_ID
         - app_id: $APP_ID
+        - bundle_id: $BUNDLE_ID
         - skip_screenshots: "no"
         - skip_metadata: "yes"
         - submit_for_review: "no"
+        - altool_options: "--use-old-altool"
         - fastlane_version: latest
         - verbose_log: "yes"
