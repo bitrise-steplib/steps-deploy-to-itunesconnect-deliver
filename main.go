@@ -415,11 +415,9 @@ alphanumeric characters.`)
 
 	if cfg.AppID != "" {
 		args = append(args, "--app", cfg.AppID)
-		//warn user if BundleID is also set f
-		if cfg.BundleID != "" {
-			log.Warnf("AppID parameter specified, BundleID will be ignored")
-		}
-	} else if cfg.BundleID != "" {
+		// //warn use
+	}
+	if cfg.BundleID != "" {
 		args = append(args, "--app_identifier", cfg.BundleID)
 	}
 
