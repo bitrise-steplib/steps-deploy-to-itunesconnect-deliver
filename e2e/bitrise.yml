@@ -132,7 +132,7 @@ workflows:
         - project_path: $BITRISE_PROJECT_PATH
         - distribution_method: app-store
     - path::./:
-        run_if: {{ enveq "IS_LATEST_STACK_XCODE" "true" }}
+        run_if: '{{ enveq "IS_LATEST_STACK_XCODE" "true" }}'
         inputs:
         - connection: $CONNECTION
         - itunescon_user: $ITUNESCON_USER
