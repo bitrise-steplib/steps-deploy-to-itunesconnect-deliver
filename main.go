@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/bitrise-io/go-steputils/command/gems"
@@ -45,9 +46,10 @@ type Config struct {
 	Platform             string `env:"platform,opt[ios,osx,appletvos]"`
 	Options              string `env:"options"`
 
-	GemfilePath     string `env:"gemfile_path"`
-	FastlaneVersion string `env:"fastlane_version"`
-	ITMSParameters  string `env:"itms_upload_parameters"`
+	GemfilePath             string `env:"gemfile_path"`
+	FastlaneVersion         string `env:"fastlane_version"`
+	AltoolAdditionalOptions string `env:"altool_options"`
+	ITMSParameters          string `env:"itms_upload_parameters"`
 
 	VerboseLog bool `env:"verbose_log,opt[yes,no]"`
 
@@ -393,6 +395,11 @@ alphanumeric characters.`)
 
 	envs := []string{}
 	// Xcode 14 and above fastlane uses altool to upload
+	altoolOptions, err := shellquote.Split(cfg.AltoolAdditionalOptions)
+	if err != nil {
+		fail("Provided altool options (%s) are not valid CLI parameters: %s", err)
+	}
+	envs = append(envs, "DELIVER_ALTOOL_ADDITIONAL_UPLOAD_PARAMETERS="+shellquote.Join(altoolOptions...))
 	if version.MajorVersion < 14 {
 		envs = append(envs, "ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD=true")
 		if cfg.ITMSParameters != "" {
@@ -470,6 +477,9 @@ alphanumeric characters.`)
 	args = append(args, "--platform", cfg.Platform)
 
 	args = append(args, options...)
+	if cfg.VerboseLog && !slices.Contains(options, "--verbose") {
+		args = append(args, "--verbose")
+	}
 
 	cmdSlice := append(fastlaneCmdSlice, args...)
 
