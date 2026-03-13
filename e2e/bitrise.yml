@@ -10,7 +10,7 @@ app:
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
   - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
-  - BUNDLE_ID: com.bitrise.Bitrise-iTunesConnectBetaTest
+  # - BUNDLE_ID: com.bitrise.Bitrise-iTunesConnectBetaTest
   # Shared secrets
   - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
   - BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
