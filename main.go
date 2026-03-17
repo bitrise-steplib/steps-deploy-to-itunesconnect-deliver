@@ -395,6 +395,7 @@ alphanumeric characters.`)
 
 	envs := []string{}
 	// Xcode 14 and above fastlane uses altool to upload
+	//
 	altoolOptions, err := shellquote.Split(cfg.AltoolAdditionalOptions)
 	if err != nil {
 		fail("Provided altool options (%s) are not valid CLI parameters: %s", err)
