@@ -399,7 +399,9 @@ alphanumeric characters.`)
 	if err != nil {
 		fail("Provided altool options (%s) are not valid CLI parameters: %s", err)
 	}
-	envs = append(envs, "DELIVER_ALTOOL_ADDITIONAL_UPLOAD_PARAMETERS="+shellquote.Join(altoolOptions...))
+	if len(altoolOptions) != 0 {
+		envs = append(envs, "DELIVER_ALTOOL_ADDITIONAL_UPLOAD_PARAMETERS="+shellquote.Join(altoolOptions...))
+	}
 	if version.MajorVersion < 14 {
 		envs = append(envs, "ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD=true")
 		if cfg.ITMSParameters != "" {

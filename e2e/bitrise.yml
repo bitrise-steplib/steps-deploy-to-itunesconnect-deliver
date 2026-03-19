@@ -59,7 +59,7 @@ workflows:
     - APP_SPECIFIC_PASSWORD: ""
     - TEAM_ID: ""
     - APP_ID: $ITUNES_CONNECT_APP_ID
-    - ALTOOL_OPTIONS: --bundle_id $BUNDLE_ID
+    #- ALTOOL_OPTIONS: --bundle_id $BUNDLE_ID
     after_run:
     - _run
 
