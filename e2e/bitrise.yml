@@ -146,6 +146,6 @@ workflows:
         - skip_screenshots: "no"
         - skip_metadata: "yes"
         - submit_for_review: "no"
-        - altool_options: "--bundle_id com.bitrise.Bitrise-iTunesConnectBetaTest --use-old-altool"
+        - altool_options: "--use-old-altool"
         - fastlane_version: latest
         - verbose_log: "yes"
