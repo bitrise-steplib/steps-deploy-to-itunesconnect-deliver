@@ -52,6 +52,7 @@ workflows:
 
   test_api_key_service_auth:
     title: Test API key connection authentication
+    run_if: "{{ enveq 'IS_LATEST_STACK_XCODE' 'true' }}"
     envs:
     - CONNECTION: api_key
     - API_KEY_URL: ""
@@ -59,7 +60,6 @@ workflows:
     - APP_SPECIFIC_PASSWORD: ""
     - TEAM_ID: ""
     - APP_ID: $ITUNES_CONNECT_APP_ID
-    #- ALTOOL_OPTIONS: --bundle_id $BUNDLE_ID
     after_run:
     - _run
 
@@ -133,7 +133,6 @@ workflows:
         - project_path: $BITRISE_PROJECT_PATH
         - distribution_method: app-store
     - path::./:
-        run_if: '{{ enveq "IS_LATEST_STACK_XCODE" "true" }}'
         inputs:
         - connection: $CONNECTION
         - itunescon_user: $ITUNESCON_USER
