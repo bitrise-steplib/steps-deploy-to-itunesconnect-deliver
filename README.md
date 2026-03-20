@@ -83,6 +83,7 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `gemfile_path` | Path to the `Gemfile` which contains the `fastlane` gem. If a `Gemfile` doesn't exist or doesn't contain the `fastlane` gem and if the **fastlane version** input isn't specified, the latest fastlane version will be used.  |  | `./Gemfile` |
 | `fastlane_version` | This option lets you specify a version of the **fastlane** gem to be installed. - `latest-stable` installs the latest stable version. - `latest` installs the latest version of fastlane including pre-release (release candidate) versions. |  | `latest-stable` |
 | `options` | Options added to the end of the `deliver` call. If you want to add more options, list those separated by space character. Example: `--skip_metadata --skip_screenshots` |  |  |
+| `altool_options` | `deliver` uses `altool` to upload IPAs. Options are added to the end of the `altool` call. You can use multiple options, separated by a space character. Examples: - `--use-old-altool` - `--bundle_id <BUNDLE_ID>` |  |  |
 | `itms_upload_parameters` | `deliver` uses the iTunes Transporter to upload metadata and binaries. If you are behind a firewall, you can specify a different transporter protocol using this input. Read more on Apple [Transporter User Guide](https://help.apple.com/itc/transporteruserguide/#/apdATD1E1288-D1E1A1303-D1E1288A1126). |  |  |
 | `verbose_log` | Enable verbose logging? | required | `no` |
 </details>
