@@ -80,6 +80,8 @@ You can also run this step directly with [Bitrise CLI](https://github.com/bitris
 | `skip_metadata` | Don't upload the metadata. This will still upload screenshots. | required | `yes` |
 | `skip_screenshots` | Don't upload the screenshots. | required | `yes` |
 | `skip_app_version_update` | Don't update the app version for submission. | required | `no` |
+| `release_notes` | The text of the localized release notes (What's New) to be uploaded for this version. **NOTE:** To upload release notes, you must also set the **Skip metadata?** (`skip_metadata`) input to `no`. If `skip_metadata` is set to `yes`, this input will be ignored. |  |  |
+| `release_notes_language` | The language/locale folder name under which to save the release notes (e.g. `en-US`, `default`, `fr-FR`). If you want the release notes to apply as the default fallback for all languages, set this to `default`. |  | `en-US` |
 | `gemfile_path` | Path to the `Gemfile` which contains the `fastlane` gem. If a `Gemfile` doesn't exist or doesn't contain the `fastlane` gem and if the **fastlane version** input isn't specified, the latest fastlane version will be used.  |  | `./Gemfile` |
 | `fastlane_version` | This option lets you specify a version of the **fastlane** gem to be installed. - `latest-stable` installs the latest stable version. - `latest` installs the latest version of fastlane including pre-release (release candidate) versions. |  | `latest-stable` |
 | `options` | Options added to the end of the `deliver` call. If you want to add more options, list those separated by space character. Example: `--skip_metadata --skip_screenshots` |  |  |
