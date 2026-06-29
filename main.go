@@ -41,6 +41,8 @@ type Config struct {
 	SkipMetadata         string `env:"skip_metadata,opt[yes,no]"`
 	SkipScreenshots      string `env:"skip_screenshots,opt[yes,no]"`
 	SkipAppVersionUpdate string `env:"skip_app_version_update,opt[yes,no]"`
+	ReleaseNotes         string `env:"release_notes"`
+	ReleaseNotesLanguage string `env:"release_notes_language"`
 	TeamID               string `env:"team_id"`
 	TeamName             string `env:"team_name"`
 	Platform             string `env:"platform,opt[ios,osx,appletvos]"`
@@ -369,6 +371,19 @@ func main() {
 	fmt.Println()
 	log.Infof("Deploy")
 
+	if cfg.ReleaseNotes != "" {
+		path, err := writeReleaseNotes("fastlane", cfg.ReleaseNotes, cfg.ReleaseNotesLanguage)
+		if err != nil {
+			fail("Failed to write release notes: %s", err)
+		}
+
+		log.Donef("Successfully wrote release notes to %s", path)
+
+		if cfg.SkipMetadata == "yes" {
+			log.Warnf("Release notes are configured, but 'skip_metadata' is set to 'yes'. Release notes will be ignored by fastlane deliver. Please set 'skip_metadata' to 'no' to upload release notes.")
+		}
+	}
+
 	if cfg.Password != "" {
 		log.Printf(`**Note:** if your password
 contains special characters
@@ -529,4 +544,27 @@ func normalizeArtifactPath(pth string) (string, error) {
 	}
 
 	return tmpPath, nil
+}
+
+func writeReleaseNotes(baseDir, releaseNotes, language string) (string, error) {
+	if releaseNotes == "" {
+		return "", nil
+	}
+
+	lang := language
+	if lang == "" {
+		lang = "en-US"
+	}
+
+	dir := filepath.Join(baseDir, "metadata", lang)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	path := filepath.Join(dir, "release_notes.txt")
+	if err := fileutil.WriteStringToFile(path, releaseNotes); err != nil {
+		return "", fmt.Errorf("failed to write release notes to %s: %w", path, err)
+	}
+
+	return path, nil
 }
