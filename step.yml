@@ -224,7 +224,7 @@ inputs:
       The text of the localized release notes (What's New) to be uploaded for this version.
       **NOTE:** To upload release notes, you must also set the **Skip metadata?** (`skip_metadata`) input to `no`.
       If `skip_metadata` is set to `yes`, this input will be ignored.
-- release_notes_language: "en-US"
+- release_notes_language: en-US
   opts:
     title: Release notes language
     summary: The language of the release notes (e.g. en-US, default).
