@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -94,7 +95,7 @@ func fail(format string, v ...interface{}) {
 func gemInstallWithRetry(rubyFactory ruby.CommandFactory, gemName string, version string) error {
 	return retry.Times(2).Try(func(attempt uint) error {
 		if attempt > 0 {
-			log.Warnf("%d attempt failed", attempt+1)
+			log.Warnf("attempt %d failed", attempt)
 		}
 
 		versionToInstall := version
@@ -129,15 +130,29 @@ func gemVersionFromGemfileLock(gem, gemfileLockPth string) (ruby.Version, error)
 // fastlaneInvocation describes how Fastlane has to be called: through bundler, with a gem version
 // selector, or as the system installed gem.
 type fastlaneInvocation struct {
-	// bundlerVersion, when set, calls Fastlane as `bundle _version_ exec fastlane`
+	// useBundler calls Fastlane as `bundle exec fastlane`. It is separate from bundlerVersion on
+	// purpose: the gem lockfile does not always name a bundler version, and Fastlane still has to be
+	// called through bundler in that case.
+	useBundler bool
+	// bundlerVersion, when set, selects the bundler version: `bundle _version_ exec fastlane`
 	bundlerVersion string
 	// gemVersion, when set, passes `_version_` to Fastlane as its first argument
 	gemVersion string
 }
 
+// commandOpts returns the command options the Step's Ruby commands share.
+func commandOpts(dir string, stdin io.Reader) *v2command.Opts {
+	return &v2command.Opts{
+		Stdout: os.Stdout,
+		Stderr: os.Stderr,
+		Stdin:  stdin,
+		Dir:    dir,
+	}
+}
+
 // createCommand creates the Fastlane command for the given arguments.
 func (i fastlaneInvocation) createCommand(rubyFactory ruby.CommandFactory, args []string, opts *v2command.Opts) v2command.Command {
-	if i.bundlerVersion != "" {
+	if i.useBundler {
 		return rubyFactory.CreateBundleExec("fastlane", args, i.bundlerVersion, opts)
 	}
 
@@ -148,7 +163,7 @@ func (i fastlaneInvocation) createCommand(rubyFactory ruby.CommandFactory, args 
 	return rubyFactory.Create("fastlane", args, opts)
 }
 
-func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, cmdFactory v2command.Factory, forceVersion, gemfilePth string) (fastlaneInvocation, string, error) {
+func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, forceVersion, gemfilePth string) (fastlaneInvocation, string, error) {
 	if forceVersion != "" {
 		log.Printf("fastlane version defined: %s, installing...", forceVersion)
 
@@ -182,15 +197,10 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, cmdFactory v2command
 	gemfileDir := filepath.Dir(gemfilePth)
 	gemfileLockPth, err := ruby.GemFileLockPth(gemfileDir)
 	if err != nil {
-		if err == ruby.ErrGemLockNotFound {
+		if errors.Is(err, ruby.ErrGemLockNotFound) {
 			log.Printf("gem lockfile not exist at: %s, running 'bundle install' ...", gemfileDir)
 
-			cmd := cmdFactory.Create("bundle", []string{"install"}, &v2command.Opts{
-				Stdout: os.Stdout,
-				Stderr: os.Stderr,
-				Stdin:  os.Stdin,
-				Dir:    gemfileDir,
-			})
+			cmd := rubyFactory.CreateBundleInstall("", commandOpts(gemfileDir, os.Stdin))
 			if err := cmd.Run(); err != nil {
 				return fastlaneInvocation{}, "", err
 			}
@@ -199,7 +209,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, cmdFactory v2command
 
 			gemfileLockPth, err = ruby.GemFileLockPth(gemfileDir)
 			if err != nil {
-				if err == ruby.ErrGemLockNotFound {
+				if errors.Is(err, ruby.ErrGemLockNotFound) {
 					return fastlaneInvocation{}, "", errors.New("gem lockfile still not exist, even after 'bundle install' was called")
 				}
 				return fastlaneInvocation{}, "", err
@@ -234,11 +244,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, cmdFactory v2command
 
 			// install bundler with `gem install bundler [-v version]`
 			// in some configurations, the command "bunder _1.2.3_" can return 'Command not found', installing bundler solves this
-			installBundlerCommands := rubyFactory.CreateGemInstall("bundler", bundlerVersion.Version, false, true, &v2command.Opts{
-				Stdout: os.Stdout,
-				Stderr: os.Stderr,
-				Dir:    gemfileDir,
-			})
+			installBundlerCommands := rubyFactory.CreateGemInstall("bundler", bundlerVersion.Version, false, true, commandOpts(gemfileDir, nil))
 
 			for _, installBundlerCommand := range installBundlerCommands {
 				fmt.Println()
@@ -253,11 +259,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, cmdFactory v2command
 			fmt.Println()
 			log.Infof("Installing bundle")
 
-			cmd := rubyFactory.CreateBundleInstall(bundlerVersion.Version, &v2command.Opts{
-				Stdout: os.Stdout,
-				Stderr: os.Stderr,
-				Dir:    gemfileDir,
-			})
+			cmd := rubyFactory.CreateBundleInstall(bundlerVersion.Version, commandOpts(gemfileDir, nil))
 
 			fmt.Println()
 			log.Donef("$ %s", cmd.PrintableCommandArgs())
@@ -267,7 +269,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, cmdFactory v2command
 			}
 		}
 
-		return fastlaneInvocation{bundlerVersion: bundlerVersion.Version}, gemfileDir, nil
+		return fastlaneInvocation{useBundler: true, bundlerVersion: bundlerVersion.Version}, gemfileDir, nil
 	}
 
 	log.Printf("Fastlane version not found in gem lockfile, using system installed Fastlane...")
@@ -317,6 +319,12 @@ func main() {
 	stepconf.Print(cfg)
 	log.SetEnableDebugLog(cfg.VerboseLog)
 
+	//
+	// Validate inputs
+	if err := cfg.validate(); err != nil {
+		fail("Issue with input: %s", err)
+	}
+
 	logger := v2log.NewLogger()
 	logger.EnableDebugLog(cfg.VerboseLog)
 	envRepository := v2env.NewRepository()
@@ -328,11 +336,6 @@ func main() {
 		fail("Failed to initialize Ruby command factory: %s", err)
 	}
 
-	//
-	// Validate inputs
-	if err := cfg.validate(); err != nil {
-		fail("Issue with input: %s", err)
-	}
 	authInputs := appleauth.Inputs{
 		Username:            cfg.ItunesConnectUser,
 		Password:            string(cfg.Password),
@@ -387,17 +390,14 @@ func main() {
 
 	startTime := time.Now()
 
-	fastlane, workDir, err := ensureFastlaneVersion(rubyFactory, cmdFactory, cfg.FastlaneVersion, cfg.GemfilePath)
+	fastlane, workDir, err := ensureFastlaneVersion(rubyFactory, cfg.FastlaneVersion, cfg.GemfilePath)
 	if err != nil {
 		fail("Failed to ensure Fastlane version, error: %s", err)
 	}
 
-	versionCmd := fastlane.createCommand(rubyFactory, []string{"-v"}, &v2command.Opts{
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-	})
+	versionCmd := fastlane.createCommand(rubyFactory, []string{"-v"}, commandOpts(workDir, nil))
 	fmt.Println()
-	log.Donef(fmt.Sprintf("$ %s", versionCmd.PrintableCommandArgs()))
+	log.Donef("$ %s", versionCmd.PrintableCommandArgs())
 	if err := versionCmd.Run(); err != nil {
 		fail("Failed to print Fastlane version, error: %s", err)
 	}
@@ -432,14 +432,14 @@ alphanumeric characters.`)
 
 	version, err := utility.GetXcodeVersion()
 	if err != nil {
-		fail("Failed to read Xcode version: %w", err)
+		fail("Failed to read Xcode version: %s", err)
 	}
 
 	envs := []string{}
 	// Xcode 14 and above fastlane uses altool to upload
 	altoolOptions, err := shellquote.Split(cfg.AltoolAdditionalOptions)
 	if err != nil {
-		fail("Provided altool options (%s) are not valid CLI parameters: %s", err)
+		fail("Provided altool options (%s) are not valid CLI parameters: %s", cfg.AltoolAdditionalOptions, err)
 	}
 	if len(altoolOptions) != 0 {
 		envs = append(envs, "DELIVER_ALTOOL_ADDITIONAL_UPLOAD_PARAMETERS="+shellquote.Join(altoolOptions...))
@@ -530,16 +530,12 @@ alphanumeric characters.`)
 
 	// Unset before creating the command: the factory captures the environment at creation time.
 	if err := os.Unsetenv("FASTLANE_PASSWORD"); err != nil {
-		fail("Could not unset Fastlane password, reason: ", err)
+		fail("Could not unset Fastlane password, reason: %s", err)
 	}
 
-	cmd := fastlane.createCommand(rubyFactory, args, &v2command.Opts{
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-		Stdin:  os.Stdin,
-		Dir:    workDir,
-		Env:    envs,
-	})
+	runOpts := commandOpts(workDir, os.Stdin)
+	runOpts.Env = envs
+	cmd := fastlane.createCommand(rubyFactory, args, runOpts)
 
 	fmt.Println()
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
