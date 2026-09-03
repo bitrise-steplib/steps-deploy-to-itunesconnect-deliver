@@ -12,13 +12,13 @@ import (
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/v2/ruby"
-	"github.com/bitrise-io/go-utils/command"
+	v1command "github.com/bitrise-io/go-utils/command"
 	"github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
-	v2command "github.com/bitrise-io/go-utils/v2/command"
-	v2env "github.com/bitrise-io/go-utils/v2/env"
+	"github.com/bitrise-io/go-utils/v2/command"
+	"github.com/bitrise-io/go-utils/v2/env"
 	v2log "github.com/bitrise-io/go-utils/v2/log"
 	"github.com/bitrise-io/go-xcode/appleauth"
 	"github.com/bitrise-io/go-xcode/devportalservice"
@@ -141,8 +141,8 @@ type fastlaneInvocation struct {
 }
 
 // commandOpts returns the command options the Step's Ruby commands share.
-func commandOpts(dir string, stdin io.Reader) *v2command.Opts {
-	return &v2command.Opts{
+func commandOpts(dir string, stdin io.Reader) *command.Opts {
+	return &command.Opts{
 		Stdout: os.Stdout,
 		Stderr: os.Stderr,
 		Stdin:  stdin,
@@ -151,7 +151,7 @@ func commandOpts(dir string, stdin io.Reader) *v2command.Opts {
 }
 
 // createCommand creates the Fastlane command for the given arguments.
-func (i fastlaneInvocation) createCommand(rubyFactory ruby.CommandFactory, args []string, opts *v2command.Opts) v2command.Command {
+func (i fastlaneInvocation) createCommand(rubyFactory ruby.CommandFactory, args []string, opts *command.Opts) command.Command {
 	if i.useBundler {
 		return rubyFactory.CreateBundleExec("fastlane", args, i.bundlerVersion, opts)
 	}
@@ -327,11 +327,9 @@ func main() {
 
 	logger := v2log.NewLogger()
 	logger.EnableDebugLog(cfg.VerboseLog)
-	envRepository := v2env.NewRepository()
-	cmdFactory := v2command.NewFactory(envRepository)
-	// An unrecognised Ruby install type is only warned about, but a missing Ruby is fatal: this Step
-	// cannot call Fastlane without it.
-	rubyFactory, err := ruby.NewCommandFactory(cmdFactory, v2env.NewCommandLocator(), logger)
+	envRepository := env.NewRepository()
+	cmdFactory := command.NewFactory(envRepository)
+	rubyFactory, err := ruby.NewCommandFactory(cmdFactory, env.NewCommandLocator(), logger)
 	if err != nil {
 		fail("Failed to initialize Step: %s", err)
 	}
@@ -561,7 +559,7 @@ func normalizeArtifactPath(pth string) (string, error) {
 	}
 
 	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
-	if err := command.CopyFile(pth, tmpPath); err != nil {
+	if err := v1command.CopyFile(pth, tmpPath); err != nil {
 		return "", err
 	}
 

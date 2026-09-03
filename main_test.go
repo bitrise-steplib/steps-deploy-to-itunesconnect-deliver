@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/bitrise-io/go-steputils/v2/ruby"
-	v2command "github.com/bitrise-io/go-utils/v2/command"
-	v2env "github.com/bitrise-io/go-utils/v2/env"
+	"github.com/bitrise-io/go-utils/v2/command"
+	"github.com/bitrise-io/go-utils/v2/env"
 	v2log "github.com/bitrise-io/go-utils/v2/log"
 )
 
@@ -14,8 +14,8 @@ func newRubyCommandFactory(t *testing.T) ruby.CommandFactory {
 	t.Helper()
 
 	logger := v2log.NewLogger()
-	cmdFactory := v2command.NewFactory(v2env.NewRepository())
-	rubyFactory, err := ruby.NewCommandFactory(cmdFactory, v2env.NewCommandLocator(), logger)
+	cmdFactory := command.NewFactory(env.NewRepository())
+	rubyFactory, err := ruby.NewCommandFactory(cmdFactory, env.NewCommandLocator(), logger)
 	if err != nil {
 		t.Fatalf("failed to create Ruby command factory: %s", err)
 	}
