@@ -12,13 +12,13 @@ import (
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/v2/ruby"
-	v1command "github.com/bitrise-io/go-utils/command"
-	"github.com/bitrise-io/go-utils/fileutil"
+	v1fileutil "github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
 	"github.com/bitrise-io/go-utils/v2/command"
 	"github.com/bitrise-io/go-utils/v2/env"
+	"github.com/bitrise-io/go-utils/v2/fileutil"
 	v2log "github.com/bitrise-io/go-utils/v2/log"
 	"github.com/bitrise-io/go-xcode/appleauth"
 	"github.com/bitrise-io/go-xcode/devportalservice"
@@ -120,7 +120,7 @@ func gemInstallWithRetry(rubyFactory ruby.CommandFactory, gemName string, versio
 }
 
 func gemVersionFromGemfileLock(gem, gemfileLockPth string) (ruby.Version, error) {
-	content, err := fileutil.ReadStringFromFile(gemfileLockPth)
+	content, err := v1fileutil.ReadStringFromFile(gemfileLockPth)
 	if err != nil {
 		return ruby.Version{}, err
 	}
@@ -229,7 +229,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, forceVersion, gemfil
 
 		var bundlerVersion ruby.Version
 		if !bundleInstallCalled {
-			content, err := fileutil.ReadStringFromFile(gemfileLockPth)
+			content, err := v1fileutil.ReadStringFromFile(gemfileLockPth)
 			if err != nil {
 				return fastlaneInvocation{}, "", fmt.Errorf("failed to read file (%s) contents, error: %s", gemfileLockPth, err)
 			}
@@ -329,6 +329,7 @@ func main() {
 	logger.EnableDebugLog(cfg.VerboseLog)
 	envRepository := env.NewRepository()
 	cmdFactory := command.NewFactory(envRepository)
+	fileManager := fileutil.NewFileManager()
 	rubyFactory, err := ruby.NewCommandFactory(cmdFactory, env.NewCommandLocator(), logger)
 	if err != nil {
 		fail("Failed to initialize Step: %s", err)
@@ -485,7 +486,7 @@ alphanumeric characters.`)
 	}
 
 	if cfg.IpaPath != "" {
-		tmpIpaPath, err := normalizeArtifactPath(cfg.IpaPath)
+		tmpIpaPath, err := normalizeArtifactPath(fileManager, cfg.IpaPath)
 		if err != nil {
 			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(cfg.IpaPath), err)
 			tmpIpaPath = cfg.IpaPath
@@ -493,7 +494,7 @@ alphanumeric characters.`)
 		args = append(args, "--ipa", tmpIpaPath)
 
 	} else if cfg.PkgPath != "" {
-		tmpPkgPath, err := normalizeArtifactPath(cfg.PkgPath)
+		tmpPkgPath, err := normalizeArtifactPath(fileManager, cfg.PkgPath)
 		if err != nil {
 			log.Warnf("failed to copy the %s to the temporarily dir, error: %s", filepath.Base(cfg.PkgPath), err)
 			tmpPkgPath = cfg.PkgPath
@@ -552,14 +553,14 @@ Set the fastlane version input to "%s" to enable prerelease versions.`, latestPr
 	log.Printf("The app (.ipa) was successfully uploaded to [App Store Connect](https://appstoreconnect.apple.com), you should see it in the *Prerelease* section on the app's page!")
 }
 
-func normalizeArtifactPath(pth string) (string, error) {
+func normalizeArtifactPath(fileManager fileutil.FileManager, pth string) (string, error) {
 	tmpDir, err := pathutil.NormalizedOSTempDirPath("ipaOrPkg")
 	if err != nil {
 		return "", err
 	}
 
 	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
-	if err := v1command.CopyFile(pth, tmpPath); err != nil {
+	if err := fileManager.CopyFile(pth, tmpPath, nil); err != nil {
 		return "", err
 	}
 
