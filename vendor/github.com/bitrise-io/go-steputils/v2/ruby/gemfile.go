@@ -1,9 +1,8 @@
-package gems
+package ruby
 
 import (
 	"errors"
 	"fmt"
-	"github.com/bitrise-io/go-utils/fileutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,19 +18,20 @@ type Version struct {
 // ParseVersionFromBundle returns the specified gem version parsed from a Gemfile.lock on a best effort basis, for logging purposes only.
 //
 // for "fastlane" and the following Gemfile.lock example, it returns: ">= 2.0)"
-//   specs:
-//     CFPropertyList (3.0.0)
-//     addressable (2.6.0)
-//       public_suffix (>= 2.0.2, < 4.0)
-//     atomos (0.1.3)
-//     babosa (1.0.2)
-//     badge (0.8.5)
-//       curb (~> 0.9)
-//       fastimage (>= 1.6)
-//       fastlane (>= 2.0)
-//       mini_magick (>= 4.5)
-//     claide (1.0.2)
-func ParseVersionFromBundle(gemName string, gemfileLockContent string) (gemVersion Version, err error) {
+//
+//	specs:
+//	  CFPropertyList (3.0.0)
+//	  addressable (2.6.0)
+//	    public_suffix (>= 2.0.2, < 4.0)
+//	  atomos (0.1.3)
+//	  babosa (1.0.2)
+//	  badge (0.8.5)
+//	    curb (~> 0.9)
+//	    fastimage (>= 1.6)
+//	    fastlane (>= 2.0)
+//	    mini_magick (>= 4.5)
+//	  claide (1.0.2)
+func ParseVersionFromBundle(gemName string, gemfileLockContent string) (Version, error) {
 	var relevantLines []string
 	lines := strings.Split(gemfileLockContent, "\n")
 
@@ -51,7 +51,6 @@ func ParseVersionFromBundle(gemName string, gemfileLockContent string) (gemVersi
 		}
 	}
 
-	//     fastlane (1.109.0)
 	exp := regexp.MustCompile(fmt.Sprintf(`^%s \((.+)\)`, regexp.QuoteMeta(gemName)))
 	for _, line := range relevantLines {
 		match := exp.FindStringSubmatch(strings.TrimSpace(line))
@@ -71,11 +70,7 @@ func ParseVersionFromBundle(gemName string, gemfileLockContent string) (gemVersi
 }
 
 // ParseBundlerVersion returns the bundler version used to create the bundle
-func ParseBundlerVersion(gemfileLockContent string) (gemVersion Version, err error) {
-	/*
-		BUNDLED WITH
-			1.17.1
-	*/
+func ParseBundlerVersion(gemfileLockContent string) (Version, error) {
 	bundlerRegexp := regexp.MustCompile(`(?m)^BUNDLED WITH\n\s+(\S+)`)
 	match := bundlerRegexp.FindStringSubmatch(gemfileLockContent)
 	if match == nil {
@@ -92,9 +87,8 @@ func ParseBundlerVersion(gemfileLockContent string) (gemVersion Version, err err
 }
 
 var (
-	// gemFileLockNames the list of possible lock file names.
 	gemFileLockNames = []string{"Gemfile.lock", "gems.locked"}
-	// ErrGemLockNotFound is thrown when the gem file is not found.
+	// ErrGemLockNotFound is returned when no gem lock file is found in the search dir.
 	ErrGemLockNotFound = errors.New("gem lock file not found")
 )
 
@@ -119,15 +113,18 @@ func GemFileLockContent(searchDir string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fileutil.ReadStringFromFile(gemFileLockPth)
+	content, err := os.ReadFile(gemFileLockPth)
+	if err != nil {
+		return "", err
+	}
+	return string(content), nil
 }
 
 // ParseVersionFromBundlePth overload for ParseVersionFromBundle.
 func ParseVersionFromBundlePth(gemName string, gemFileLockPth string) (Version, error) {
-	content, err := fileutil.ReadStringFromFile(gemFileLockPth)
+	content, err := os.ReadFile(gemFileLockPth)
 	if err != nil {
 		return Version{}, err
 	}
-
-	return ParseVersionFromBundle(gemName, content)
+	return ParseVersionFromBundle(gemName, string(content))
 }

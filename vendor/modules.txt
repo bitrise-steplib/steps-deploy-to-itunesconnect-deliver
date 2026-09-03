@@ -1,9 +1,10 @@
 # github.com/bitrise-io/go-steputils v1.0.5
 ## explicit; go 1.15
-github.com/bitrise-io/go-steputils/command/gems
-github.com/bitrise-io/go-steputils/command/rubycommand
 github.com/bitrise-io/go-steputils/input
 github.com/bitrise-io/go-steputils/stepconf
+# github.com/bitrise-io/go-steputils/v2 v2.0.0-alpha.54
+## explicit; go 1.21
+github.com/bitrise-io/go-steputils/v2/ruby
 # github.com/bitrise-io/go-utils v1.0.9
 ## explicit; go 1.13
 github.com/bitrise-io/go-utils/colorstring
@@ -15,6 +16,14 @@ github.com/bitrise-io/go-utils/parseutil
 github.com/bitrise-io/go-utils/pathutil
 github.com/bitrise-io/go-utils/pointers
 github.com/bitrise-io/go-utils/retry
+# github.com/bitrise-io/go-utils/v2 v2.0.0-alpha.39
+## explicit; go 1.21
+github.com/bitrise-io/go-utils/v2/command
+github.com/bitrise-io/go-utils/v2/env
+github.com/bitrise-io/go-utils/v2/fileutil
+github.com/bitrise-io/go-utils/v2/log
+github.com/bitrise-io/go-utils/v2/log/colorstring
+github.com/bitrise-io/go-utils/v2/pathutil
 # github.com/bitrise-io/go-xcode v1.0.16
 ## explicit; go 1.20
 github.com/bitrise-io/go-xcode/appleauth
