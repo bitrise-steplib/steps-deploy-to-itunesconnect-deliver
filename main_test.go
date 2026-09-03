@@ -10,7 +10,7 @@ import (
 	v2log "github.com/bitrise-io/go-utils/v2/log"
 )
 
-func newRubyCommandFactory(t *testing.T) ruby.CommandFactory {
+func newRubyCommands(t *testing.T) rubyCommands {
 	t.Helper()
 
 	logger := v2log.NewLogger()
@@ -20,7 +20,7 @@ func newRubyCommandFactory(t *testing.T) ruby.CommandFactory {
 		t.Fatalf("failed to create Ruby command factory: %s", err)
 	}
 
-	return rubyFactory
+	return rubyCommands{factory: rubyFactory}
 }
 
 func Test_fastlaneInvocation_createCommand(t *testing.T) {
@@ -53,11 +53,11 @@ func Test_fastlaneInvocation_createCommand(t *testing.T) {
 		},
 	}
 
-	rubyFactory := newRubyCommandFactory(t)
+	rubyCmds := newRubyCommands(t)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := tt.invocation.createCommand(rubyFactory, []string{"deliver"}, nil)
+			cmd := tt.invocation.createCommand(rubyCmds, command.NewFactory(env.NewRepository()), []string{"deliver"}, nil)
 
 			if got := cmd.PrintableCommandArgs(); got != tt.want {
 				t.Errorf("createCommand() = %v, want %v", got, tt.want)
@@ -95,11 +95,11 @@ func Test_ensureFastlaneVersion(t *testing.T) {
 		},
 	}
 
-	rubyFactory := newRubyCommandFactory(t)
+	rubyCmds := newRubyCommands(t)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ensureFastlaneVersion(rubyFactory, tt.forceVersion, tt.gemfilePth)
+			got, got1, err := ensureFastlaneVersion(rubyCmds, tt.forceVersion, tt.gemfilePth)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ensureFastlaneVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return
