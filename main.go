@@ -333,7 +333,7 @@ func main() {
 	// cannot call Fastlane without it.
 	rubyFactory, err := ruby.NewCommandFactory(cmdFactory, v2env.NewCommandLocator(), logger)
 	if err != nil {
-		fail("Failed to initialize Ruby command factory: %s", err)
+		fail("Failed to initialize Step: %s", err)
 	}
 
 	authInputs := appleauth.Inputs{
