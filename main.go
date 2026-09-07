@@ -587,6 +587,9 @@ func normalizeArtifactPath(fileManager fileutil.FileManager, pth string) (string
 	}
 
 	tmpPath := filepath.Join(tmpDir, "tmp"+filepath.Ext(pth))
+	// No copy options means the defaults, which do not overwrite: unlike v1's command.CopyFile,
+	// this call fails if the destination already exists. tmpDir is created fresh just above, so it
+	// cannot, and a collision there would be worth failing on rather than overwriting.
 	if err := fileManager.CopyFile(pth, tmpPath, nil); err != nil {
 		return "", err
 	}
