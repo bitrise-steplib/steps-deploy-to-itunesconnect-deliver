@@ -10,7 +10,7 @@ import (
 	v2log "github.com/bitrise-io/go-utils/v2/log"
 )
 
-func newRubyCommands(t *testing.T) rubyCommands {
+func newRubyCommandFactory(t *testing.T) ruby.CommandFactory {
 	t.Helper()
 
 	logger := v2log.NewLogger()
@@ -20,10 +20,13 @@ func newRubyCommands(t *testing.T) rubyCommands {
 		t.Fatalf("failed to create Ruby command factory: %s", err)
 	}
 
-	return rubyCommands{factory: rubyFactory}
+	return rubyFactory
 }
 
 func Test_fastlaneInvocation_createCommand(t *testing.T) {
+	rubyFactory := newRubyCommandFactory(t)
+	cmdFactory := command.NewFactory(env.NewRepository())
+
 	tests := []struct {
 		name       string
 		invocation fastlaneInvocation
@@ -38,26 +41,24 @@ func Test_fastlaneInvocation_createCommand(t *testing.T) {
 			// The gem lockfile does not name a bundler version, but Fastlane still has to be called
 			// through bundler, otherwise the version the Gemfile pins is bypassed.
 			name:       "bundler without a version",
-			invocation: fastlaneInvocation{useBundler: true},
+			invocation: fastlaneInvocation{useBundler: true, rubyFactory: rubyFactory},
 			want:       `bundle "exec" "fastlane" "deliver"`,
 		},
 		{
 			name:       "bundler with a version",
-			invocation: fastlaneInvocation{useBundler: true, bundlerVersion: "2.4.12"},
+			invocation: fastlaneInvocation{useBundler: true, bundlerVersion: "2.4.12", rubyFactory: rubyFactory},
 			want:       `bundle "_2.4.12_" "exec" "fastlane" "deliver"`,
 		},
 		{
 			name:       "Fastlane version selector",
-			invocation: fastlaneInvocation{gemVersion: "2.217.0"},
+			invocation: fastlaneInvocation{gemVersion: "2.217.0", rubyFactory: rubyFactory},
 			want:       `fastlane "_2.217.0_" "deliver"`,
 		},
 	}
 
-	rubyCmds := newRubyCommands(t)
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := tt.invocation.createCommand(rubyCmds, command.NewFactory(env.NewRepository()), []string{"deliver"}, nil)
+			cmd := tt.invocation.createCommand(cmdFactory, []string{"deliver"}, nil)
 
 			if got := cmd.PrintableCommandArgs(); got != tt.want {
 				t.Errorf("createCommand() = %v, want %v", got, tt.want)
@@ -95,11 +96,11 @@ func Test_ensureFastlaneVersion(t *testing.T) {
 		},
 	}
 
-	rubyCmds := newRubyCommands(t)
+	rubyFactory := newRubyCommandFactory(t)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ensureFastlaneVersion(rubyCmds, tt.forceVersion, tt.gemfilePth)
+			got, got1, err := ensureFastlaneVersion(rubyFactory, nil, tt.forceVersion, tt.gemfilePth)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ensureFastlaneVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return
