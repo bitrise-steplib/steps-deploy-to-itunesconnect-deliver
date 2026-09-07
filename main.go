@@ -22,7 +22,7 @@ import (
 	v2log "github.com/bitrise-io/go-utils/v2/log"
 	"github.com/bitrise-io/go-xcode/appleauth"
 	"github.com/bitrise-io/go-xcode/devportalservice"
-	"github.com/bitrise-io/go-xcode/utility"
+	"github.com/bitrise-io/go-xcode/v2/xcodeversion"
 	"github.com/kballard/go-shellquote"
 )
 
@@ -345,6 +345,7 @@ func main() {
 	envRepository := env.NewRepository()
 	cmdFactory := command.NewFactory(envRepository)
 	fileManager := fileutil.NewFileManager()
+	xcodeVersionReader := xcodeversion.NewXcodeVersionProvider(cmdFactory)
 	rubyFactory, rubyErr := ruby.NewCommandFactory(cmdFactory, env.NewCommandLocator(), logger)
 	if rubyErr != nil {
 		logger.Warnf("Ruby is not available: %s", rubyErr)
@@ -445,7 +446,7 @@ alphanumeric characters.`)
 		options = opts
 	}
 
-	version, err := utility.GetXcodeVersion()
+	version, err := xcodeVersionReader.GetVersion()
 	if err != nil {
 		fail("Failed to read Xcode version: %s", err)
 	}
@@ -459,7 +460,7 @@ alphanumeric characters.`)
 	if len(altoolOptions) != 0 {
 		envs = append(envs, "DELIVER_ALTOOL_ADDITIONAL_UPLOAD_PARAMETERS="+shellquote.Join(altoolOptions...))
 	}
-	if version.MajorVersion < 14 {
+	if version.Major < 14 {
 		envs = append(envs, "ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD=true")
 		if cfg.ITMSParameters != "" {
 			envs = append(envs, "DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="+cfg.ITMSParameters)
