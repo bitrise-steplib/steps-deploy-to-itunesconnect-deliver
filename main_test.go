@@ -34,31 +34,31 @@ func Test_fastlaneInvocation_createCommand(t *testing.T) {
 	}{
 		{
 			name:       "system installed Fastlane",
-			invocation: fastlaneInvocation{},
+			invocation: fastlaneInvocation{cmdFactory: cmdFactory},
 			want:       `fastlane "deliver"`,
 		},
 		{
 			// The gem lockfile does not name a bundler version, but Fastlane still has to be called
 			// through bundler, otherwise the version the Gemfile pins is bypassed.
 			name:       "bundler without a version",
-			invocation: fastlaneInvocation{useBundler: true, rubyFactory: rubyFactory},
+			invocation: fastlaneInvocation{useBundler: true, rubyFactory: rubyFactory, cmdFactory: cmdFactory},
 			want:       `bundle "exec" "fastlane" "deliver"`,
 		},
 		{
 			name:       "bundler with a version",
-			invocation: fastlaneInvocation{useBundler: true, bundlerVersion: "2.4.12", rubyFactory: rubyFactory},
+			invocation: fastlaneInvocation{useBundler: true, bundlerVersion: "2.4.12", rubyFactory: rubyFactory, cmdFactory: cmdFactory},
 			want:       `bundle "_2.4.12_" "exec" "fastlane" "deliver"`,
 		},
 		{
 			name:       "Fastlane version selector",
-			invocation: fastlaneInvocation{gemVersion: "2.217.0", rubyFactory: rubyFactory},
+			invocation: fastlaneInvocation{gemVersion: "2.217.0", rubyFactory: rubyFactory, cmdFactory: cmdFactory},
 			want:       `fastlane "_2.217.0_" "deliver"`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := tt.invocation.createCommand(cmdFactory, []string{"deliver"}, nil)
+			cmd := tt.invocation.createCommand([]string{"deliver"}, nil)
 
 			if got := cmd.PrintableCommandArgs(); got != tt.want {
 				t.Errorf("createCommand() = %v, want %v", got, tt.want)
@@ -100,7 +100,7 @@ func Test_ensureFastlaneVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ensureFastlaneVersion(rubyFactory, nil, tt.forceVersion, tt.gemfilePth)
+			got, got1, err := ensureFastlaneVersion(rubyFactory, nil, command.NewFactory(env.NewRepository()), tt.forceVersion, tt.gemfilePth)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ensureFastlaneVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return

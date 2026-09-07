@@ -132,6 +132,8 @@ type fastlaneInvocation struct {
 	// rubyFactory is set only when a path that needs Ruby was taken, which is why the branches
 	// below can rely on it.
 	rubyFactory ruby.CommandFactory
+	// cmdFactory runs the Fastlane that is already installed, which needs no Ruby of ours.
+	cmdFactory command.Factory
 }
 
 // commandOpts returns the command options the Step's Ruby commands share.
@@ -145,7 +147,7 @@ func commandOpts(dir string, stdin io.Reader) *command.Opts {
 }
 
 // createCommand creates the Fastlane command for the given arguments.
-func (i fastlaneInvocation) createCommand(cmdFactory command.Factory, args []string, opts *command.Opts) command.Command {
+func (i fastlaneInvocation) createCommand(args []string, opts *command.Opts) command.Command {
 	if i.useBundler {
 		return i.rubyFactory.CreateBundleExec("fastlane", args, i.bundlerVersion, opts)
 	}
@@ -158,10 +160,14 @@ func (i fastlaneInvocation) createCommand(cmdFactory command.Factory, args []str
 
 	// The system installed Fastlane needs no Ruby of ours: the Ruby factory only adds sudo, and
 	// never for a `fastlane` command.
-	return cmdFactory.Create("fastlane", args, opts)
+	return i.cmdFactory.Create("fastlane", args, opts)
 }
 
-func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, forceVersion, gemfilePth string) (fastlaneInvocation, string, error) {
+func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, cmdFactory command.Factory, forceVersion, gemfilePth string) (fastlaneInvocation, string, error) {
+	// systemFastlane calls the Fastlane that is already installed. It is also the base for the
+	// paths that go through Ruby, so every returned invocation can create a command.
+	systemFastlane := fastlaneInvocation{cmdFactory: cmdFactory}
+
 	if forceVersion != "" {
 		log.Printf("fastlane version defined: %s, installing...", forceVersion)
 
@@ -173,7 +179,8 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, force
 			return fastlaneInvocation{}, "", err
 		}
 
-		invocation := fastlaneInvocation{rubyFactory: rubyFactory}
+		invocation := systemFastlane
+		invocation.rubyFactory = rubyFactory
 		if forceVersion != latestStable && forceVersion != latestPrerelease {
 			invocation.gemVersion = forceVersion
 		}
@@ -183,14 +190,14 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, force
 
 	if gemfilePth == "" {
 		log.Printf("no fastlane version nor Gemfile path defined, using system installed fastlane...")
-		return fastlaneInvocation{}, "", nil
+		return systemFastlane, "", nil
 	}
 
 	if exist, err := pathutil.IsPathExists(gemfilePth); err != nil {
 		return fastlaneInvocation{}, "", err
 	} else if !exist {
 		log.Printf("Gemfile not exist at: %s and no fastlane version defined, using system installed fastlane...", gemfilePth)
-		return fastlaneInvocation{}, "", nil
+		return systemFastlane, "", nil
 	}
 
 	log.Printf("Gemfile exist, checking Fastlane version from gem lockfile")
@@ -275,12 +282,17 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, force
 			}
 		}
 
-		return fastlaneInvocation{useBundler: true, bundlerVersion: bundlerVersion.Version, rubyFactory: rubyFactory}, gemfileDir, nil
+		bundlerFastlane := systemFastlane
+		bundlerFastlane.useBundler = true
+		bundlerFastlane.bundlerVersion = bundlerVersion.Version
+		bundlerFastlane.rubyFactory = rubyFactory
+
+		return bundlerFastlane, gemfileDir, nil
 	}
 
 	log.Printf("Fastlane version not found in gem lockfile, using system installed Fastlane...")
 
-	return fastlaneInvocation{}, "", nil
+	return systemFastlane, "", nil
 }
 
 func (cfg Config) validate() error {
@@ -397,12 +409,12 @@ func main() {
 
 	startTime := time.Now()
 
-	fastlane, workDir, err := ensureFastlaneVersion(rubyFactory, rubyErr, cfg.FastlaneVersion, cfg.GemfilePath)
+	fastlane, workDir, err := ensureFastlaneVersion(rubyFactory, rubyErr, cmdFactory, cfg.FastlaneVersion, cfg.GemfilePath)
 	if err != nil {
 		fail("Failed to ensure Fastlane version, error: %s", err)
 	}
 
-	versionCmd := fastlane.createCommand(cmdFactory, []string{"-v"}, commandOpts(workDir, nil))
+	versionCmd := fastlane.createCommand([]string{"-v"}, commandOpts(workDir, nil))
 	fmt.Println()
 	log.Donef("$ %s", versionCmd.PrintableCommandArgs())
 	if err := versionCmd.Run(); err != nil {
@@ -542,7 +554,7 @@ alphanumeric characters.`)
 
 	runOpts := commandOpts(workDir, os.Stdin)
 	runOpts.Env = envs
-	cmd := fastlane.createCommand(cmdFactory, args, runOpts)
+	cmd := fastlane.createCommand(args, runOpts)
 
 	fmt.Println()
 	log.Donef("$ %s", cmd.PrintableCommandArgs())
