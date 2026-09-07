@@ -52,7 +52,22 @@ workflows:
 
   test_api_key_service_auth:
     title: Test API key connection authentication
-    run_if: "{{ enveq 'IS_LATEST_STACK_XCODE' 'true' }}"
+    steps:
+    # This uploads a build to App Store Connect, which Apple rate limits per app per day, so it runs
+    # on the latest stable and the edge Stack only, not on every Stack of the matrix.
+    #
+    # The gate has to sit on a Step: a workflow has no run_if field (only StepModel does), so the
+    # one that used to be here, on the workflow, was silently ignored and the upload ran on every
+    # Stack -- exhausting the daily quota within a single build.
+    - bitrise-run:
+        run_if: |-
+          {{ or (enveq "IS_LATEST_STACK_XCODE" "true") (enveq "BITRISEIO_STACK_ID" "osx-xcode-edge") (not .IsCI) }}
+        inputs:
+        - workflow_id: utility_test_api_key_service_auth
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_api_key_service_auth:
+    title: Test API key connection authentication
     envs:
     - CONNECTION: api_key
     - API_KEY_URL: ""
