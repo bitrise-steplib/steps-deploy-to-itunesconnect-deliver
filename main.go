@@ -12,7 +12,6 @@ import (
 
 	"github.com/bitrise-io/go-steputils/stepconf"
 	"github.com/bitrise-io/go-steputils/v2/ruby"
-	v1fileutil "github.com/bitrise-io/go-utils/fileutil"
 	"github.com/bitrise-io/go-utils/log"
 	"github.com/bitrise-io/go-utils/pathutil"
 	"github.com/bitrise-io/go-utils/retry"
@@ -117,14 +116,6 @@ func gemInstallWithRetry(rubyFactory ruby.CommandFactory, gemName string, versio
 
 		return nil
 	})
-}
-
-func gemVersionFromGemfileLock(gem, gemfileLockPth string) (ruby.Version, error) {
-	content, err := v1fileutil.ReadStringFromFile(gemfileLockPth)
-	if err != nil {
-		return ruby.Version{}, err
-	}
-	return ruby.ParseVersionFromBundle(gem, content)
 }
 
 // fastlaneInvocation describes how Fastlane has to be called: through bundler, with a gem version
@@ -234,7 +225,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, force
 		}
 	}
 
-	fastlane, err := gemVersionFromGemfileLock("fastlane", gemfileLockPth)
+	fastlane, err := ruby.ParseVersionFromBundlePth("fastlane", gemfileLockPth)
 	if err != nil {
 		return fastlaneInvocation{}, "", err
 	}
@@ -244,7 +235,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, force
 
 		var bundlerVersion ruby.Version
 		if !bundleInstallCalled {
-			content, err := v1fileutil.ReadStringFromFile(gemfileLockPth)
+			content, err := ruby.GemFileLockContent(gemfileDir)
 			if err != nil {
 				return fastlaneInvocation{}, "", fmt.Errorf("failed to read file (%s) contents, error: %s", gemfileLockPth, err)
 			}
