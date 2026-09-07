@@ -163,7 +163,7 @@ func (i fastlaneInvocation) createCommand(args []string, opts *command.Opts) com
 	return i.cmdFactory.Create("fastlane", args, opts)
 }
 
-func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, cmdFactory command.Factory, forceVersion, gemfilePth string) (fastlaneInvocation, string, error) {
+func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyMissing bool, cmdFactory command.Factory, forceVersion, gemfilePth string) (fastlaneInvocation, string, error) {
 	// systemFastlane calls the Fastlane that is already installed. It is also the base for the
 	// paths that go through Ruby, so every returned invocation can create a command.
 	systemFastlane := fastlaneInvocation{cmdFactory: cmdFactory}
@@ -171,8 +171,8 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, cmdFa
 	if forceVersion != "" {
 		log.Printf("fastlane version defined: %s, installing...", forceVersion)
 
-		if rubyErr != nil {
-			return fastlaneInvocation{}, "", fmt.Errorf("installing a specific Fastlane version requires Ruby: %w", rubyErr)
+		if rubyMissing {
+			return fastlaneInvocation{}, "", fmt.Errorf("installing a specific Fastlane version requires Ruby: %w", ruby.ErrRubyNotFound)
 		}
 
 		if err := gemInstallWithRetry(rubyFactory, "fastlane", forceVersion); err != nil {
@@ -202,8 +202,8 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyErr error, cmdFa
 
 	log.Printf("Gemfile exist, checking Fastlane version from gem lockfile")
 
-	if rubyErr != nil {
-		return fastlaneInvocation{}, "", fmt.Errorf("using a Gemfile requires Ruby: %w", rubyErr)
+	if rubyMissing {
+		return fastlaneInvocation{}, "", fmt.Errorf("using a Gemfile requires Ruby: %w", ruby.ErrRubyNotFound)
 	}
 
 	bundleInstallCalled := false
@@ -350,7 +350,14 @@ func main() {
 	fileManager := fileutil.NewFileManager()
 	xcodeVersionReader := xcodeversion.NewXcodeVersionProvider(cmdFactory)
 	rubyFactory, rubyErr := ruby.NewCommandFactory(cmdFactory, env.NewCommandLocator(), logger)
-	if rubyErr != nil {
+	// A missing Ruby is the one error this reports that the Step can work around, by running a
+	// Fastlane that is already installed. An unrecognised version manager is not an error at all.
+	// Anything else is unexpected, so report it rather than silently dropping to the limited path.
+	rubyMissing := errors.Is(rubyErr, ruby.ErrRubyNotFound)
+	if rubyErr != nil && !rubyMissing {
+		fail("Failed to check the Ruby installation: %s", rubyErr)
+	}
+	if rubyMissing {
 		logger.Warnf("Ruby is not available: %s", rubyErr)
 		logger.Warnf("Only a Fastlane that is already installed can be used, without a Gemfile and without the Fastlane version input.")
 	}
@@ -409,7 +416,7 @@ func main() {
 
 	startTime := time.Now()
 
-	fastlane, workDir, err := ensureFastlaneVersion(rubyFactory, rubyErr, cmdFactory, cfg.FastlaneVersion, cfg.GemfilePath)
+	fastlane, workDir, err := ensureFastlaneVersion(rubyFactory, rubyMissing, cmdFactory, cfg.FastlaneVersion, cfg.GemfilePath)
 	if err != nil {
 		fail("Failed to ensure Fastlane version, error: %s", err)
 	}

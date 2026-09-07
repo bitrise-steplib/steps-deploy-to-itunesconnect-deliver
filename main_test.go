@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"path"
 	"testing"
 
@@ -100,7 +101,7 @@ func Test_ensureFastlaneVersion(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1, err := ensureFastlaneVersion(rubyFactory, nil, command.NewFactory(env.NewRepository()), tt.forceVersion, tt.gemfilePth)
+			got, got1, err := ensureFastlaneVersion(rubyFactory, false, command.NewFactory(env.NewRepository()), tt.forceVersion, tt.gemfilePth)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ensureFastlaneVersion() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -116,6 +117,51 @@ func Test_ensureFastlaneVersion(t *testing.T) {
 			}
 			if got1 != tt.wantWorkDir {
 				t.Errorf("ensureFastlaneVersion() workDir = %v, want %v", got1, tt.wantWorkDir)
+			}
+		})
+	}
+}
+
+func Test_ensureFastlaneVersion_rubyMissing(t *testing.T) {
+	// A nil Ruby command factory asserts that no branch reaches for Ruby when it is missing.
+	var noRubyFactory ruby.CommandFactory
+
+	tests := []struct {
+		name         string
+		forceVersion string
+		gemfilePth   string
+		wantErr      bool
+	}{
+		{
+			name:         "a Fastlane version input needs Ruby",
+			forceVersion: "2.0.0",
+			wantErr:      true,
+		},
+		{
+			name:       "a Gemfile needs Ruby",
+			gemfilePth: path.Join("testdata", "Gemfile"),
+			wantErr:    true,
+		},
+		{
+			name:    "the system installed Fastlane does not need Ruby",
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			invocation, _, err := ensureFastlaneVersion(noRubyFactory, true, command.NewFactory(env.NewRepository()), tt.forceVersion, tt.gemfilePth)
+			if tt.wantErr {
+				if !errors.Is(err, ruby.ErrRubyNotFound) {
+					t.Errorf("ensureFastlaneVersion() error = %v, want it to wrap ruby.ErrRubyNotFound", err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("ensureFastlaneVersion() error = %v, want nil", err)
+			}
+			if invocation.useBundler || invocation.gemVersion != "" {
+				t.Errorf("ensureFastlaneVersion() = %+v, want the system installed Fastlane", invocation)
 			}
 		})
 	}
