@@ -256,7 +256,7 @@ func ensureFastlaneVersion(rubyFactory ruby.CommandFactory, rubyMissing bool, cm
 			log.Infof("Installing bundler")
 
 			// install bundler with `gem install bundler [-v version]`
-			// in some configurations, the command "bunder _1.2.3_" can return 'Command not found', installing bundler solves this
+			// in some configurations, the command "bundler _1.2.3_" can return 'Command not found', installing bundler solves this
 			installBundlerCommands := rubyFactory.CreateGemInstall("bundler", bundlerVersion.Version, false, true, commandOpts(gemfileDir, nil))
 
 			for _, installBundlerCommand := range installBundlerCommands {
