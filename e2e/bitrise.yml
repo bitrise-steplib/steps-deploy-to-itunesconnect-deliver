@@ -11,6 +11,10 @@ app:
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
   - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
   - BUNDLE_ID: com.bitrise.Bitrise-iTunesConnectBetaTest
+  # How Fastlane gets invoked. The default is the installed gem version, which is what every
+  # workflow used before; the gated test overrides these per Stack to cover both ways.
+  - GEMFILE_PATH: ""
+  - FASTLANE_VERSION: latest
   # Shared secrets
   - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
   - BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
@@ -52,7 +56,51 @@ workflows:
 
   test_api_key_service_auth:
     title: Test API key connection authentication
-    run_if: "{{ enveq 'IS_LATEST_STACK_XCODE' 'true' }}"
+    steps:
+    # This uploads a build to App Store Connect, which Apple rate limits per app per day, so it runs
+    # on the latest stable and the edge Stack only, not on every Stack of the matrix.
+    #
+    # The gate has to sit on a Step: a workflow has no run_if field (only StepModel does), so the
+    # one that used to be here, on the workflow, was silently ignored and the upload ran on every
+    # Stack -- exhausting the daily quota within a single build.
+    #
+    # The Step has two ways to invoke Fastlane, so the two Stacks run one each. That covers both
+    # without a third upload.
+    - bitrise-run:
+        title: Fastlane through bundler, on the latest stable Stack
+        run_if: |-
+          {{ or (enveq "IS_LATEST_STACK_XCODE" "true") (not .IsCI) }}
+        inputs:
+        - workflow_id: utility_test_api_key_service_auth_bundler
+        - bitrise_config_path: ./e2e/bitrise.yml
+    - bitrise-run:
+        title: An installed Fastlane gem version, on the edge Stack
+        run_if: |-
+          {{ enveq "BITRISEIO_STACK_ID" "osx-xcode-edge" }}
+        inputs:
+        - workflow_id: utility_test_api_key_service_auth_gem_version
+        - bitrise_config_path: ./e2e/bitrise.yml
+
+  utility_test_api_key_service_auth_bundler:
+    title: Call Fastlane through bundler, from the test app's Gemfile
+    envs:
+    - GEMFILE_PATH: ./Gemfile
+    # Emptied deliberately, not dropped: fastlane_version defaults to `latest-stable`, and a
+    # version -- any version -- is honoured before the Gemfile is ever read.
+    - FASTLANE_VERSION: ""
+    after_run:
+    - utility_test_api_key_service_auth
+
+  utility_test_api_key_service_auth_gem_version:
+    title: Install a Fastlane gem version and call it directly
+    envs:
+    - GEMFILE_PATH: ""
+    - FASTLANE_VERSION: latest
+    after_run:
+    - utility_test_api_key_service_auth
+
+  utility_test_api_key_service_auth:
+    title: Test API key connection authentication
     envs:
     - CONNECTION: api_key
     - API_KEY_URL: ""
@@ -147,5 +195,6 @@ workflows:
         - skip_metadata: "yes"
         - submit_for_review: "no"
         - altool_options: $ALTOOL_OPTIONS
-        - fastlane_version: latest
+        - gemfile_path: $GEMFILE_PATH
+        - fastlane_version: $FASTLANE_VERSION
         - verbose_log: "yes"

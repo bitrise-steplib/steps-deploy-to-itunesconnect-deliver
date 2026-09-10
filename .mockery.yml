@@ -1,0 +1,21 @@
+all: false
+template: testify
+packages:
+  github.com/bitrise-io/go-steputils/v2/ruby:
+    config:
+      dir: mocks
+      pkgname: mocks
+    interfaces:
+      CommandFactory:
+        config:
+          structname: RubyCommandFactory
+          filename: RubyCommandFactory.go
+  github.com/bitrise-io/go-utils/v2/command:
+    config:
+      dir: mocks
+      pkgname: mocks
+    interfaces:
+      Command:
+        config:
+          structname: Command
+          filename: Command.go
