@@ -10,22 +10,20 @@ app:
   - BITRISE_SCHEME: Bitrise-iTunesConnectBetaTest
   - INFO_PLIST_PATH: ./Bitrise-iTunesConnectBetaTest/Bitrise-iTunesConnectBetaTest/Info.plist
   - BITRISE_KEYCHAIN_PATH: $HOME/Library/Keychains/login.keychain
-  - BUNDLE_ID: com.bitrise.Bitrise-iTunesConnectBetaTest
+  - BUNDLE_ID: io.bitrise.samples.deliver-test
   # How Fastlane gets invoked. The default is the installed gem version, which is what every
   # workflow used before; the gated test overrides these per Stack to cover both ways.
   - GEMFILE_PATH: ""
   - FASTLANE_VERSION: latest
   # Shared secrets
   - BITRISE_KEYCHAIN_PASSWORD: $BITRISE_KEYCHAIN_PASSWORD
-  - BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST
-  - BITFALL_APPLE_IOS_CERTIFICATE_URL_LIST: $BITFALL_APPLE_IOS_CERTIFICATE_URL_LIST
-  - BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST
-  - BITFALL_APPLE_IOS_CERTIFICATE_PASSPHRASE_LIST: $BITFALL_APPLE_IOS_CERTIFICATE_PASSPHRASE_LIST
-  - BITFALL_APPSTORECONNECT_API_KEY_URL: $BITFALL_APPSTORECONNECT_API_KEY_URL
-  - BITFALL_APPSTORECONNECT_API_KEY_ISSUER_ID: $BITFALL_APPSTORECONNECT_API_KEY_ISSUER_ID
+  - BLTD_APPLE_CERTIFICATE_URL_LIST: $BLTD_APPLE_CERTIFICATE_URL_LIST
+  - BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
+  - BLTD_APPSTORECONNECT_API_KEY_URL: $BLTD_APPSTORECONNECT_API_KEY_URL
+  - BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID: $BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID
+  - BLTD_APPSTORECONNECT_APP_ID: $BLTD_APPSTORECONNECT_APP_ID
   - ITUNES_CONNECT_APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
   - ITUNES_CONNECT_TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-  - ITUNES_CONNECT_APP_ID: $ITUNES_CONNECT_APP_ID
 
 workflows:
   # These E2E tests are not triggered automatically (not prefixed with `test_`) because of App Store rate limits and high flakiness
@@ -38,7 +36,7 @@ workflows:
     - API_KEY_ISSUER: ""
     - APP_SPECIFIC_PASSWORD: $ITUNES_CONNECT_APP_SPECIFIC_PASSWORD
     - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-    - APP_ID: $ITUNES_CONNECT_APP_ID
+    - APP_ID: $BLTD_APPSTORECONNECT_APP_ID
     after_run:
     - _run
 
@@ -50,7 +48,7 @@ workflows:
     - API_KEY_ISSUER: ""
     - APP_SPECIFIC_PASSWORD: ""
     - TEAM_ID: $ITUNES_CONNECT_TEAM_ID
-    - APP_ID: $ITUNES_CONNECT_APP_ID
+    - APP_ID: $BLTD_APPSTORECONNECT_APP_ID
     after_run:
     - _run
 
@@ -107,7 +105,7 @@ workflows:
     - API_KEY_ISSUER: ""
     - APP_SPECIFIC_PASSWORD: ""
     - TEAM_ID: ""
-    - APP_ID: $ITUNES_CONNECT_APP_ID
+    - APP_ID: $BLTD_APPSTORECONNECT_APP_ID
     after_run:
     - _run
 
@@ -115,11 +113,11 @@ workflows:
     title: Test API key Step Input authentication
     envs:
     - CONNECTION: "off"
-    - API_KEY_URL: $BITFALL_APPSTORECONNECT_API_KEY_URL
-    - API_KEY_ISSUER: $BITFALL_APPSTORECONNECT_API_KEY_ISSUER_ID
+    - API_KEY_URL: $BLTD_APPSTORECONNECT_API_KEY_URL
+    - API_KEY_ISSUER: $BLTD_APPSTORECONNECT_API_KEY_ISSUER_ID
     - APP_SPECIFIC_PASSWORD: ""
     - TEAM_ID: ""
-    - APP_ID: $ITUNES_CONNECT_APP_ID
+    - APP_ID: $BLTD_APPSTORECONNECT_APP_ID
     after_run:
     - _run
 
@@ -148,8 +146,8 @@ workflows:
         inputs:
         - distribution_method: app-store
         - scheme: $BITRISE_SCHEME
-        - certificate_url_list: $BITFALL_APPLE_APPLE_CERTIFICATE_URL_LIST|$BITFALL_APPLE_IOS_CERTIFICATE_URL_LIST
-        - passphrase_list: $BITFALL_APPLE_APPLE_CERTIFICATE_PASSPHRASE_LIST|$BITFALL_APPLE_IOS_CERTIFICATE_PASSPHRASE_LIST
+        - certificate_url_list: $BLTD_APPLE_CERTIFICATE_URL_LIST
+        - passphrase_list: $BLTD_APPLE_CERTIFICATE_PASSPHRASE_LIST
         - keychain_path: $BITRISE_KEYCHAIN_PATH
         - keychain_password: $BITRISE_KEYCHAIN_PASSWORD
     - script:
@@ -170,7 +168,7 @@ workflows:
     - set-xcode-build-number:
         title: Set Build Number
         inputs:
-        - build_short_version_string: "4.1"
+        - build_short_version_string: "1.0"
         - build_version: $BITRISE_BUILD_NUMBER
         - plist_path: $INFO_PLIST_PATH
         - build_version_offset: $BITRISE_BUILD_VERSION_OFFSET
